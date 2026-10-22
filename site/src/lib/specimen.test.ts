@@ -52,7 +52,7 @@ test("I toggles italic", () => {
 test("digits jump to a section and out-of-range digits do nothing", () => {
   expect(applyKey(INITIAL_STATE, "3", idle)).toEqual({ type: "section", index: 2 });
   expect(applyKey(INITIAL_STATE, "9", idle)).toEqual({ type: "none" });
-  expect(SECTIONS.length).toBe(7);
+  expect(SECTIONS.length).toBe(8);
 });
 
 test("arrows walk the sections and stop at the ends", () => {

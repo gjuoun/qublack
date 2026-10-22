@@ -34,6 +34,7 @@ export const SECTIONS = [
   "grid",
   "text",
   "coverage",
+  "howto",
   "download",
 ] as const;
 
