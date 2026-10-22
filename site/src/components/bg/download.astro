@@ -1,5 +1,5 @@
 ---
-import { DOWNLOAD_URL, RELEASE_URL, VERSION, ZIP_NAME } from "../../data/site.ts";
+import { RELEASE_URL, VERSION } from "../../data/site.ts";
 import { BGButton } from "./button.tsx";
 import BGCopyButton from "./copy-button.astro";
 import BGDownloadCard from "./download-card.astro";
@@ -76,7 +76,7 @@ const installLinux = `mkdir -p ~/.local/share/fonts && unzip -o ${ZIP_NAME} -d ~
         <p class="mt-4 mb-1 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">sha256</p>
         <code class="block overflow-x-auto font-code text-[0.68rem] break-all text-bf-fg-muted">{sha256}</code>
         <div class="mt-auto flex flex-wrap gap-2 pt-4">
-          <BGButton tone="glow" href={DOWNLOAD_URL}>Download v{VERSION}</BGButton>
+          <BGButton tone="glow" href={RELEASE_URL}>Download v{VERSION}</BGButton>
           <BGButton tone="ghost" href="https://github.com/gjuoun/qublack">Source</BGButton>
         </div>
       </div>
