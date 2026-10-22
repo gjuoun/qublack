@@ -273,11 +273,139 @@ alignment.labelCount >= 12 && alignment.labelSpread <= 2
       `alignment: lookalike labels sit on one column (${alignment.labelSpread.toFixed(1)}px spread)`,
     )
   : fail(`alignment: ${alignment.labelCount} labels, spread ${alignment.labelSpread.toFixed(1)}px`);
+const typography = await page.evaluate(() => {
+  const baselineDelta = (row: Element) => {
+    const glyph = row.querySelector("[data-lookalike-glyphs] span")!;
+    const label = row.querySelector("[data-testid=lookalike-label]") as HTMLElement;
+    const text = label.firstChild!;
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 1);
+    return glyph.getBoundingClientRect().bottom - range.getBoundingClientRect().bottom;
+  };
+  const deltas = [...document.querySelectorAll("[data-lookalike]")].map(baselineDelta);
+  const cells = [...document.querySelectorAll("[data-stat-grid] > div")];
+  const labelSizes = [
+    ...new Set(cells.map((cell) => getComputedStyle(cell.querySelector("dt")!).fontSize)),
+  ];
+  const valueSizes = [
+    ...new Set(cells.map((cell) => getComputedStyle(cell.querySelector("dd")!).fontSize)),
+  ];
+  const buttonInk = (element: Element) => {
+    const style = getComputedStyle(element);
+    const canvas = document.createElement("canvas").getContext("2d")!;
+    canvas.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const metrics = canvas.measureText(element.textContent ?? "");
+    const box = element.getBoundingClientRect();
+    const centre = (box.top + box.bottom) / 2;
+    const inkCentre =
+      centre -
+      (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / 2 +
+      (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) / 2;
+    return Math.abs(inkCentre - centre);
+  };
+  return {
+    baselineSpread: Math.max(...deltas) - Math.min(...deltas),
+    baselineRows: deltas.length,
+    labelSizes,
+    valueSizes,
+    copyOffset: buttonInk(document.querySelector(".mt-\\[1\\.4rem\\] button[data-copy]")!),
+    sendOffset: buttonInk(document.querySelector("#agent-form button")!),
+  };
+});
+typography.baselineRows >= 12 && typography.baselineSpread <= 2
+  ? pass(
+      `alignment: lookalike baselines agree across ${typography.baselineRows} rows (±${typography.baselineSpread.toFixed(1)}px)`,
+    )
+  : fail(`alignment: lookalike baseline spread ${typography.baselineSpread.toFixed(1)}px`);
+typography.labelSizes.length === 1 && typography.valueSizes.length === 1
+  ? pass(
+      `alignment: both grid cards use one stat style (${typography.labelSizes[0]} / ${typography.valueSizes[0]})`,
+    )
+  : fail(
+      `alignment: stat sizes ${JSON.stringify(typography.labelSizes)} / ${JSON.stringify(typography.valueSizes)}`,
+    );
+typography.copyOffset <= 2 && typography.sendOffset <= 2
+  ? pass(
+      `alignment: copy-CSS and send stay centred (ink offset ${typography.copyOffset.toFixed(1)} / ${typography.sendOffset.toFixed(1)}px)`,
+    )
+  : fail(
+      `alignment: button ink offsets ${typography.copyOffset.toFixed(1)} / ${typography.sendOffset.toFixed(1)}px`,
+    );
+
 alignment.ctaGaps.every((gap) => Math.abs(gap - 9.6) <= 2)
   ? pass(
       `alignment: CTA gaps are even (${alignment.ctaGaps.map((gap) => gap.toFixed(1)).join("/")}px; ${alignment.ctaRowWidths - 1} button wraps to a second row) — measured, unchanged`,
     )
   : fail(`alignment: CTA gaps ${JSON.stringify(alignment.ctaGaps)}`);
+
+// Mobile containment: nothing may stick out past the viewport, at any of the three audited widths.
+// document.scrollWidth is not the test — an ancestor clips the overflow, so each element is measured.
+const scanOverflow = async (width: number) => {
+  await page.setViewport({ width, height: width === 390 ? 844 : 900 });
+  await page.reload({ waitUntil: "load" });
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  return page.evaluate(() => {
+    const limit = window.innerWidth + 1;
+    // An element wider than the viewport is fine when it lives inside a horizontal scroller —
+    // that is the code plate doing its job. Anything else sticking out is a real overflow.
+    const inScroller = (element: Element): boolean => {
+      let node = element.parentElement;
+      while (node && node !== document.body) {
+        const style = getComputedStyle(node);
+        if (
+          (style.overflowX === "auto" || style.overflowX === "scroll") &&
+          node.scrollWidth > node.clientWidth
+        ) {
+          return true;
+        }
+        node = node.parentElement;
+      }
+      return false;
+    };
+    const offenders = [...document.querySelectorAll("*")]
+      .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+      .filter(({ element, rect }) => rect.width > 0 && rect.right > limit && !inScroller(element))
+      .slice(0, 6)
+      .map(
+        ({ element, rect }) =>
+          `${element.tagName.toLowerCase()}.${String(element.className).split(" ")[0]}@${Math.round(rect.right)}`,
+      );
+    const plates = [...document.querySelectorAll<HTMLElement>("#agent-thread pre[data-md-code]")];
+    return {
+      innerWidth: window.innerWidth,
+      offenders,
+      scrolls: plates.filter((plate) => plate.scrollWidth > plate.clientWidth).length,
+      clipped: plates.filter((plate) => getComputedStyle(plate).overflowX !== "auto").length,
+      threadFits:
+        document.getElementById("agent-thread")!.scrollWidth <=
+        document.getElementById("agent-thread")!.clientWidth,
+      keysWrap: getComputedStyle(document.querySelector("[data-control-metrics]")!).whiteSpace,
+    };
+  });
+};
+for (const width of [390, 834, 1440]) {
+  const audit = await scanOverflow(width);
+  audit.offenders.length === 0
+    ? pass(`containment ${width}px: no element extends past the viewport`)
+    : fail(`containment ${width}px: ${audit.offenders.join(", ")}`);
+  if (width === 390) {
+    audit.scrolls >= 1 && audit.clipped === 0
+      ? pass(
+          `containment 390px: ${audit.scrolls} long code plates scroll horizontally (overflow-x auto)`,
+        )
+      : fail(`containment 390px: ${audit.scrolls} scrolling plates, ${audit.clipped} clipped`);
+    audit.threadFits
+      ? pass("containment 390px: the chat thread no longer overflows its own box")
+      : fail("containment 390px: the chat thread is still wider than its box");
+    audit.keysWrap === "normal"
+      ? pass("containment 390px: the keys helper is allowed to wrap")
+      : fail(`containment 390px: keys helper white-space is ${audit.keysWrap}`);
+  }
+}
+await page.setViewport({ width: 1440, height: 900 });
+await page.reload({ waitUntil: "load" });
+await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
 // The editable specimen compensates Mono's upm-833 cell: font-size × 0.833 so one hanzi keeps
 // the same optical size, and nothing outside the specimen (ASCII table, 2:1 proof) rescales.
