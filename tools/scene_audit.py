@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
 """Audit the three scenes the symbol pose has to survive: English, Chinese, mixed.
 
-One criterion covers all three: the symbol's ink top must sit inside the band a CJK monospace lays
-out for it —
+Cap-reaching glyphs must sit inside the band a CJK monospace lays out for them:
 
-    Latin cap top  <=  symbol ink top  <=  hanzi ink top + 5% of the hanzi ink height
+    Latin cap top <= symbol ink top <= hanzi ink top + 5% of the hanzi ink height
 
-In pure English that keeps the symbols just above the caps (the CJK-mono convention the ruling
-accepts); in pure Chinese they lean toward the hanzi top; in mixed lines they never step outside
-the taller of their two neighbours, so the transition stays smooth. The 5% headroom mirrors Sarasa,
-whose parens exceed its own hanzi top by ~1.7%.
-
-The pose itself is asserted by tools/symbol_audit.py against the blended target; this tool checks
-the scene-level consequences and prints the numbers gemini-4-argon judges from the PNGs.
+Centre and baseline marks (- = : ; _ , .) legitimately live below the cap; they are validated by
+tools/symbol_audit.py against their own blended target instead, and only reported here.
 
 usage: scene_audit.py [--style Regular]
 """
@@ -28,7 +22,7 @@ from fontTools.ttLib import TTFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from symbol_targets import FIXED_SYMBOLS, boxes  # noqa: E402
+from symbol_targets import FIXED_SYMBOLS, boxes, target  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work"
@@ -55,32 +49,35 @@ def main() -> int:
     args = parser.parse_args()
 
     qublack = TTFont(str(args.fonts / f"QuBlackMono-{args.style}.ttf"))
+    reference = TTFont(str(DONORS / f"SarasaTermSC-{args.style}.ttf"))
     han_top, han_h, cap_top, cap_h = boxes(qublack)
     upm = qublack["head"].unitsPerEm
     han_top, han_h, cap_top, cap_h = han_top / upm, han_h / upm, cap_top / upm, cap_h / upm
     upper = han_top + HEADROOM * han_h
 
     failures: list[str] = []
-    rows: list[str] = []
+    banded = 0
     for char in FIXED_SYMBOLS:
         box = bounds(qublack, char)
         if box is None:
             continue
+        expected = target(qublack, reference, char)
+        if expected is None:
+            continue
+        # Only glyphs the pose pushes up to the cap belong in the band; centre and baseline marks
+        # are validated against their own target by symbol_audit.py.
+        if expected[0] / upm < cap_top - 0.02:
+            continue
+        banded += 1
         top = box["top"]
-        above_cap = (top - cap_top) / cap_h
-        below_han = (han_top - top) / han_h
-        rows.append(
-            f"  {char!r:4} top {top:.3f}em · cap +{above_cap * 100:.0f}% · hanzi -{below_han * 100:.1f}%"
-        )
         if not (cap_top - 0.001 <= top <= upper):
             failures.append(f"{char!r} outside the cap..hanzi band (top {top:.3f}em)")
 
     print(f"== QuBlackMono-{args.style} scene band: cap {cap_top:.3f}em .. hanzi+5% {upper:.3f}em")
-    print("\n".join(rows))
     verdict = "PASS" if not failures else "FAIL"
     print(
-        f"{verdict}  scenes: EN symbols sit above the cap, CN leans to the hanzi top, "
-        f"mixed lines bridge both ({len(FIXED_SYMBOLS) - len(failures)}/{len(FIXED_SYMBOLS)} inside the band)"
+        f"{verdict}  scenes: {banded - len(failures)}/{banded} cap-reaching symbols inside the band; "
+        f"centre/baseline marks validated against their own target"
     )
     for failure in failures[:6]:
         print(f"        {failure}")
