@@ -44,6 +44,17 @@ await page.goto(url, { waitUntil: "load", timeout: 60_000 });
 await page.waitForSelector("#hero-specimen");
 await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
+// Baseline the first-paint font payload before any interaction: the chat input below is typed
+// into, and those characters legitimately pull extra shards that are not part of a cold load.
+const initialFonts = await page.evaluate(() => {
+  const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+  const woff2 = resources.filter((entry) => entry.name.endsWith(".woff2"));
+  return {
+    bytes: woff2.reduce((sum, entry) => sum + (entry.transferSize || entry.encodedBodySize), 0),
+    shards: woff2.length,
+  };
+});
+
 // 1. The hero is genuinely editable: type, commit with Enter, text survives.
 await page.click("#hero-specimen");
 await page.evaluate(() => {
@@ -115,7 +126,41 @@ counts.download.some((href) => href?.includes("/releases/tag/v1.0.0"))
   ? pass("download: links the v1.0.0 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
-// 5. Fonts: both families resolve, the initial payload stays small, nothing shifts.
+// 5. The hero's agent container: a real thread, code in the mono face, a streamed reply.
+const chat = await page.evaluate(() => {
+  const thread = document.getElementById("agent-thread");
+  const code = thread?.querySelector<HTMLElement>("[data-message-code]");
+  return {
+    messages: thread?.querySelectorAll("[data-message]").length ?? 0,
+    codeBlocks: thread?.querySelectorAll("[data-message-code]").length ?? 0,
+    codeFont: code ? getComputedStyle(code).fontFamily : "",
+    title: document.title,
+  };
+});
+chat.messages >= 4
+  ? pass(`agent chat: ${chat.messages} messages in the initial thread`)
+  : fail(`agent chat: ${chat.messages} messages`);
+chat.codeBlocks >= 2 && chat.codeFont.includes("QuBlack Mono")
+  ? pass(`agent chat: ${chat.codeBlocks} code blocks render in QuBlack Mono`)
+  : fail(`agent chat: ${chat.codeBlocks} code blocks, font ${chat.codeFont}`);
+chat.title.includes("for your agent")
+  ? pass("positioning: the title says \"a modern font for your agent\"")
+  : fail(`positioning: title is ${JSON.stringify(chat.title)}`);
+
+const beforeSend = chat.messages;
+await page.click("#agent-input");
+await page.type("#agent-input", "把 2:1 对齐再跑一遍");
+await page.keyboard.press("Enter");
+await page
+  .waitForFunction(
+    (target) => Number(document.documentElement.dataset.agentMessages ?? 0) >= target,
+    { timeout: 8_000 },
+    beforeSend + 2,
+  )
+  .then(() => pass(`agent chat: message sent, streamed reply appended (${beforeSend} -> ${beforeSend + 2})`))
+  .catch(() => fail(`agent chat: no reply after sending (still ${beforeSend})`));
+
+// 6. Fonts: both families resolve, the initial payload stays small, nothing shifts.
 const fonts = await page.evaluate(() => {
   const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
   const woff2 = resources.filter((entry) => entry.name.endsWith(".woff2"));
@@ -130,11 +175,13 @@ const fonts = await page.evaluate(() => {
 fonts.mono && fonts.sans
   ? pass("fonts: QuBlack Mono and QuBlack Sans both resolve")
   : fail(`fonts: mono=${fonts.mono} sans=${fonts.sans}`);
-fonts.bytes < 400_000
+initialFonts.bytes < 400_000
   ? pass(
-      `font payload: ${(fonts.bytes / 1024).toFixed(0)} KB over ${fonts.shards} shards (< 400 KB)`,
+      `font payload: ${(initialFonts.bytes / 1024).toFixed(0)} KB over ${initialFonts.shards} shards on load (< 400 KB)`,
     )
-  : fail(`font payload: ${(fonts.bytes / 1024).toFixed(0)} KB over ${fonts.shards} shards`);
+  : fail(
+      `font payload: ${(initialFonts.bytes / 1024).toFixed(0)} KB over ${initialFonts.shards} shards on load`,
+    );
 fonts.cls < 0.1
   ? pass(`CLS: ${fonts.cls.toFixed(3)} (< 0.1)`)
   : fail(`CLS: ${fonts.cls.toFixed(3)}`);

@@ -1,0 +1,93 @@
+---
+import { REPLIES, THREAD } from "../../data/agent-thread.ts";
+import { MONO } from "../../data/metrics.ts";
+
+// The hero's live specimen: an agent conversation rendered entirely in QuBlack. The prose rides
+// on QuBlack Sans, every identifier and code block on QuBlack Mono — one grid, both families.
+const messages = JSON.stringify({ thread: THREAD, replies: REPLIES });
+---
+
+<div
+  id="agent-chat"
+  class="overflow-hidden rounded-[22px] border border-bf-border bg-bf-border-muted/80 shadow-[0_24px_60px_-34px_color-mix(in_srgb,var(--bf-border-muted)_95%,transparent)]"
+  data-agent-chat
+  aria-label="Agent conversation specimen"
+>
+  <div
+    class="flex items-center justify-between gap-3 border-b border-bf-border/70 px-[0.9rem] py-[0.65rem]"
+  >
+    <div class="flex items-center gap-[0.5rem]">
+      <span class="relative flex size-[9px] items-center justify-center">
+        <span class="absolute size-[9px] rounded-full bg-bf-lime/25"></span>
+        <span class="size-[5px] rounded-full bg-bf-lime"></span>
+      </span>
+      <span class="font-code text-[0.72rem] tracking-[0.08em] text-bf-fg-muted uppercase">
+        agent · qublack
+      </span>
+    </div>
+    <span class="font-code text-[0.66rem] text-bf-dim">
+      汉 {MONO.han.toFixed(3)}em / ASCII {MONO.ascii.toFixed(3)}em
+    </span>
+  </div>
+
+  <div
+    id="agent-thread"
+    class="grid max-h-[460px] gap-[0.7rem] overflow-y-auto px-[0.8rem] py-[0.9rem]"
+    data-agent-thread
+    aria-live="polite"
+  >
+    {
+      THREAD.map((message) => (
+        <div
+          class:list={[
+            "max-w-[92%] rounded-[14px] border px-[0.75rem] py-[0.6rem]",
+            message.role === "user"
+              ? "ml-auto border-bf-blue/35 bg-bf-blue/10"
+              : "mr-auto border-bf-border bg-bf-border-muted",
+          ]}
+          data-message={message.role}
+        >
+          <p class="m-0 mb-[0.3rem] font-code text-[0.62rem] tracking-[0.06em] text-bf-dim uppercase">
+            {message.meta}
+          </p>
+          {message.blocks.map((block) =>
+            block.kind === "code" ? (
+              <pre
+                class="mt-[0.35rem] mb-0 overflow-x-auto rounded-[9px] border border-bf-border/80 bg-bf-bg/70 px-[0.6rem] py-[0.5rem] font-code text-[0.72rem] leading-[1.55] text-bf-fg"
+                data-message-code={block.lang ?? "text"}
+              >
+                <code>{block.body}</code>
+              </pre>
+            ) : (
+              <p class="m-0 text-[0.84rem] leading-[1.62]" data-message-text>
+                {block.body}
+              </p>
+            ),
+          )}
+        </div>
+      ))
+    }
+  </div>
+
+  <form
+    id="agent-form"
+    class="flex items-center gap-[0.45rem] border-t border-bf-border/70 px-[0.7rem] py-[0.6rem]"
+  >
+    <label class="sr-only" for="agent-input">Ask the agent</label>
+    <input
+      id="agent-input"
+      name="message"
+      autocomplete="off"
+      placeholder="问点什么 — try “fix the 断行”"
+      class="min-w-0 flex-1 rounded-full border border-bf-selection bg-bf-bg/60 px-[0.75rem] py-[0.42rem] font-code text-[0.76rem] text-bf-fg placeholder:text-bf-dim focus:border-bf-blue focus:outline-none"
+    />
+    <button
+      type="submit"
+      class="cursor-pointer rounded-full border border-bf-selection bg-bf-border/10 px-[0.7rem] py-[0.4rem] font-code text-[0.72rem] text-bf-fg-muted transition-colors duration-200 hover:border-bf-blue hover:text-bf-blue"
+    >
+      send
+    </button>
+  </form>
+
+  <script type="application/json" id="agent-thread-data" set:html={messages} />
+</div>
