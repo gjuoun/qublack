@@ -1,9 +1,10 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
   "files": {
     "includes": [
       "**",
       "!site/public/fonts",
+      "!site/src/styles/qublack-fonts.css",
       "!site/dist",
       "!site/.astro",
       "!site/src/components/ui",

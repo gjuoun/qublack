@@ -41,6 +41,8 @@ FACES = [
 TIER_LATIN = [(0x20, 0x7E), (0xA0, 0xFF), (0x2000, 0x206F), (0x2190, 0x21FF), (0x2500, 0x25FF),
               (0x2800, 0x28FF), (0x3000, 0x303F), (0xFF00, 0xFFEF)]
 TIER_GB2312_LEVEL1 = (0xB0A1, 0xD7F9)
+# Seconds since 1904-01-01, fixed so every shard is reproducible.
+FIXED_EPOCH = 3800000000
 
 
 def page_codepoints(site_dir: Path) -> set[int]:
@@ -104,6 +106,11 @@ def subset_shard(job: tuple[str, list[int], str]) -> tuple[str, int]:
     subsetter = subset.Subsetter(options=options)
     subsetter.populate(unicodes=codepoints)
     subsetter.subset(font)
+    # A fixed head.modified/created is what makes the shards byte-identical across runs:
+    # the field keeps its length but changes the brotli stream, so `--check` can diff bytes.
+    font.recalcTimestamp = False
+    font["head"].modified = FIXED_EPOCH
+    font["head"].created = FIXED_EPOCH
     font.flavor = "woff2"
     font.save(out)
     return Path(out).name, Path(out).stat().st_size
@@ -183,8 +190,12 @@ def check(out_dir: Path, css_path: Path, chunk: int, workers: int, fonts_dir: Pa
         print(f"FAIL  shard set differs: {len(left)} generated vs {len(right)} on disk")
         return 1
     mismatch = [name for name in left if not filecmp.cmp(temp / "fonts" / name, out_dir / name, shallow=False)]
-    if mismatch or (temp / "fonts.css").read_text() != css_path.read_text():
-        print(f"FAIL  regeneration differs ({len(mismatch)} shards, css {'differs' if not mismatch else 'equal'})")
+    css_differs = (temp / "fonts.css").read_text() != css_path.read_text()
+    if mismatch or css_differs:
+        print(
+            f"FAIL  regeneration differs ({len(mismatch)} shards byte-differ, "
+            f"css {'differs' if css_differs else 'identical'})"
+        )
         return 1
     print(f"PASS  deterministic: {len(left)} shards and the CSS regenerate byte-identically")
     return 0
