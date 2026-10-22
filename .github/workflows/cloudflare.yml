@@ -47,8 +47,9 @@ jobs:
             https://github.com/gjuoun/qublack/releases/download/v1.0.4/QuBlack-family-1.0.4.zip
           curl -fsSL -o dist/SHA256SUMS \
             https://github.com/gjuoun/qublack/releases/download/v1.0.4/SHA256SUMS
-          ( cd dist && shasum -a 256 -c SHA256SUMS )
-          unzip -q -o dist/QuBlack-family-1.0.4.zip -d fonts
+          # The release ships TTC and WOFF2 too; the deploy only fetches the zip, so check its line.
+          ( cd dist && grep 'QuBlack-family-.*\.zip$' SHA256SUMS | shasum -a 256 -c )
+          unzip -q -o dist/QuBlack-family-1.0.4.zip '*.ttf' -d fonts
           ls fonts/*.ttf | wc -l
 
       - name: Cut the web fonts
