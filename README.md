@@ -28,6 +28,16 @@ Four styles each: Regular, Italic, Bold, BoldItalic.
 - **v1.0.2** — the bracket set harmonised.
 - **v1.0.1** — the mono `@` swapped for Recursive's `at.alt` alternate.
 
+### Formats
+
+| Format    | Files                                    | Use it for                                                                                   |
+| --------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **TTF**   | `QuBlackMono-*.ttf`, `QuBlackSans-*.ttf` | system install — macOS `~/Library/Fonts`, Linux `~/.local/share/fonts`, Windows double-click |
+| **TTC**   | `QuBlackMono.ttc`, `QuBlackSans.ttc`     | the smaller bundle: four faces per file, shared tables                                       |
+| **WOFF2** | `QuBlack*-*.woff2`                       | `@font-face` self-hosting on the web — **WOFF2, not WOFF1**                                  |
+
+No OTF: the outlines are `glyf`; a CFF conversion would only cost size and hinting.
+
 ## Build
 
 ```sh
