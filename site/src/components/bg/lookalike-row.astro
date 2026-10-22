@@ -10,7 +10,7 @@ const { row } = Astro.props;
 {/* Three strict columns — glyphs / annotation / note — so the middle column starts at the same
     x on every row instead of trailing the glyph run. Single column below 900px. */}
 <div
-  class="lookalike-row grid grid-cols-[minmax(0,1fr)_13rem_minmax(0,1fr)] items-center gap-x-5 border-b border-bf-border/60 py-4 last:border-b-0 max-[900px]:grid-cols-1 max-[900px]:gap-y-2"
+  class="lookalike-row grid grid-cols-[minmax(0,1fr)_13rem_minmax(0,1fr)] items-baseline gap-x-5 border-b border-bf-border/60 py-4 last:border-b-0 max-[900px]:grid-cols-1 max-[900px]:items-start max-[900px]:gap-y-2"
   data-lookalike={row.label}
 >
   <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1" data-specimen data-lookalike-glyphs>

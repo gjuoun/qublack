@@ -31,22 +31,29 @@ const latin = "abcdefghijkl";
             <div class="text-bf-blue">{latin}</div>
           </div>
         </div>
-        <div class="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[12px] border border-bf-border">
+        <dl
+          class="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[12px] border border-bf-border"
+          data-stat-grid
+        >
           <div class="bg-bf-border-muted/80 px-3 py-2">
-            <div class="font-code text-[0.62rem] text-bf-dim uppercase">hanzi advance</div>
-            <div class="font-code text-[1.05rem] text-foreground">{MONO.han.toFixed(3)}em</div>
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">hanzi advance</dt>
+            <dd class="m-0 font-code text-[0.95rem] text-foreground">
+              {MONO.han.toFixed(3)}em
+            </dd>
           </div>
           <div class="bg-bf-border-muted/80 px-3 py-2">
-            <div class="font-code text-[0.62rem] text-bf-dim uppercase">ascii advance</div>
-            <div class="font-code text-[1.05rem] text-foreground">{MONO.ascii.toFixed(3)}em</div>
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">ascii advance</dt>
+            <dd class="m-0 font-code text-[0.95rem] text-foreground">
+              {MONO.ascii.toFixed(3)}em
+            </dd>
           </div>
           <div class="bg-bf-border-muted/80 px-3 py-2">
-            <div class="font-code text-[0.62rem] text-bf-dim uppercase">ratio</div>
-            <div id="ratio-value" class="font-code text-[1.05rem] text-bf-lime">
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">ratio</dt>
+            <dd id="ratio-value" class="m-0 font-code text-[0.95rem] text-bf-lime">
               {MONO.ratio.toFixed(3)}
-            </div>
+            </dd>
           </div>
-        </div>
+        </dl>
       </div>
 
       <div class="rounded-[18px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,2.5vw,1.6rem)]">
@@ -57,22 +64,25 @@ const latin = "abcdefghijkl";
           中英混排时，比例家族让正文更自然：<code class="font-code">className</code> 与
           <code class="font-code">app.pak</code> 仍然留在等宽家族里。
         </div>
-        <dl class="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-bf-border text-[0.82rem]">
+        <dl
+          class="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-bf-border"
+          data-stat-grid
+        >
           <div class="bg-bf-border-muted/80 px-3 py-2">
             <dt class="font-code text-[0.62rem] text-bf-dim uppercase">upm</dt>
-            <dd class="m-0 font-code text-foreground">{SANS.upm}</dd>
+            <dd class="m-0 font-code text-[0.95rem] text-foreground">{SANS.upm}</dd>
           </div>
           <div class="bg-bf-border-muted/80 px-3 py-2">
             <dt class="font-code text-[0.62rem] text-bf-dim uppercase">hanzi</dt>
-            <dd class="m-0 font-code text-foreground">{SANS.han.toFixed(3)}em</dd>
+            <dd class="m-0 font-code text-[0.95rem] text-foreground">{SANS.han.toFixed(3)}em</dd>
           </div>
           <div class="bg-bf-border-muted/80 px-3 py-2">
             <dt class="font-code text-[0.62rem] text-bf-dim uppercase">ascii</dt>
-            <dd class="m-0 font-code text-foreground">{SANS.ascii.toFixed(3)}em</dd>
+            <dd class="m-0 font-code text-[0.95rem] text-foreground">{SANS.ascii.toFixed(3)}em</dd>
           </div>
           <div class="bg-bf-border-muted/80 px-3 py-2">
             <dt class="font-code text-[0.62rem] text-bf-dim uppercase">line height</dt>
-            <dd class="m-0 font-code text-foreground">{SANS.lineHeight.toFixed(3)}em</dd>
+            <dd class="m-0 font-code text-[0.95rem] text-foreground">{SANS.lineHeight.toFixed(3)}em</dd>
           </div>
         </dl>
       </div>
