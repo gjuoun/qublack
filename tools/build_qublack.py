@@ -18,6 +18,7 @@ usage: build_qublack.py --mode mono|sans --style Regular|Italic|Bold|BoldItalic 
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -153,6 +154,10 @@ def _ink_units(glyph) -> tuple[float, float, float]:
     return top, bottom, top - bottom
 
 
+# Blends live in tools/symbol_targets.py so the build and the audit cannot drift apart.
+from symbol_targets import FIXED_SYMBOLS, target as symbol_target  # noqa: E402
+
+
 def harmonize_symbols(font: TTFont, reference_path: Path) -> int:
     """Scale+translate (y only) the hanzi-adjacent symbols onto Sarasa's ink ratios.
 
@@ -163,40 +168,26 @@ def harmonize_symbols(font: TTFont, reference_path: Path) -> int:
     (0.600em) cell survives.
     """
     reference = TTFont(str(reference_path))
-    ref_han_name = reference.getBestCmap().get(ord("汉"))
-    if ref_han_name is None:
+    if "汉" not in [chr(cp) for cp in reference.getBestCmap()]:
         return 0
-    reference["glyf"][ref_han_name].recalcBounds(reference["glyf"])
-    ref_han_top, _, ref_han_h = _ink_units(reference["glyf"][ref_han_name])
-
-    han_name = font.getBestCmap().get(ord("汉"))
-    if han_name is None:
-        return 0
-    font["glyf"][han_name].recalcBounds(font["glyf"])
-    han_top, _, han_h = _ink_units(font["glyf"][han_name])
 
     moved = 0
     for char in FIXED_SYMBOLS:
         name = font.getBestCmap().get(ord(char))
-        ref_name = reference.getBestCmap().get(ord(char))
-        if not name or not ref_name:
+        if name is None:
             continue
         glyph = font["glyf"][name]
-        ref_glyph = reference["glyf"][ref_name]
         if getattr(glyph, "numberOfContours", 0) <= 0 or not hasattr(glyph, "coordinates"):
             continue
         glyph.recalcBounds(font["glyf"])
-        ref_glyph.recalcBounds(reference["glyf"])
-
-        ref_top, _, ref_height = _ink_units(ref_glyph)
-        top_ratio = (ref_han_top - ref_top) / ref_han_h
-        height_ratio = ref_height / ref_han_h
+        target = symbol_target(font, reference, char)
+        if target is None:
+            continue
+        target_top, target_height = target
 
         current_top, _, current_height = _ink_units(glyph)
         if current_height <= 0:
             continue
-        target_height = height_ratio * han_h
-        target_top = han_top - top_ratio * han_h
         scale = target_height / current_height
         shift = target_top - scale * current_top
 
