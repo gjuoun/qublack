@@ -7,17 +7,19 @@ interface Props {
 const { row } = Astro.props;
 ---
 
+{/* Three strict columns — glyphs / annotation / note — so the middle column starts at the same
+    x on every row instead of trailing the glyph run. Single column below 900px. */}
 <div
-  class="lookalike-row grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center gap-4 border-b border-bf-border/60 py-4 last:border-b-0 max-[760px]:grid-cols-1"
+  class="lookalike-row grid grid-cols-[minmax(0,1fr)_13rem_minmax(0,1fr)] items-center gap-x-5 border-b border-bf-border/60 py-4 last:border-b-0 max-[900px]:grid-cols-1 max-[900px]:gap-y-2"
   data-lookalike={row.label}
 >
-  <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1" data-specimen>
+  <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1" data-specimen data-lookalike-glyphs>
     {
       row.glyphs.map((glyph) => (
         <span class="text-[clamp(1.7rem,4vw,2.6rem)] leading-none text-foreground">{glyph}</span>
       ))
     }
-    <span class="font-code text-[0.68rem] text-bf-dim" data-testid="lookalike-label">{row.label}</span>
   </div>
+  <span class="font-code text-[0.68rem] text-bf-dim" data-testid="lookalike-label">{row.label}</span>
   <p class="m-0 text-[0.85rem] text-bf-fg-muted">{row.note}</p>
 </div>
