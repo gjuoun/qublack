@@ -53,17 +53,22 @@ await page.waitForFunction(
   { timeout: 20_000 },
 );
 
-// The chat specimen must open on its newest turn, not mid-message.
+// The chat specimen must open on its newest turn, not mid-message. A thread whose messages fit
+// the box is already at its newest turn (they ride the input row since delta 9e), so only a
+// scrollable thread has to prove it is parked at the end.
 const mountScroll = await page.evaluate(() => {
   const thread = document.getElementById("agent-thread") as HTMLElement | null;
   if (!thread) return null;
   return {
-    gap: Math.round(thread.scrollHeight - thread.scrollTop - thread.clientHeight),
+    gap: Math.max(0, Math.round(thread.scrollHeight - thread.scrollTop - thread.clientHeight)),
     scrolled: thread.scrollTop > 0,
+    fits: thread.scrollHeight <= thread.clientHeight + 2,
   };
 });
-mountScroll && mountScroll.scrolled && mountScroll.gap <= 2
-  ? pass(`agent chat: mounts scrolled to the newest message (tail gap ${mountScroll.gap}px)`)
+mountScroll && (mountScroll.scrolled || mountScroll.fits) && mountScroll.gap <= 2
+  ? pass(
+      `agent chat: opens on its newest message (${mountScroll.scrolled ? "scrolled to the end" : "messages fit the box"}, tail gap ${mountScroll.gap}px)`,
+    )
   : fail(`agent chat: mount scroll ${JSON.stringify(mountScroll)}`);
 
 // Baseline the first-paint font payload before any interaction: the chat input below is typed
@@ -607,6 +612,48 @@ const scanOverflow = async (width: number) => {
         const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
         return twoUp ? Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10 : null;
       })(),
+      // Chat tail (delta 9e): the bubbles ride the input row. The newest bubble must end exactly
+      // one inter-message gap above the form, and the form must stay pinned to the card's bottom
+      // edge. Where the copy column hands the card spare height (two-up only), the spare has to
+      // pool ABOVE the first bubble — which is why the probe grows the card by 240px: the thread
+      // never underflows on its own at these three widths, so this is the only honest way to see
+      // whether spare height parks at the top (a dead zone) or is absorbed by the anchor.
+      chatTail: (() => {
+        const thread = document.getElementById("agent-thread");
+        const form = document.getElementById("agent-form");
+        const card = document.getElementById("agent-chat");
+        const messages = [...(thread?.querySelectorAll<HTMLElement>("[data-message]") ?? [])];
+        if (!thread || !form || !card || messages.length < 2) return null;
+        const box = (element: Element) => element.getBoundingClientRect();
+        const newest = messages[messages.length - 1]!;
+        const gaps = messages
+          .slice(1)
+          .map((message, index) => box(message).top - box(messages[index]!).bottom);
+        const inter = gaps.slice().sort((a, b) => a - b)[Math.floor(gaps.length / 2)]!;
+        const tail = box(form).top - box(newest).bottom;
+        // The card's 1px border is outside its padding box; the form must sit on that edge.
+        const pinned =
+          box(card).bottom -
+          Number.parseFloat(getComputedStyle(card).borderBottomWidth) -
+          box(form).bottom;
+        const clientBefore = thread.clientHeight;
+        const previous = card.style.height;
+        card.style.height = `${box(card).height + 240}px`;
+        const grown = thread.clientHeight - clientBefore;
+        const paddingTop = Number.parseFloat(getComputedStyle(thread).paddingTop);
+        const spare = box(messages[0]!).top - (box(thread).top + paddingTop);
+        const spareTail = box(form).top - box(messages[messages.length - 1]!).bottom;
+        card.style.height = previous;
+        const round = (value: number) => Math.round(value * 10) / 10;
+        return {
+          inter: round(inter),
+          tail: round(tail),
+          pinned: round(pinned),
+          grown: Math.round(grown),
+          spare: grown > 40 ? round(spare) : null,
+          spareTail: grown > 40 ? round(spareTail) : null,
+        };
+      })(),
       // Download: the zip list and the install/sha block must end on the same line when two-up.
       downloadBottoms: (() => {
         const grid = document.querySelector("#download [data-two-column]");
@@ -661,6 +708,25 @@ for (const width of [390, 834, 1440]) {
           `hero ${width}px: the chat card ends on the left column's line (${audit.heroBottoms}px apart)`,
         )
       : fail(`hero ${width}px: the columns end ${audit.heroBottoms}px apart`);
+  const tail = audit.chatTail;
+  const tailOk =
+    tail !== null && Math.abs(tail.tail - tail.inter) <= 4 && Math.abs(tail.pinned) <= 1;
+  tailOk
+    ? pass(
+        `chat ${width}px: the newest bubble ends one gap above the input (${tail!.tail}px vs ${tail!.inter}px), form pinned to the card bottom (${tail!.pinned}px)`,
+      )
+    : fail(`chat ${width}px: tail ${JSON.stringify(tail)}`);
+  if (tail && tail.spare !== null) {
+    tail.spare > 1 && tail.spareTail !== null && Math.abs(tail.spareTail - tail.inter) <= 4
+      ? pass(
+          `chat ${width}px: spare height (${tail.spare}px) pools above the first bubble; the tail stays one gap (${tail.spareTail}px)`,
+        )
+      : fail(
+          `chat ${width}px: spare height parked wrong — ${tail.spare}px above the first bubble, tail ${tail.spareTail}px`,
+        );
+  } else {
+    pass(`chat ${width}px: no spare height at this width, so there is nothing to park`);
+  }
   if (width === 1440) {
     audit.heroBottoms !== null && audit.heroBottoms <= 2
       ? pass(`hero 1440px: two-up and flush (${audit.heroBottoms}px apart)`)
