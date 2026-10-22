@@ -273,6 +273,48 @@ alignment.labelCount >= 12 && alignment.labelSpread <= 2
       `alignment: lookalike labels sit on one column (${alignment.labelSpread.toFixed(1)}px spread)`,
     )
   : fail(`alignment: ${alignment.labelCount} labels, spread ${alignment.labelSpread.toFixed(1)}px`);
+// One two-column grid for the whole site: every section that is two-up splits on the same line.
+const seam = await page.evaluate(() => {
+  const grids = [...document.querySelectorAll("[data-two-column]")].map((grid) => {
+    const children = [...grid.children].map((child) => child.getBoundingClientRect());
+    const twoUp = children.length === 2 && Math.abs(children[0]!.top - children[1]!.top) < 2;
+    return {
+      id: grid.closest("section")?.id ?? "?",
+      twoUp,
+      gap: Number.parseFloat(getComputedStyle(grid).columnGap) || 0,
+      rightStart: twoUp ? children[1]!.left : null,
+    };
+  });
+  const twoUp = grids.filter((grid) => grid.twoUp);
+  const starts = twoUp.map((grid) => grid.rightStart!);
+  return {
+    sections: grids.length,
+    twoUp: twoUp.length,
+    gaps: [...new Set(twoUp.map((grid) => grid.gap))],
+    startSpread: starts.length > 1 ? Math.max(...starts) - Math.min(...starts) : 0,
+    start: starts[0] ?? 0,
+  };
+});
+seam.twoUp >= 4 &&
+Math.max(...seam.gaps) - Math.min(...seam.gaps) <= 2 &&
+Math.abs(seam.gaps[0]! - 16) <= 2 &&
+seam.startSpread <= 2
+  ? pass(
+      `alignment: ${seam.twoUp}/${seam.sections} sections share one seam (gutter ${seam.gaps[0]}px, right column at ${Math.round(seam.start)}px, spread ${seam.startSpread.toFixed(1)}px)`,
+    )
+  : fail(
+      `alignment: seam gaps ${JSON.stringify(seam.gaps)}, start spread ${seam.startSpread.toFixed(1)}px`,
+    );
+
+const groupLabels = await page.evaluate(() =>
+  [...document.querySelectorAll("[data-control-group] > span")].map((label) =>
+    Math.round(label.getBoundingClientRect().width),
+  ),
+);
+Math.max(...groupLabels) - Math.min(...groupLabels) <= 2
+  ? pass(`alignment: control labels share one width (${groupLabels[0]}px)`)
+  : fail(`alignment: control label widths ${JSON.stringify(groupLabels)}`);
+
 const typography = await page.evaluate(() => {
   const baselineDelta = (row: Element) => {
     const glyph = row.querySelector("[data-lookalike-glyphs] span")!;
