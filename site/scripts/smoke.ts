@@ -169,6 +169,10 @@ const sizing = await page.evaluate(() => {
   const body = document.querySelector("#agent-thread [data-message-body]") as HTMLElement | null;
   return {
     input: input ? Number.parseFloat(getComputedStyle(input).fontSize) : 0,
+    // The placeholder must inherit the input size — muted colour, never a smaller type size.
+    placeholder: input
+      ? Number.parseFloat(getComputedStyle(input, "::placeholder").fontSize) || 0
+      : 0,
     body: body ? Number.parseFloat(getComputedStyle(body).fontSize) : 0,
   };
 });
@@ -177,6 +181,29 @@ sizing.input >= 14 && sizing.input >= sizing.body
       `agent chat: input is ${sizing.input}px, not smaller than the ${sizing.body}px message body`,
     )
   : fail(`agent chat: input ${sizing.input}px vs body ${sizing.body}px`);
+sizing.placeholder === 0 || sizing.placeholder === sizing.input
+  ? pass(`agent chat: placeholder keeps the input size (${sizing.input}px)`)
+  : fail(`agent chat: placeholder ${sizing.placeholder}px vs input ${sizing.input}px`);
+
+// The delta's own threshold: below ~1020px the hero is one column and the chat owns the row.
+await page.setViewport({ width: 1024, height: 900 });
+await page.reload({ waitUntil: "load" });
+const narrow = await page.evaluate(() => {
+  const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
+  const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
+  const heading = document.querySelector("#specimen h1")!.getBoundingClientRect();
+  return {
+    chat: Math.round(chat.width),
+    wrap: Math.round(wrap.width),
+    singleColumn: Math.round(chat.x) === Math.round(heading.x),
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  };
+});
+narrow.singleColumn && narrow.chat === narrow.wrap && narrow.overflow === 0
+  ? pass(`agent chat: 1024px is one column and full width (${narrow.chat}px = wrap)`)
+  : fail(
+      `agent chat: 1024px single=${narrow.singleColumn}, chat ${narrow.chat} vs wrap ${narrow.wrap}`,
+    );
 
 await page.setViewport({ width: 390, height: 844 });
 await page.reload({ waitUntil: "load" });
