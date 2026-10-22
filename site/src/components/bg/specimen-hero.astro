@@ -1,4 +1,6 @@
 ---
+import { MONO, SANS } from "../../data/metrics.ts";
+import BGAgentChat from "./agent-chat.astro";
 import { BGButton } from "./button.tsx";
 import BGCopyButton from "./copy-button.astro";
 import BGEyebrow from "./eyebrow.astro";
@@ -8,36 +10,76 @@ interface Props {
   releaseUrl: string;
 }
 const { version, releaseUrl } = Astro.props;
+const stats = [
+  { value: MONO.ratio.toFixed(3), label: "汉 / ASCII ratio" },
+  { value: `${MONO.upm} / ${SANS.upm}`, label: "upm Mono / Sans" },
+  { value: "8", label: "faces shipped" },
+  { value: "OFL 1.1", label: "licence" },
+];
 ---
 
 <section id="specimen" class="scroll-mt-24 pt-[clamp(1.5rem,5vw,3.5rem)] pb-6">
   <div class="bf-wrap" data-reveal>
-    <BGEyebrow>SIL OFL 1.1 · two families · eight faces · {version}</BGEyebrow>
-
-    <h1
-      class="mt-[0.6rem] mb-[0.4rem] text-[clamp(3.2rem,8vw,5.6rem)] font-extrabold tracking-[-0.035em]"
+    <div
+      class="grid items-start gap-[clamp(1.8rem,4vw,3.2rem)] min-[1020px]:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]"
     >
-      <span class="bf-grad">黢黑</span>
-      <span class="text-foreground">QuBlack</span>
-    </h1>
+      <div>
+        <BGEyebrow>A modern font for your agent · v{version}</BGEyebrow>
 
-    <p class="bf-lead">
-      A bilingual typeface for code. <strong class="text-foreground">QuBlack Mono</strong> holds a
-      strict <strong class="text-foreground">2:1</strong> grid — one hanzi is exactly two ASCII cells.
-      <strong class="text-foreground">QuBlack Sans</strong> is its proportional sibling.
-    </p>
+        <h1
+          class="mt-[0.6rem] mb-[0.4rem] text-[clamp(3.2rem,7vw,5.2rem)] font-extrabold tracking-[-0.035em]"
+        >
+          <span class="bf-grad">黢黑</span>
+          <span class="text-foreground">QuBlack</span>
+        </h1>
+
+        <p class="bf-lead">
+          Your agent answers in English, 中文 and code — in the same message. QuBlack renders all
+          three on one grid: <strong class="text-foreground">QuBlack Mono</strong> keeps a measured
+          <strong class="text-foreground">2:1</strong> cell (汉 1.200em, ASCII 0.600em), so diffs,
+          tables and logs stay aligned; <strong class="text-foreground">QuBlack Sans</strong> keeps
+          the prose readable next to them.
+        </p>
+
+        <div class="mt-[1.4rem] flex flex-wrap items-center gap-[0.6rem]">
+          <BGButton tone="glow" href="#download">Download the family</BGButton>
+          <BGButton tone="ghost" href="#grid">See the 2:1 proof</BGButton>
+          <BGButton tone="ghost" href={releaseUrl}>Release {version}</BGButton>
+          <BGCopyButton
+            value={'font-family: "QuBlack Sans", sans-serif;'}
+            label="copy CSS"
+            swap="on"
+          />
+        </div>
+
+        <dl
+          class="mt-[1.5rem] grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-bf-border min-[560px]:grid-cols-4"
+        >
+          {
+            stats.map((stat) => (
+              <div class="bg-bf-border-muted/80 px-[0.8rem] py-[0.65rem]">
+                <dt class="font-code text-[0.58rem] tracking-[0.08em] text-bf-dim uppercase">
+                  {stat.label}
+                </dt>
+                <dd class="m-0 font-code text-[0.95rem] text-foreground">{stat.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <BGAgentChat />
+    </div>
 
     <div
-      class="mt-8 rounded-[22px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,3vw,2rem)]"
+      class="mt-[clamp(1.6rem,4vw,2.6rem)] rounded-[22px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,3vw,2rem)]"
     >
       <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
         <span class="font-code text-[0.72rem] tracking-[0.14em] text-bf-dim uppercase">
           editable specimen — click and type, Enter to commit, Esc to revert
         </span>
-        <span
-          id="face-label"
-          class="font-code text-[0.72rem] text-bf-blue"
-          aria-live="polite">QuBlack Sans Regular</span
+        <span id="face-label" class="font-code text-[0.72rem] text-bf-blue" aria-live="polite"
+          >QuBlack Sans Regular</span
         >
       </div>
 
@@ -65,21 +107,18 @@ const { version, releaseUrl } = Astro.props;
         <BGButton tone="chip" data-control="family" data-value="sans" aria-pressed="true">Sans</BGButton>
         <BGButton tone="chip" data-control="family" data-value="mono" aria-pressed="false">Mono</BGButton>
         <span class="mx-2 font-code text-[0.72rem] text-bf-dim uppercase">weight</span>
-        <BGButton tone="chip" data-control="weight" data-value="regular" aria-pressed="true">Regular</BGButton>
+        <BGButton tone="chip" data-control="weight" data-value="regular" aria-pressed="true"
+          >Regular</BGButton
+        >
         <BGButton tone="chip" data-control="weight" data-value="bold" aria-pressed="false">Bold</BGButton>
         <span class="mx-2 font-code text-[0.72rem] text-bf-dim uppercase">style</span>
-        <BGButton tone="chip" data-control="italic" data-value="toggle" aria-pressed="false">Italic</BGButton>
+        <BGButton tone="chip" data-control="italic" data-value="toggle" aria-pressed="false"
+          >Italic</BGButton
+        >
         <span class="ml-auto font-code text-[0.7rem] text-bf-dim">
           keys: B/L bold · M/S family · I italic · ↓↑ sections · 1–7 jump
         </span>
       </div>
-    </div>
-
-    <div class="mt-[1.4rem] flex flex-wrap items-center gap-[0.6rem]">
-      <BGButton tone="glow" href="#download">Download the family</BGButton>
-      <BGButton tone="ghost" href="#grid">See the 2:1 proof</BGButton>
-      <BGButton tone="ghost" href={releaseUrl}>Release {version}</BGButton>
-      <BGCopyButton value="font-family: &quot;QuBlack Sans&quot;, sans-serif;" label="copy CSS" swap="on" />
     </div>
   </div>
 </section>
