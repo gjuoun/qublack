@@ -44,7 +44,7 @@ if (form && input && thread && dataNode) {
     ].join(" ");
     const meta = document.createElement("p");
     meta.className =
-      "m-0 mb-[0.3rem] font-code text-[0.62rem] tracking-[0.06em] text-bf-dim uppercase";
+      "m-0 mb-[0.3rem] font-code text-[0.62rem] tracking-[0.06em] text-bf-fg-muted uppercase";
     meta.textContent = role === "user" ? "you · now" : "agent · streaming";
     wrapper.append(meta);
     thread.append(wrapper);

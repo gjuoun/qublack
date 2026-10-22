@@ -25,7 +25,7 @@ const messages = JSON.stringify({ thread: THREAD, replies: REPLIES });
         agent · qublack
       </span>
     </div>
-    <span class="font-code text-[0.66rem] text-bf-dim">
+    <span class="font-code text-[0.66rem] text-bf-fg-muted">
       汉 {MONO.han.toFixed(3)}em / ASCII {MONO.ascii.toFixed(3)}em
     </span>
   </div>
@@ -47,7 +47,7 @@ const messages = JSON.stringify({ thread: THREAD, replies: REPLIES });
           ]}
           data-message={message.role}
         >
-          <p class="m-0 mb-[0.3rem] font-code text-[0.62rem] tracking-[0.06em] text-bf-dim uppercase">
+          <p class="m-0 mb-[0.3rem] font-code text-[0.62rem] tracking-[0.06em] text-bf-fg-muted uppercase">
             {message.meta}
           </p>
           {message.blocks.map((block) =>
@@ -79,7 +79,7 @@ const messages = JSON.stringify({ thread: THREAD, replies: REPLIES });
       name="message"
       autocomplete="off"
       placeholder="问点什么 — try “fix the 断行”"
-      class="min-w-0 flex-1 rounded-full border border-bf-selection bg-bf-bg/60 px-[0.75rem] py-[0.42rem] font-code text-[0.76rem] text-bf-fg placeholder:text-bf-dim focus:border-bf-blue focus:outline-none"
+      class="min-w-0 flex-1 rounded-full border border-bf-selection bg-bf-bg/60 px-[0.75rem] py-[0.42rem] font-code text-[0.76rem] text-bf-fg placeholder:text-bf-fg-muted focus:border-bf-blue focus:outline-none"
     />
     <button
       type="submit"
