@@ -43,6 +43,15 @@ await page.evaluateOnNewDocument(() => {
 await page.goto(url, { waitUntil: "load", timeout: 60_000 });
 await page.waitForSelector("#hero-specimen");
 await page.evaluate(() => document.fonts.ready.then(() => undefined));
+// The How-to tabs are a React island: Astro drops the ssr attribute once it hydrates. Wait for it,
+// otherwise the first click lands on inert markup and silently does nothing.
+await page.waitForFunction(
+  () => {
+    const island = document.querySelector("[data-howto-tabs]")?.closest("astro-island");
+    return island !== null && !island.hasAttribute("ssr");
+  },
+  { timeout: 20_000 },
+);
 
 // The chat specimen must open on its newest turn, not mid-message.
 const mountScroll = await page.evaluate(() => {
@@ -145,14 +154,120 @@ heroCopy.lead.includes("measured 2:1")
   ? pass('copy: the hero reads "measured 2:1" with its space')
   : fail(`copy: hero lead is ${JSON.stringify(heroCopy.lead.slice(0, 120))}`);
 Math.max(...heroCopy.ctaHeights) - Math.min(...heroCopy.ctaHeights) <= 2
-  ? pass(
-      `copy: the CTA row shares one height (${heroCopy.ctaHeights.join("/")}px, copy CSS included)`,
-    )
+  ? pass(`copy: the CTA row shares one height (${heroCopy.ctaHeights.join("/")}px)`)
   : fail(`copy: CTA heights ${JSON.stringify(heroCopy.ctaHeights)}`);
 
 counts.download.some((href) => href?.includes("/releases/tag/v1.0.2"))
   ? pass("download: links the v1.0.2 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
+
+// The hero's copy-CSS pill is gone: the How-to section below the fold owns the instructions.
+const heroCopyButtons = await page.evaluate(
+  () => document.querySelectorAll("#specimen [data-copy]").length,
+);
+heroCopyButtons === 0
+  ? pass("copy: the hero no longer carries a copy CSS button")
+  : fail(`copy: the hero still has ${heroCopyButtons} copy buttons`);
+
+// The How-to block: four tabs, every plate carrying a copy button whose payload is the plate.
+const howto = await page.evaluate(() => {
+  const panelOf = (card: Element | null) =>
+    card?.closest<HTMLElement>("[data-howto-panel]")?.dataset.howtoPanel ?? "";
+  const cards = [...document.querySelectorAll("[data-howto-card]")];
+  const plates = [...document.querySelectorAll<HTMLElement>("[data-howto-code]")];
+  return {
+    tabs: [...document.querySelectorAll<HTMLElement>("[data-howto-tab]")].map(
+      (tab) => tab.dataset.howtoTab ?? "",
+    ),
+    panels: [...document.querySelectorAll<HTMLElement>("[data-howto-panel]")].map(
+      (panel) => panel.dataset.howtoPanel ?? "",
+    ),
+    cards: cards.length,
+    plates: plates.length,
+    steps: document.querySelectorAll("[data-howto-steps]").length,
+    perTab: [...document.querySelectorAll<HTMLElement>("[data-howto-panel]")].map(
+      (panel) => panel.querySelectorAll("[data-howto-card]").length,
+    ),
+    mismatched: plates
+      .filter((plate) => {
+        const card = plate.closest("[data-howto-card]");
+        const button = card?.querySelector("[data-copy]");
+        const text = plate.querySelector("code")?.textContent ?? "";
+        return !button || button.getAttribute("data-copy") !== text;
+      })
+      .map((plate) => plate.dataset.howtoCode ?? "?"),
+    cardsWithNoCopyOrSteps: cards
+      .filter(
+        (card) => !card.querySelector("[data-copy]") && !card.querySelector("[data-howto-steps]"),
+      )
+      .map((card) => panelOf(card) + "/" + card.getAttribute("data-howto-card")),
+  };
+});
+JSON.stringify(howto.tabs) === JSON.stringify(["os", "web", "terminals", "frameworks"]) &&
+howto.panels.length === 4
+  ? pass(`how-to: four tabs (${howto.tabs.join(" · ")}), one panel each`)
+  : fail(`how-to: tabs ${JSON.stringify(howto.tabs)}, panels ${JSON.stringify(howto.panels)}`);
+howto.cards === 14 && howto.plates === 13 && howto.steps === 1
+  ? pass(
+      `how-to: ${howto.cards} cards across ${howto.perTab.join("/")} per tab, ${howto.plates} code plates, 1 GUI recipe`,
+    )
+  : fail(
+      `how-to: ${howto.cards} cards, ${howto.plates} plates, ${howto.steps} step lists (${howto.perTab.join("/")})`,
+    );
+howto.mismatched.length === 0 && howto.cardsWithNoCopyOrSteps.length === 0
+  ? pass("how-to: every copy button carries its plate, every card is actionable")
+  : fail(
+      `how-to: payload mismatches ${JSON.stringify(howto.mismatched)}, empty cards ${JSON.stringify(howto.cardsWithNoCopyOrSteps)}`,
+    );
+
+// Switching tabs swaps the visible panel, and the copy button inherits Base.astro's toast.
+const visiblePanels = () =>
+  page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("[data-howto-panel]")]
+      .filter((panel) => panel.getBoundingClientRect().height > 0)
+      .map((panel) => panel.dataset.howtoPanel ?? ""),
+  );
+const beforePanels = await visiblePanels();
+// A real mouse click, not element.click(): Radix Tabs selects on mousedown, not on click.
+await page.click('[data-howto-tab="terminals"]');
+await new Promise((resolve) => setTimeout(resolve, 150));
+const tabSwitch = await page.evaluate(async () => {
+  const after = [...document.querySelectorAll<HTMLElement>("[data-howto-panel]")]
+    .filter((panel) => panel.getBoundingClientRect().height > 0)
+    .map((panel) => panel.dataset.howtoPanel ?? "");
+  const terminals = document.querySelector<HTMLElement>('[data-howto-tab="terminals"]');
+  const copy = document.querySelector<HTMLElement>('[data-howto-card="ghostty"] [data-copy]');
+  copy?.click();
+  await new Promise((resolve) => setTimeout(resolve, 80));
+  const toast = document.getElementById("toast")?.textContent ?? "";
+  const shown = document.getElementById("toast")?.classList.contains("show") ?? false;
+  const style = terminals ? getComputedStyle(terminals) : null;
+  return {
+    after,
+    active: terminals?.getAttribute("data-state") ?? "",
+    toast,
+    shown,
+    payload: copy?.getAttribute("data-copy") ?? "",
+    fill: style?.backgroundImage ?? "",
+    color: style?.color ?? "",
+  };
+});
+const tabState = { before: beforePanels, ...tabSwitch };
+JSON.stringify(tabState.before) === JSON.stringify(["os"]) &&
+JSON.stringify(tabState.after) === JSON.stringify(["terminals"]) &&
+tabState.active === "active"
+  ? pass("how-to: switching to Terminals hides the OS panel and marks the tab active")
+  : fail(
+      `how-to: panels ${JSON.stringify(tabState.before)} -> ${JSON.stringify(tabState.after)}, tab state ${tabState.active}`,
+    );
+tabState.fill.startsWith("linear-gradient") && tabState.color === "rgb(37, 41, 37)"
+  ? pass(`how-to: the active tab carries the blue fill and the dark ink (${tabState.color})`)
+  : fail(`how-to: active tab fill is ${tabState.fill}, ink ${tabState.color}`);
+tabState.shown &&
+tabState.toast.startsWith("copied") &&
+tabState.toast.includes(tabState.payload.slice(0, 20))
+  ? pass("how-to: a snippet copy button writes the plate to the clipboard and fires the toast")
+  : fail(`how-to: toast ${JSON.stringify(tabSwitch.toast)} shown=${tabSwitch.shown}`);
 
 // 5. The hero's agent container: markdown rendered in QuBlack — bold, inline code and a
 // colourless code plate — plus a streamed reply.
@@ -246,10 +361,8 @@ const sizing = await page.evaluate(() => {
     body: body ? Number.parseFloat(getComputedStyle(body).fontSize) : 0,
   };
 });
-sizing.input >= 14 && sizing.input >= sizing.body
-  ? pass(
-      `agent chat: input is ${sizing.input}px, not smaller than the ${sizing.body}px message body`,
-    )
+sizing.input > 0 && sizing.input === sizing.body
+  ? pass(`agent chat: input is exactly the message body size (${sizing.input}px)`)
   : fail(`agent chat: input ${sizing.input}px vs body ${sizing.body}px`);
 sizing.placeholder === 0 || sizing.placeholder === sizing.input
   ? pass(`agent chat: placeholder keeps the input size (${sizing.input}px)`)
@@ -379,7 +492,7 @@ const typography = await page.evaluate(() => {
     baselineRows: deltas.length,
     labelSizes,
     valueSizes,
-    copyOffset: buttonInk(document.querySelector(".mt-\\[1\\.4rem\\] button[data-copy]")!),
+    copyOffset: buttonInk(document.querySelector("[data-howto-card='macos'] [data-copy]")!),
     sendOffset: buttonInk(document.querySelector("#agent-form button")!),
   };
 });
@@ -397,7 +510,7 @@ typography.labelSizes.length === 1 && typography.valueSizes.length === 1
     );
 typography.copyOffset <= 2 && typography.sendOffset <= 2
   ? pass(
-      `alignment: copy-CSS and send stay centred (ink offset ${typography.copyOffset.toFixed(1)} / ${typography.sendOffset.toFixed(1)}px)`,
+      `alignment: how-to copy and send stay centred (ink offset ${typography.copyOffset.toFixed(1)} / ${typography.sendOffset.toFixed(1)}px)`,
     )
   : fail(
       `alignment: button ink offsets ${typography.copyOffset.toFixed(1)} / ${typography.sendOffset.toFixed(1)}px`,
@@ -459,6 +572,49 @@ const scanOverflow = async (width: number) => {
       asciiColumns: getComputedStyle(
         document.getElementById("ascii-grid")!,
       ).gridTemplateColumns.split(" ").length,
+      // The How-to tab strip: never clipped, one row where it fits, uniform pill heights.
+      howtoListFits: (() => {
+        const list = document.querySelector<HTMLElement>("[data-howto-tabs]");
+        return list ? list.scrollWidth <= list.clientWidth + 1 : false;
+      })(),
+      howtoRows: new Set(
+        [...document.querySelectorAll("[data-howto-tab]")].map((tab) =>
+          Math.round(tab.getBoundingClientRect().top),
+        ),
+      ).size,
+      howtoHeights: [
+        ...new Set(
+          [...document.querySelectorAll("[data-howto-tab]")].map((tab) =>
+            Math.round(tab.getBoundingClientRect().height),
+          ),
+        ),
+      ],
+      howtoCards: document.querySelectorAll("[data-howto-card]").length,
+      // The top bar is trimmed to three items: the install guide, the download, the repo.
+      navItems: [...document.querySelectorAll("#site-header nav a, #site-header nav button")]
+        .filter((item) => item.getBoundingClientRect().width > 0)
+        .map((item) => item.textContent?.trim() ?? ""),
+      navFits: (() => {
+        const nav = document.querySelector<HTMLElement>("#site-header nav");
+        return nav ? nav.scrollWidth <= nav.clientWidth + 1 : false;
+      })(),
+      // Hero: the left column and the chat card must end on the same line when two-up. The card is
+      // taken out of flow at >=1180px precisely so the left column keeps setting that line.
+      heroBottoms: (() => {
+        const grid = document.querySelector("#specimen [data-two-column]");
+        if (!grid) return null;
+        const kids = [...grid.children].map((child) => child.getBoundingClientRect());
+        const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
+        return twoUp ? Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10 : null;
+      })(),
+      // Download: the zip list and the install/sha block must end on the same line when two-up.
+      downloadBottoms: (() => {
+        const grid = document.querySelector("#download [data-two-column]");
+        if (!grid) return null;
+        const kids = [...grid.children].map((child) => child.getBoundingClientRect());
+        const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
+        return twoUp ? Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10 : null;
+      })(),
     };
   });
 };
@@ -484,6 +640,37 @@ for (const width of [390, 834, 1440]) {
     audit.asciiTruncated === 0
       ? pass(`containment 834px: no ASCII label is ellipsized (${audit.asciiColumns} columns)`)
       : fail(`containment 834px: ${audit.asciiTruncated} ASCII labels truncate`);
+  }
+  audit.howtoListFits &&
+  audit.howtoCards === 14 &&
+  Math.max(...audit.howtoHeights) - Math.min(...audit.howtoHeights) <= 1
+    ? pass(
+        `how-to ${width}px: the tab strip fits (no clipping), ${audit.howtoRows} row(s), pill heights ${audit.howtoHeights.join("/")}px`,
+      )
+    : fail(
+        `how-to ${width}px: fits=${audit.howtoListFits}, ${audit.howtoCards} cards, heights ${JSON.stringify(audit.howtoHeights)}`,
+      );
+  const NAV = ["How to use", "Download", "GitHub"];
+  JSON.stringify(audit.navItems) === JSON.stringify(NAV) && audit.navFits
+    ? pass(`nav ${width}px: exactly three items (${audit.navItems.join(" · ")}), nothing clipped`)
+    : fail(`nav ${width}px: ${JSON.stringify(audit.navItems)}, fits=${audit.navFits}`);
+  audit.heroBottoms === null
+    ? pass(`hero ${width}px: one column, so bottom alignment does not apply`)
+    : audit.heroBottoms <= 2
+      ? pass(
+          `hero ${width}px: the chat card ends on the left column's line (${audit.heroBottoms}px apart)`,
+        )
+      : fail(`hero ${width}px: the columns end ${audit.heroBottoms}px apart`);
+  if (width === 1440) {
+    audit.heroBottoms !== null && audit.heroBottoms <= 2
+      ? pass(`hero 1440px: two-up and flush (${audit.heroBottoms}px apart)`)
+      : fail(`hero 1440px: bottoms differ by ${audit.heroBottoms}px`);
+    audit.howtoRows === 1
+      ? pass("how-to 1440px: four tabs on one row")
+      : fail(`how-to 1440px: ${audit.howtoRows} tab rows`);
+    audit.downloadBottoms !== null && audit.downloadBottoms <= 2
+      ? pass(`download 1440px: both blocks end on one line (${audit.downloadBottoms}px apart)`)
+      : fail(`download 1440px: bottoms differ by ${audit.downloadBottoms}px`);
   }
 }
 await page.setViewport({ width: 1440, height: 900 });
@@ -536,11 +723,19 @@ const narrow = await page.evaluate(() => {
   const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
   const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
   const heading = document.querySelector("#specimen h1")!.getBoundingClientRect();
+  // 1024 is above the 900px two-up breakpoint, so the download columns must share a bottom too.
+  const download = [...document.querySelector("#download [data-two-column]")!.children].map(
+    (child) => child.getBoundingClientRect(),
+  );
   return {
     chat: Math.round(chat.width),
     wrap: Math.round(wrap.width),
     singleColumn: Math.round(chat.x) === Math.round(heading.x),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
+    downloadDelta:
+      download.length === 2 && Math.abs(download[0]!.top - download[1]!.top) < 2
+        ? Math.round(Math.abs(download[0]!.bottom - download[1]!.bottom) * 10) / 10
+        : null,
   };
 });
 narrow.singleColumn && narrow.chat === narrow.wrap && narrow.overflow === 0
@@ -548,6 +743,27 @@ narrow.singleColumn && narrow.chat === narrow.wrap && narrow.overflow === 0
   : fail(
       `agent chat: 1024px single=${narrow.singleColumn}, chat ${narrow.chat} vs wrap ${narrow.wrap}`,
     );
+narrow.downloadDelta !== null && narrow.downloadDelta <= 2
+  ? pass(`download 1024px: both blocks end on one line (${narrow.downloadDelta}px apart)`)
+  : fail(`download 1024px: bottoms differ by ${narrow.downloadDelta}px`);
+
+// The hero's exact two-up breakpoint: the chat card must already be flush at 1180px, not just 1440.
+await page.setViewport({ width: 1180, height: 900 });
+await page.reload({ waitUntil: "load" });
+await page.evaluate(() => document.fonts.ready.then(() => undefined));
+const heroEdge = await page.evaluate(() => {
+  const kids = [...document.querySelector("#specimen [data-two-column]")!.children].map((child) =>
+    child.getBoundingClientRect(),
+  );
+  const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
+  return {
+    twoUp,
+    delta: Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10,
+  };
+});
+heroEdge.twoUp && heroEdge.delta <= 2
+  ? pass(`hero 1180px: flush at the two-up breakpoint (${heroEdge.delta}px apart)`)
+  : fail(`hero 1180px: twoUp=${heroEdge.twoUp}, delta ${heroEdge.delta}px`);
 
 await page.setViewport({ width: 390, height: 844 });
 await page.reload({ waitUntil: "load" });

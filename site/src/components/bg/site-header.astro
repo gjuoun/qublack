@@ -8,11 +8,10 @@ interface Props {
 const { base, repo } = Astro.props;
 const link =
   "rounded-full px-3 py-[0.4rem] text-bf-fg-muted no-underline transition-[color,background] duration-200 hover:bg-bf-border/10 hover:text-foreground max-[520px]:px-2";
+// Three items only: the install guide, the download, and the repo. The wordmark on the left is
+// the home link, and every other section is still on the page — it just does not compete here.
 const nav = [
-  { href: "#specimen", label: "Specimen" },
-  { href: "#ascii", label: "ASCII" },
-  { href: "#lookalikes", label: "Lookalikes" },
-  { href: "#grid", label: "2:1 grid" },
+  { href: "#howto", label: "How to use" },
   { href: "#download", label: "Download" },
 ];
 ---
@@ -37,7 +36,7 @@ const nav = [
       <span class="max-[520px]:sr-only">QuBlack</span>
     </a>
     <nav aria-label="Main" class="flex items-center gap-[0.4rem] text-[0.9rem] max-[700px]:gap-[0.15rem]">
-      {nav.map((item) => <a class={`${link} max-[700px]:hidden`} href={item.href}>{item.label}</a>)}
+      {nav.map((item) => <a class={link} href={item.href}>{item.label}</a>)}
       <BGButton tone="nav" href={repo}>GitHub</BGButton>
     </nav>
   </div>

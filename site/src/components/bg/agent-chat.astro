@@ -29,7 +29,7 @@ const md =
 
 <div
   id="agent-chat"
-  class="overflow-hidden rounded-[22px] border border-bf-border bg-bf-border-muted/80 shadow-[0_24px_60px_-34px_color-mix(in_srgb,var(--bf-border-muted)_95%,transparent)]"
+  class="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] border border-bf-border bg-bf-border-muted/80 shadow-[0_24px_60px_-34px_color-mix(in_srgb,var(--bf-border-muted)_95%,transparent)] min-[1180px]:absolute min-[1180px]:inset-0"
   data-agent-chat
   aria-label="Agent conversation specimen"
 >
@@ -52,7 +52,7 @@ const md =
 
   <div
     id="agent-thread"
-    class="grid max-h-[460px] grid-cols-1 gap-[0.7rem] overflow-y-auto overflow-x-hidden px-[0.8rem] py-[0.9rem]"
+    class="grid max-h-[460px] min-h-0 flex-1 grid-cols-1 gap-[0.7rem] overflow-x-hidden overflow-y-auto px-[0.8rem] py-[0.9rem] min-[1180px]:max-h-none"
     data-agent-thread
     aria-live="polite"
   >
@@ -86,7 +86,7 @@ const md =
       name="message"
       autocomplete="off"
       placeholder="问点什么 — try “fix the 断行”"
-      class="min-w-0 flex-1 rounded-full border border-bf-selection bg-bf-bg/60 px-[0.8rem] py-[0.46rem] font-code text-[0.9rem] text-bf-fg placeholder:text-bf-fg-muted focus:border-bf-blue focus:outline-none"
+      class="min-w-0 flex-1 rounded-full border border-bf-selection bg-bf-bg/60 px-[0.8rem] py-[0.46rem] font-code text-[0.84rem] text-bf-fg placeholder:text-bf-fg-muted focus:border-bf-blue focus:outline-none"
     />
     <button
       type="submit"
