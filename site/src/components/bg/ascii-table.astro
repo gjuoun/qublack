@@ -19,7 +19,7 @@ import { ASCII_CELLS } from "../../data/ascii.ts";
 
     <div
       id="ascii-grid"
-      class="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-px overflow-hidden rounded-[14px] border border-bf-border bg-bf-border/60"
+      class="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-px overflow-hidden rounded-[14px] border border-bf-border bg-bf-border/60 min-[700px]:max-[1100px]:grid-cols-[repeat(auto-fill,minmax(92px,1fr))]"
     >
       {
         ASCII_CELLS.map((cell) => (
@@ -30,7 +30,10 @@ import { ASCII_CELLS } from "../../data/ascii.ts";
             <span class="font-code text-[0.6rem] tracking-[0.06em] text-bf-dim uppercase">
               {cell.hex}
             </span>
-            <span class="max-w-full truncate font-code text-[0.55rem] text-bf-dim/70" title={cell.name}>
+            <span
+              class="max-w-full text-center font-code text-[0.55rem] leading-[1.25] break-words text-bf-dim/70"
+              title={cell.name}
+            >
               {cell.name}
             </span>
           </div>
