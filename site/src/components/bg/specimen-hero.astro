@@ -20,7 +20,7 @@ const stats = [
 <section id="specimen" class="scroll-mt-24 pt-[clamp(1.5rem,5vw,3.5rem)] pb-6">
   <div class="bf-wrap" data-reveal>
     <div
-      class="bf-cols-xl items-start"
+      class="bf-cols-xl"
       data-two-column
     >
       <div>
@@ -44,14 +44,8 @@ const stats = [
         <div class="mt-[1.4rem] flex flex-wrap items-center gap-[0.6rem]">
           <BGButton tone="glow" href="#download">Download the family</BGButton>
           <BGButton tone="ghost" href="#grid">See the 2:1 proof</BGButton>
+          <BGButton tone="ghost" href="#howto">How to use</BGButton>
           <BGButton tone="ghost" href={releaseUrl}>Release {version}</BGButton>
-          <BGButton
-            tone="ghost"
-            className="min-h-[49.2px]"
-            data-copy={'font-family: "QuBlack Sans", sans-serif;'}
-            data-swap="on"
-            data-label="copy CSS">copy CSS</BGButton
-          >
         </div>
 
         <dl
@@ -70,7 +64,11 @@ const stats = [
         </dl>
       </div>
 
-      <BGAgentChat />
+      <!-- Two-up: the card is taken out of flow so the left column sets the row height, then the
+           card is stretched back to that height and its thread grows into the space. -->
+      <div class="relative min-w-0">
+        <BGAgentChat />
+      </div>
     </div>
 
     <div
@@ -145,7 +143,7 @@ const stats = [
           </div>
         </div>
         <span class="ml-auto font-code text-[0.7rem] text-bf-dim" data-control-metrics>
-          keys: B/L bold · M/N mono · S sans · I italic · ↓↑ sections · 1–7 jump
+          keys: B/L bold · M/N mono · S sans · I italic · ↓↑ sections · 1–8 jump
         </span>
       </div>
     </div>
