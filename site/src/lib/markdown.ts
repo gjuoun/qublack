@@ -13,11 +13,7 @@
  */
 
 const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const FENCE = /^```(\w*)\s*$/;
 const HEADING = /^(#{1,4})\s+(.*)$/;
@@ -54,9 +50,7 @@ export function renderMarkdown(source: string): string {
         index += 1;
       }
       index += 1; // the closing fence, or one past the end while streaming
-      out.push(
-        `<pre data-md-code="${language}"><code>${escapeHtml(body.join("\n"))}</code></pre>`,
-      );
+      out.push(`<pre data-md-code="${language}"><code>${escapeHtml(body.join("\n"))}</code></pre>`);
       continue;
     }
 

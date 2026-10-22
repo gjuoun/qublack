@@ -126,23 +126,43 @@ counts.download.some((href) => href?.includes("/releases/tag/v1.0.0"))
   ? pass("download: links the v1.0.0 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
-// 5. The hero's agent container: a real thread, code in the mono face, a streamed reply.
+// 5. The hero's agent container: markdown rendered in QuBlack — bold, inline code and a
+// colourless code plate — plus a streamed reply.
 const chat = await page.evaluate(() => {
   const thread = document.getElementById("agent-thread");
-  const code = thread?.querySelector<HTMLElement>("[data-message-code]");
+  const code = thread?.querySelector<HTMLElement>("pre[data-md-code]");
+  const codeText = code?.querySelector("code");
+  const bold = thread?.querySelector<HTMLElement>("[data-md-bold]");
+  const inline = thread?.querySelector<HTMLElement>("[data-md-inline-code]");
+  const colour = (element: Element | null | undefined) =>
+    element ? getComputedStyle(element).color : "";
   return {
     messages: thread?.querySelectorAll("[data-message]").length ?? 0,
-    codeBlocks: thread?.querySelectorAll("[data-message-code]").length ?? 0,
+    codeBlocks: thread?.querySelectorAll("pre[data-md-code]").length ?? 0,
     codeFont: code ? getComputedStyle(code).fontFamily : "",
+    boldWeight: bold ? getComputedStyle(bold).fontWeight : "",
+    boldText: bold?.textContent ?? "",
+    inlineFont: inline ? getComputedStyle(inline).fontFamily : "",
+    codeUniform: codeText ? colour(code) === colour(codeText) : false,
+    codeSpans: code ? code.querySelectorAll("span").length : -1,
     title: document.title,
   };
 });
 chat.messages >= 4
   ? pass(`agent chat: ${chat.messages} messages in the initial thread`)
   : fail(`agent chat: ${chat.messages} messages`);
-chat.codeBlocks >= 2 && chat.codeFont.includes("QuBlack Mono")
-  ? pass(`agent chat: ${chat.codeBlocks} code blocks render in QuBlack Mono`)
-  : fail(`agent chat: ${chat.codeBlocks} code blocks, font ${chat.codeFont}`);
+chat.codeBlocks >= 3 && chat.codeFont.includes("QuBlack Mono")
+  ? pass(`agent chat: ${chat.codeBlocks} markdown code plates render in QuBlack Mono`)
+  : fail(`agent chat: ${chat.codeBlocks} code plates, font ${chat.codeFont}`);
+chat.codeUniform && chat.codeSpans === 0
+  ? pass("agent chat: code plate is one greyscale slab (no syntax colours)")
+  : fail(`agent chat: code colours uniform=${chat.codeUniform}, spans=${chat.codeSpans}`);
+chat.boldWeight === "700" && chat.boldText.includes("Found it")
+  ? pass(`agent chat: **bold** renders at weight ${chat.boldWeight}`)
+  : fail(`agent chat: bold weight ${chat.boldWeight}, text ${JSON.stringify(chat.boldText)}`);
+chat.inlineFont.includes("QuBlack Mono")
+  ? pass("agent chat: inline code renders in QuBlack Mono")
+  : fail(`agent chat: inline code font ${chat.inlineFont}`);
 chat.title.includes("for your agent")
   ? pass('positioning: the title says "a modern font for your agent"')
   : fail(`positioning: title is ${JSON.stringify(chat.title)}`);

@@ -9,7 +9,7 @@ test("a fenced block becomes one flat code plate, never a highlighted one", () =
 
 test("an unterminated fence still renders as code (streaming in progress)", () => {
   const html = renderMarkdown("```css\n.a { color: red; }");
-  expect(html).toContain("<pre data-md-code=\"css\"><code>.a { color: red; }</code></pre>");
+  expect(html).toContain('<pre data-md-code="css"><code>.a { color: red; }</code></pre>');
 });
 
 test("bold renders as a strong tag", () => {

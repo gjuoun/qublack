@@ -1,20 +1,14 @@
 /**
- * The conversation the homepage specimen renders: a real-shaped agent exchange, English and
- * Chinese and code in the same answer. It exists so the container is a live specimen — the mono
- * face carries the code and the inline identifiers, the sans face carries the prose.
+ * The conversation the homepage specimen renders: a real-shaped agent exchange. Every agent turn
+ * is **markdown**, because that is what agent output looks like in the wild — a bold verdict, a
+ * bulleted explanation, a fenced code block, inline identifiers. The container renders it with
+ * QuBlack: prose in the sans face, code and identifiers in the mono face, no syntax colours.
  */
-
-export interface ChatBlock {
-  kind: "text" | "code";
-  /** Text, or the exact code for a code block. */
-  body: string;
-  /** Language label for a code block. */
-  lang?: string;
-}
 
 export interface ChatMessage {
   role: "user" | "agent";
-  blocks: ChatBlock[];
+  /** Markdown source, rendered by site/src/lib/markdown.ts. */
+  markdown: string;
   /** Small meta line: model / duration / mode. */
   meta: string;
 }
@@ -23,58 +17,64 @@ export const THREAD: ChatMessage[] = [
   {
     role: "user",
     meta: "you · 14:02",
-    blocks: [
-      {
-        kind: "text",
-        body: "我们的 checkout 页在 Safari 上错位了，价格那一列会被挤出去。能看一下吗？",
-      },
-    ],
+    markdown: "我们的 checkout 页在 Safari 上错位了，价格那一列会被挤出去。能看一下吗？",
   },
   {
     role: "agent",
     meta: "agent · 4s · 3 files",
-    blocks: [
-      {
-        kind: "text",
-        body: "Found it: the price column has no minmax(0, …), so a long 中文 product name pushes the track past the viewport. 汉字在等宽网格里是 1.200em，英文只有 0.600em —— 按字符数估宽就会差一倍。",
-      },
-      {
-        kind: "code",
-        lang: "tsx",
-        body: `- <div className="grid grid-cols-[1fr_auto]">
-+ <div className="grid grid-cols-[minmax(0,1fr)_auto]">`,
-      },
-    ],
+    markdown: [
+      "**Found it.** 价格列少了 `minmax(0, …)`，一个长中文商品名就把 grid track 顶出了视口。",
+      "",
+      "QuBlack Mono 里 **汉字 = 2 个 ASCII 格**，所以两条轨道同样宽：",
+      "",
+      "```text",
+      "汉汉 | aaaa",
+      "国国 | bbbb",
+      "```",
+      "",
+      "修法是把两条轨道都设成可收缩的：",
+      "",
+      "```tsx",
+      '- <div className="grid grid-cols-[1fr_auto]">',
+      '+ <div className="grid grid-cols-[minmax(0,1fr)_auto]">',
+      "```",
+    ].join("\n"),
   },
   {
     role: "user",
     meta: "you · 14:05",
-    blocks: [{ kind: "text", body: "改完跑测试，顺便把中文断行也修了。" }],
+    markdown: "改完跑测试，顺便把中文断行也修了。",
   },
   {
     role: "agent",
     meta: "agent · 9s · tests green",
-    blocks: [
-      {
-        kind: "text",
-        body: "`bun test checkout` → 12 passed. 断行也一并收紧了：全角标点不留在行首，`图`、`国` 这类字不会被拆成两半。",
-      },
-      {
-        kind: "code",
-        lang: "css",
-        body: `.chat-bubble {
-  word-break: normal;
-  overflow-wrap: anywhere;
-  line-height: 1.78; /* 中文行高不套拉丁的 1.5 */
-}`,
-      },
-    ],
+    markdown: [
+      "**Tests green.** `bun test checkout` → 12 passed.",
+      "",
+      "- 全角标点不留在行首",
+      "- `图`、`国` 这类全角字不会被拆成两半",
+      "",
+      "```css",
+      ".chat-bubble {",
+      "  word-break: normal;",
+      "  overflow-wrap: anywhere;",
+      "  line-height: 1.78; /* 中文行高不套拉丁的 1.5 */",
+      "}",
+      "```",
+    ].join("\n"),
   },
 ];
 
-/** Canned replies for the input box — streamed, one per send, in order. */
+/** Canned markdown replies for the input box — streamed, one per send, in order. */
 export const REPLIES: string[] = [
-  "收到。QuBlack Mono 让 汉字 与 ASCII 落在同一张网格上：一个汉字正好两个字符宽，所以 agent 的表格、diff 和日志不会错位。",
-  "Fixed. 这次改动只碰渲染层：font-family 换成 QuBlack，行高按中英分别设，其余不动。",
-  "Tests pass — 12 passed, 0 failed. 需要我把同样的修正补到移动端断点吗？",
+  [
+    "**收到。** 所有字符落在同一张网格上：`汉` 占 2 格，`a` 占 1 格。",
+    "",
+    "```text",
+    "汉汉 | aaaa",
+    "国国 | bbbb",
+    "```",
+  ].join("\n"),
+  "**Fixed.** 只动渲染层：`font-family` 换成 QuBlack，行高按中英分别设，其余不动。",
+  "**Tests pass** — 12 passed, 0 failed. 要我把同样的修正补到移动端断点吗？",
 ];
