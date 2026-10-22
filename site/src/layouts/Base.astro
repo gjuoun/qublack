@@ -29,7 +29,8 @@ const vars: Record<string, string> = {
   ),
   "--ink-on-bright": "var(--bf-bg)",
   "--fg-muted": "color-mix(in srgb, var(--bf-fg) 75%, var(--bf-bg))",
-  "--dim": "color-mix(in srgb, var(--bf-fg) 55%, var(--bf-bg))",
+  // 65% (not 55%) keeps small mono labels above WCAG AA on the page background.
+  "--dim": "color-mix(in srgb, var(--bf-fg) 65%, var(--bf-bg))",
 };
 const style = Object.entries(vars)
   .map(([name, value]) => `${name}:${value}`)
