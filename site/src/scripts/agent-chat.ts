@@ -47,6 +47,15 @@ if (form && input && thread && dataNode) {
   };
   mark();
 
+  // The specimen opens on its newest turn, not on a clip mid-message: the thread is taller than
+  // its 460px viewport by design, so park it at the bottom once the fonts have settled.
+  const toBottom = (): void => {
+    thread.scrollTop = thread.scrollHeight;
+  };
+  toBottom();
+  requestAnimationFrame(toBottom);
+  document.fonts?.ready.then(toBottom);
+
   const bubble = (role: "user" | "agent"): { wrapper: HTMLElement; body: HTMLElement } => {
     const wrapper = document.createElement("div");
     wrapper.dataset.message = role;
