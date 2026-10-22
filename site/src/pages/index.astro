@@ -7,7 +7,7 @@ import BGHowTo from "../components/bg/how-to.astro";
 import BGLookalikes from "../components/bg/lookalikes.astro";
 import BGSpecimenHero from "../components/bg/specimen-hero.astro";
 import BGSpecimenLong from "../components/bg/specimen-long.astro";
-import { RELEASE_URL, VERSION } from "../data/site.ts";
+import { VERSION } from "../data/site.ts";
 import Base from "../layouts/Base.astro";
 
 // Printed verbatim from dist/SHA256SUMS; the release audit (plan/scripts/verify-release.sh)
@@ -19,7 +19,7 @@ const SHA256 = "6a5fbbaa10338873d8710f5dd384ceb471d34aa7009e03d5c9e9687519a623a7
   title="黢黑 QuBlack — a modern font for your agent"
   description="QuBlack renders agent output — English, 中文 and code — on one grid: a measured 2:1 mono cell (汉 1.200em, ASCII 0.600em) plus a proportional sibling. SIL OFL 1.1."
 >
-  <BGSpecimenHero version={VERSION} releaseUrl={RELEASE_URL} />
+  <BGSpecimenHero version={VERSION} />
   <BGAsciiTable />
   <BGLookalikes />
   <BGGridProof />
