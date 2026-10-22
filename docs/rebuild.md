@@ -6,13 +6,13 @@ unpacked.
 
 ## 1. Inputs
 
-| Layer | File | Where |
-|---|---|---|
-| Hanzi skeleton (mono) | `SarasaTermSC-{Regular,Italic,Bold,BoldItalic}.ttf` | Sarasa Gothic 1.0.42, `SarasaTermSC-TTF-1.0.42.7z` |
-| Hanzi skeleton (sans) | `SarasaGothicSC-{…}.ttf` | Sarasa Gothic 1.0.42, `SarasaGothicSC-TTF-1.0.42.7z` |
-| Latin (mono) | `RecursiveMonoLnrSt-{…}.ttf` | `ArrowType-Recursive-1.085.zip` → `Recursive_Desktop/separate_statics/TTF/` |
-| Latin (sans) | `RecursiveSansLnrSt-{…}.ttf` | same zip |
-| Emoji table | `assets/emoji-data.txt` | vendored from the Unicode character database |
+| Layer                 | File                                                | Where                                                                       |
+| --------------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
+| Hanzi skeleton (mono) | `SarasaTermSC-{Regular,Italic,Bold,BoldItalic}.ttf` | Sarasa Gothic 1.0.42, `SarasaTermSC-TTF-1.0.42.7z`                          |
+| Hanzi skeleton (sans) | `SarasaGothicSC-{…}.ttf`                            | Sarasa Gothic 1.0.42, `SarasaGothicSC-TTF-1.0.42.7z`                        |
+| Latin (mono)          | `RecursiveMonoLnrSt-{…}.ttf`                        | `ArrowType-Recursive-1.085.zip` → `Recursive_Desktop/separate_statics/TTF/` |
+| Latin (sans)          | `RecursiveSansLnrSt-{…}.ttf`                        | same zip                                                                    |
+| Emoji table           | `assets/emoji-data.txt`                             | vendored from the Unicode character database                                |
 
 `--sources` defaults to `~/code/gjuoun/lishu-mono/assets/work`; any directory with the layout in
 `tools/README.md` works.
