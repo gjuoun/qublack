@@ -6,6 +6,8 @@ documents, web and UI. Both carry Source Han Sans hanzi (via Sarasa Gothic) and 
 Latin, so the whole family is redistributable under the SIL Open Font License 1.1.
 
 Site: **https://qublack.qqntt.com/** — specimen, measurements and downloads.
+Release: **[v1.0.0](https://github.com/gjuoun/qublack/releases/tag/v1.0.0)** · CI:
+![CI](https://github.com/gjuoun/qublack/actions/workflows/ci.yml/badge.svg)
 
 ## Family
 
