@@ -1,5 +1,13 @@
 import { expect, test } from "bun:test";
-import { applyKey, faceLabel, INITIAL_STATE, SECTIONS, type SpecimenState } from "./specimen.ts";
+import {
+  applyKey,
+  faceLabel,
+  INITIAL_STATE,
+  MONO_OPTICAL_SCALE,
+  SECTIONS,
+  type SpecimenState,
+  specimenScale,
+} from "./specimen.ts";
 
 const idle = { editing: false, section: 0 };
 
@@ -19,6 +27,19 @@ test("M and S switch family", () => {
   });
   const mono: SpecimenState = { ...INITIAL_STATE, family: "mono" };
   expect(applyKey(mono, "s", idle)).toEqual({ type: "state", state: INITIAL_STATE });
+});
+
+test("N is an alias for the mono family", () => {
+  expect(applyKey(INITIAL_STATE, "n", idle)).toEqual({
+    type: "state",
+    state: { ...INITIAL_STATE, family: "mono" },
+  });
+});
+
+test("the specimen scales mono by 833/1000 so hanzi keep one optical size", () => {
+  expect(specimenScale(INITIAL_STATE)).toBe(1);
+  expect(specimenScale({ ...INITIAL_STATE, family: "mono" })).toBe(MONO_OPTICAL_SCALE);
+  expect(MONO_OPTICAL_SCALE).toBeCloseTo(833 / 1000, 3);
 });
 
 test("I toggles italic", () => {

@@ -9,12 +9,15 @@ import {
   INITIAL_STATE,
   SECTIONS,
   type SpecimenState,
+  specimenScale,
 } from "../lib/specimen.ts";
 
 const root = document.documentElement;
 const label = document.getElementById("face-label");
 const editable = document.getElementById("hero-specimen");
 const samples = [...document.querySelectorAll<HTMLElement>("[data-specimen]")];
+// The editable specimen only: Mono's upm-833 cell is compensated so 汉字 keep one optical size.
+const scaled = [...document.querySelectorAll<HTMLElement>("[data-specimen-scale]")];
 const controls = [...document.querySelectorAll<HTMLElement>("[data-control]")];
 
 let state: SpecimenState = { ...INITIAL_STATE };
@@ -39,6 +42,9 @@ const render = (): void => {
     sample.style.fontFamily = state.family === "mono" ? '"QuBlack Mono"' : '"QuBlack Sans"';
     sample.style.fontWeight = state.weight === "bold" ? "700" : "400";
     sample.style.fontStyle = state.italic ? "italic" : "normal";
+  }
+  for (const element of scaled) {
+    element.style.setProperty("--specimen-scale", String(specimenScale(state)));
   }
   for (const control of controls) {
     const kind = control.dataset.control;

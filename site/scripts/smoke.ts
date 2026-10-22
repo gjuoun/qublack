@@ -227,6 +227,45 @@ sizing.placeholder === 0 || sizing.placeholder === sizing.input
   ? pass(`agent chat: placeholder keeps the input size (${sizing.input}px)`)
   : fail(`agent chat: placeholder ${sizing.placeholder}px vs input ${sizing.input}px`);
 
+// The editable specimen compensates Mono's upm-833 cell: font-size × 0.833 so one hanzi keeps
+// the same optical size, and nothing outside the specimen (ASCII table, 2:1 proof) rescales.
+await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+const specimenOptics = () =>
+  page.evaluate(() => {
+    const hero = document.getElementById("hero-specimen")!;
+    const sample = document.getElementById("specimen-sample")!;
+    const cell = document.querySelector("#ascii-grid span")!;
+    const context = document.createElement("canvas").getContext("2d")!;
+    const family =
+      document.documentElement.dataset.specimenFamily === "mono" ? "QuBlack Mono" : "QuBlack Sans";
+    const size = Number.parseFloat(getComputedStyle(hero).fontSize);
+    context.font = `${size}px "${family}"`;
+    const metrics = context.measureText("汉");
+    return {
+      size,
+      sampleSize: Number.parseFloat(getComputedStyle(sample).fontSize),
+      hanInk: metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent,
+      asciiCell: Number.parseFloat(getComputedStyle(cell).fontSize),
+    };
+  });
+await page.keyboard.press("s");
+const opticalSans = await specimenOptics();
+await page.keyboard.press("n");
+const opticalMono = await specimenOptics();
+const opticalRatio = opticalMono.size / opticalSans.size;
+const inkDelta = Math.abs(opticalMono.hanInk - opticalSans.hanInk) / opticalSans.hanInk;
+Math.abs(opticalRatio - 0.833) <= 0.01
+  ? pass(
+      `specimen optics: mono font-size is ${(opticalRatio * 100).toFixed(1)}% of sans (833/1000)`,
+    )
+  : fail(`specimen optics: ratio ${opticalRatio.toFixed(4)}`);
+inkDelta <= 0.02
+  ? pass(`specimen optics: hanzi ink height equal within ${(inkDelta * 100).toFixed(2)}% (< 2%)`)
+  : fail(`specimen optics: hanzi ink differs by ${(inkDelta * 100).toFixed(2)}%`);
+opticalMono.asciiCell === opticalSans.asciiCell
+  ? pass(`specimen optics: the ASCII table keeps its real size (${opticalSans.asciiCell}px)`)
+  : fail(`specimen optics: ascii cell ${opticalSans.asciiCell}px -> ${opticalMono.asciiCell}px`);
+
 // The delta's own threshold: below ~1020px the hero is one column and the chat owns the row.
 await page.setViewport({ width: 1024, height: 900 });
 await page.reload({ waitUntil: "load" });
