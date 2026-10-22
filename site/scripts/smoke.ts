@@ -940,5 +940,20 @@ cta.label && cta.href.includes("/releases/download/") && cta.releaseBtnGone
       `download CTA: label="${cta.label}" href=${cta.href} releaseBtnGone=${cta.releaseBtnGone}`,
     );
 
+// Anchor navigation lands the section just under the sticky header — one scroll offset source
+// (the sections' scroll-mt), not two (html scroll-padding used to stack a second 6rem).
+await page.evaluate(() => {
+  document.querySelector<HTMLAnchorElement>('a[href="#download"]')?.click();
+});
+await new Promise((r) => setTimeout(r, 900));
+const landing = await page.evaluate(() => {
+  const sec = document.getElementById("download")!.getBoundingClientRect();
+  const header = document.querySelector("header, nav")!.getBoundingClientRect();
+  return { gap: +(sec.top - header.bottom).toFixed(0) };
+});
+landing.gap >= 0 && landing.gap <= 48
+  ? pass(`anchors: #download lands ${landing.gap}px under the header (single scroll offset)`)
+  : fail(`anchors: #download lands ${landing.gap}px under the header (expected 0-48px)`);
+
 await browser.close();
 process.exit(failures ? 1 : 0);
