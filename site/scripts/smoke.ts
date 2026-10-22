@@ -904,5 +904,41 @@ fonts.cls < 0.1
   ? pass(`CLS: ${fonts.cls.toFixed(3)} (< 0.1)`)
   : fail(`CLS: ${fonts.cls.toFixed(3)}`);
 
+// The chat input row shares the message thread's horizontal rails: its content box sits on the
+// same left/right lines as the thread's (one padding source, asserted at every smoke viewport).
+const rails = await page.evaluate(() => {
+  const thread = document.getElementById("agent-thread");
+  const form = document.getElementById("agent-form");
+  const rail = (el: HTMLElement | null) => (el ? getComputedStyle(el).paddingLeft : "");
+  return {
+    threadLeft: rail(thread),
+    formLeft: rail(form),
+    threadRight: thread ? getComputedStyle(thread).paddingRight : "",
+    formRight: form ? getComputedStyle(form).paddingRight : "",
+  };
+});
+rails.threadLeft === rails.formLeft && rails.threadRight === rails.formRight
+  ? pass(`agent chat: input row rides the thread rails (${rails.formLeft} / ${rails.formRight})`)
+  : fail(
+      `agent chat: input row rails ${rails.formLeft}/${rails.formRight} vs thread ${rails.threadLeft}/${rails.threadRight}`,
+    );
+
+// The download CTA is a direct zip link labelled with the release version.
+const cta = await page.evaluate(() => {
+  const section = document.getElementById("download");
+  const buttons = [...(section?.querySelectorAll("a") ?? [])];
+  const dl = buttons.find((a) => a.textContent?.includes("Download v"));
+  return {
+    label: dl?.textContent?.trim() ?? "",
+    href: dl?.getAttribute("href") ?? "",
+    releaseBtnGone: !buttons.some((a) => a.textContent?.includes("Open the release")),
+  };
+});
+cta.label && cta.href.includes("/releases/download/") && cta.releaseBtnGone
+  ? pass(`download CTA: "${cta.label}" → ${cta.href}`)
+  : fail(
+      `download CTA: label="${cta.label}" href=${cta.href} releaseBtnGone=${cta.releaseBtnGone}`,
+    );
+
 await browser.close();
 process.exit(failures ? 1 : 0);
