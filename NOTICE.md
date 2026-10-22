@@ -20,7 +20,9 @@ QuBlack Mono ships Recursive's `at.alt` alternate for `@` (the target of its `ss
 instead of the default `at` drawing; the outline is imported point for point through the same
 500/600 cell transform as the rest of the ASCII set. QuBlack Sans keeps the default `@`.
 
-QuBlack Mono harmonises the symbols that sit against hanzi — `" ' ( ) [ ] { } / \ |` — by a
+QuBlack Mono harmonises every symbol in the 44-glyph census that sits against hanzi — the delta-8
+brackets `" ' ( ) [ ] { } / \ |` plus the delta-10 marks `` ` * ! % & ? @ $ # < > ^ + : ; - = _`
+(and a sub-percent nudge on `, . ~`) — by a
 per-glyph vertical scale and translate that puts their ink boxes on the same top/height ratios as
 the Sarasa Term skeleton (y only; the 500-unit advance is untouched). `tools/symbol_audit.py`
 measures and asserts the result within two points. Deliberately left alone: curly quotes (already
