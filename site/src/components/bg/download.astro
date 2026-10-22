@@ -26,7 +26,7 @@ const installLinux = `mkdir -p ~/.local/share/fonts && unzip -o ${ZIP_NAME} -d ~
       </p>
     </div>
 
-    <div class="grid items-start gap-4 min-[900px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div class="bf-cols items-start" data-two-column>
       <div class="grid gap-3">
         <BGDownloadCard href={`${RELEASE_URL}`} label={ZIP_NAME} detail={`release ${VERSION} · TTFs + OFL + README`} />
         <BGDownloadCard href={`https://github.com/gjuoun/qublack/releases`} label="All releases" detail="tag history, checksums, notes" />

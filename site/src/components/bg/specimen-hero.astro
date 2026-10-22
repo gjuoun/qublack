@@ -21,7 +21,8 @@ const stats = [
 <section id="specimen" class="scroll-mt-24 pt-[clamp(1.5rem,5vw,3.5rem)] pb-6">
   <div class="bf-wrap" data-reveal>
     <div
-      class="grid items-start gap-[clamp(1.8rem,4vw,3.2rem)] min-[1180px]:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]"
+      class="bf-cols-xl items-start"
+      data-two-column
     >
       <div>
         <BGEyebrow>A modern font for your agent · v{version}</BGEyebrow>
@@ -118,7 +119,7 @@ const stats = [
       >
         <div class="flex flex-wrap items-center gap-x-4 gap-y-2" data-control-groups>
           <div class="flex items-center gap-2" data-control-group="family">
-            <span class="font-code text-[0.72rem] text-bf-dim uppercase">family</span>
+            <span class="min-w-[3.25rem] font-code text-[0.72rem] text-bf-dim uppercase">family</span>
             <BGButton tone="chip" data-control="family" data-value="sans" aria-pressed="true"
               >Sans</BGButton
             >
@@ -127,7 +128,7 @@ const stats = [
             >
           </div>
           <div class="flex items-center gap-2" data-control-group="weight">
-            <span class="font-code text-[0.72rem] text-bf-dim uppercase">weight</span>
+            <span class="min-w-[3.25rem] font-code text-[0.72rem] text-bf-dim uppercase">weight</span>
             <BGButton tone="chip" data-control="weight" data-value="regular" aria-pressed="true"
               >Regular</BGButton
             >
@@ -136,7 +137,7 @@ const stats = [
             >
           </div>
           <div class="flex items-center gap-2" data-control-group="style">
-            <span class="font-code text-[0.72rem] text-bf-dim uppercase">style</span>
+            <span class="min-w-[3.25rem] font-code text-[0.72rem] text-bf-dim uppercase">style</span>
             <BGButton tone="chip" data-control="italic" data-value="toggle" aria-pressed="false"
               >Italic</BGButton
             >

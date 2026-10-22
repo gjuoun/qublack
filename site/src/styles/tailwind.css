@@ -166,6 +166,27 @@
   --sidebar-ring: var(--bf-blue);
 }
 
+/* One two-column grid for the whole site: equal tracks, one 16px gutter, so every section
+   splits on the same vertical line. `bf-cols` goes two-up at 900px, `bf-cols-xl` at 1180px
+   (the hero needs the wider stack); both share the template and the gap. */
+@utility bf-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  @media (min-width: 900px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@utility bf-cols-xl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  @media (min-width: 1180px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
 /* The page column: 1180px max, 1.25rem gutters (0.875rem on phones). */
 @utility bf-wrap {
   width: min(1180px, 100% - 2.5rem);
