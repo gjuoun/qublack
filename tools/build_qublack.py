@@ -35,6 +35,10 @@ REPO = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCES = Path.home() / "code/gjuoun/lishu-mono/assets/work"
 SLUGS = {"mono": "QuBlackMono", "sans": "QuBlackSans"}
 DISPLAY = {"mono": "QuBlack Mono", "sans": "QuBlack Sans"}
+# Symbols that sit against hanzi: Recursive draws them at Latin cap height, which after the
+# upm-833 move leaves them ~23-24% of the em below the hanzi top. Sarasa keeps them nearly flush.
+FIXED_SYMBOLS = ['"', "'", "(", ")", "[", "]", "{", "}", "/", "\\", "|"]
+
 KEEP_RANGES = (
     (0x2190, 0x21FF),
     (0x2500, 0x257F),
@@ -143,6 +147,68 @@ def apply_upm_trick(font: TTFont, new_upm: int = 833) -> None:
     os2.sTypoLineGap = round(os2.sTypoLineGap * scale)
 
 
+def _ink_units(glyph) -> tuple[float, float, float]:
+    """(top, bottom, height) in font units for a simple glyph."""
+    top, bottom = float(glyph.yMax), float(glyph.yMin)
+    return top, bottom, top - bottom
+
+
+def harmonize_symbols(font: TTFont, reference_path: Path) -> int:
+    """Scale+translate (y only) the hanzi-adjacent symbols onto Sarasa's ink ratios.
+
+    Recursive draws its ASCII punctuation around the Latin cap height; Sarasa Term keeps the same
+    symbols nearly flush with the hanzi top. For each symbol we take Sarasa's two ratios — ink top
+    below the hanzi top, and ink height — relative to its own hanzi ink box, then apply a vertical
+    affine transform so QuBlack Mono reproduces them. Advance widths are untouched, so the 500-unit
+    (0.600em) cell survives.
+    """
+    reference = TTFont(str(reference_path))
+    ref_han_name = reference.getBestCmap().get(ord("汉"))
+    if ref_han_name is None:
+        return 0
+    reference["glyf"][ref_han_name].recalcBounds(reference["glyf"])
+    ref_han_top, _, ref_han_h = _ink_units(reference["glyf"][ref_han_name])
+
+    han_name = font.getBestCmap().get(ord("汉"))
+    if han_name is None:
+        return 0
+    font["glyf"][han_name].recalcBounds(font["glyf"])
+    han_top, _, han_h = _ink_units(font["glyf"][han_name])
+
+    moved = 0
+    for char in FIXED_SYMBOLS:
+        name = font.getBestCmap().get(ord(char))
+        ref_name = reference.getBestCmap().get(ord(char))
+        if not name or not ref_name:
+            continue
+        glyph = font["glyf"][name]
+        ref_glyph = reference["glyf"][ref_name]
+        if getattr(glyph, "numberOfContours", 0) <= 0 or not hasattr(glyph, "coordinates"):
+            continue
+        glyph.recalcBounds(font["glyf"])
+        ref_glyph.recalcBounds(reference["glyf"])
+
+        ref_top, _, ref_height = _ink_units(ref_glyph)
+        top_ratio = (ref_han_top - ref_top) / ref_han_h
+        height_ratio = ref_height / ref_han_h
+
+        current_top, _, current_height = _ink_units(glyph)
+        if current_height <= 0:
+            continue
+        target_height = height_ratio * han_h
+        target_top = han_top - top_ratio * han_h
+        scale = target_height / current_height
+        shift = target_top - scale * current_top
+
+        coordinates = glyph.coordinates
+        for index in range(len(coordinates)):
+            x, y = coordinates[index]
+            coordinates[index] = (x, round(scale * y + shift))
+        glyph.recalcBounds(font["glyf"])
+        moved += 1
+    return moved
+
+
 def donor_paths(mode: str, style: str, sources: Path) -> tuple[Path, Path]:
     if mode == "mono":
         skeleton = sources / f"SarasaTermSC-{style}.ttf"
@@ -181,6 +247,10 @@ def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path) -> Pat
 
     if mode == "mono":
         apply_upm_trick(skeleton, 833)
+        print(
+            f"[{slug}-{style}] symbols harmonised {harmonize_symbols(skeleton, skeleton_path)}",
+            flush=True,
+        )
 
     write_names(skeleton, display, slug, style)
     skeleton["maxp"].numGlyphs = len(skeleton.getGlyphOrder())
