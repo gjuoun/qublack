@@ -44,6 +44,19 @@ await page.goto(url, { waitUntil: "load", timeout: 60_000 });
 await page.waitForSelector("#hero-specimen");
 await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
+// The chat specimen must open on its newest turn, not mid-message.
+const mountScroll = await page.evaluate(() => {
+  const thread = document.getElementById("agent-thread") as HTMLElement | null;
+  if (!thread) return null;
+  return {
+    gap: Math.round(thread.scrollHeight - thread.scrollTop - thread.clientHeight),
+    scrolled: thread.scrollTop > 0,
+  };
+});
+mountScroll && mountScroll.scrolled && mountScroll.gap <= 2
+  ? pass(`agent chat: mounts scrolled to the newest message (tail gap ${mountScroll.gap}px)`)
+  : fail(`agent chat: mount scroll ${JSON.stringify(mountScroll)}`);
+
 // Baseline the first-paint font payload before any interaction: the chat input below is typed
 // into, and those characters legitimately pull extra shards that are not part of a cold load.
 const initialFonts = await page.evaluate(() => {
@@ -122,6 +135,21 @@ counts.lookalikes >= 12
 counts.ratio === "2.000"
   ? pass("2:1 grid: ratio cell reads 2.000")
   : fail(`2:1 grid: ratio cell reads ${JSON.stringify(counts.ratio)}`);
+const heroCopy = await page.evaluate(() => ({
+  lead: document.querySelector("#specimen p.bf-lead")?.textContent ?? "",
+  ctaHeights: [
+    ...(document.querySelector("#specimen a[href='#download']")?.parentElement?.children ?? []),
+  ].map((child) => Math.round(child.getBoundingClientRect().height * 10) / 10),
+}));
+heroCopy.lead.includes("measured 2:1")
+  ? pass('copy: the hero reads "measured 2:1" with its space')
+  : fail(`copy: hero lead is ${JSON.stringify(heroCopy.lead.slice(0, 120))}`);
+Math.max(...heroCopy.ctaHeights) - Math.min(...heroCopy.ctaHeights) <= 2
+  ? pass(
+      `copy: the CTA row shares one height (${heroCopy.ctaHeights.join("/")}px, copy CSS included)`,
+    )
+  : fail(`copy: CTA heights ${JSON.stringify(heroCopy.ctaHeights)}`);
+
 counts.download.some((href) => href?.includes("/releases/tag/v1.0.1"))
   ? pass("download: links the v1.0.1 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
@@ -423,6 +451,14 @@ const scanOverflow = async (width: number) => {
         document.getElementById("agent-thread")!.scrollWidth <=
         document.getElementById("agent-thread")!.clientWidth,
       keysWrap: getComputedStyle(document.querySelector("[data-control-metrics]")!).whiteSpace,
+      // Tablet ASCII: no cell label may be ellipsized away.
+      asciiTruncated: [...document.querySelectorAll("#ascii-grid > div")].filter((cell) => {
+        const label = cell.lastElementChild as HTMLElement;
+        return label.scrollWidth > label.clientWidth + 1;
+      }).length,
+      asciiColumns: getComputedStyle(
+        document.getElementById("ascii-grid")!,
+      ).gridTemplateColumns.split(" ").length,
     };
   });
 };
@@ -443,6 +479,11 @@ for (const width of [390, 834, 1440]) {
     audit.keysWrap === "normal"
       ? pass("containment 390px: the keys helper is allowed to wrap")
       : fail(`containment 390px: keys helper white-space is ${audit.keysWrap}`);
+  }
+  if (width === 834) {
+    audit.asciiTruncated === 0
+      ? pass(`containment 834px: no ASCII label is ellipsized (${audit.asciiColumns} columns)`)
+      : fail(`containment 834px: ${audit.asciiTruncated} ASCII labels truncate`);
   }
 }
 await page.setViewport({ width: 1440, height: 900 });
