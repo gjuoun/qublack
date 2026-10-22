@@ -8,11 +8,11 @@ interface Props {
 const { base, repo } = Astro.props;
 const link =
   "rounded-full px-3 py-[0.4rem] text-bf-fg-muted no-underline transition-[color,background] duration-200 hover:bg-bf-border/10 hover:text-foreground max-[520px]:px-2";
-// Three items only: home, the install guide, and the repo. The sections are all still on the
-// page and reachable by scrolling / the arrow keys — they just do not compete in the top bar.
+// Three items only: the install guide, the download, and the repo. The wordmark on the left is
+// the home link, and every other section is still on the page — it just does not compete here.
 const nav = [
-  { href: "#specimen", label: "Home" },
   { href: "#howto", label: "How to use" },
+  { href: "#download", label: "Download" },
 ];
 ---
 
