@@ -20,7 +20,7 @@ const stats = [
 <section id="specimen" class="scroll-mt-24 pt-[clamp(1.5rem,5vw,3.5rem)] pb-6">
   <div class="bf-wrap" data-reveal>
     <div
-      class="bf-cols-xl items-start"
+      class="bf-cols-xl"
       data-two-column
     >
       <div>
@@ -64,7 +64,11 @@ const stats = [
         </dl>
       </div>
 
-      <BGAgentChat />
+      <!-- Two-up: the card is taken out of flow so the left column sets the row height, then the
+           card is stretched back to that height and its thread grows into the space. -->
+      <div class="relative min-w-0">
+        <BGAgentChat />
+      </div>
     </div>
 
     <div
