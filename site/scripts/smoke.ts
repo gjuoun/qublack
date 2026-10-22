@@ -592,7 +592,7 @@ const scanOverflow = async (width: number) => {
         ),
       ],
       howtoCards: document.querySelectorAll("[data-howto-card]").length,
-      // The top bar is trimmed to three items: home, the install guide, the repo.
+      // The top bar is trimmed to three items: the install guide, the download, the repo.
       navItems: [...document.querySelectorAll("#site-header nav a, #site-header nav button")]
         .filter((item) => item.getBoundingClientRect().width > 0)
         .map((item) => item.textContent?.trim() ?? ""),
@@ -643,7 +643,7 @@ for (const width of [390, 834, 1440]) {
     : fail(
         `how-to ${width}px: fits=${audit.howtoListFits}, ${audit.howtoCards} cards, heights ${JSON.stringify(audit.howtoHeights)}`,
       );
-  const NAV = ["Home", "How to use", "GitHub"];
+  const NAV = ["How to use", "Download", "GitHub"];
   JSON.stringify(audit.navItems) === JSON.stringify(NAV) && audit.navFits
     ? pass(`nav ${width}px: exactly three items (${audit.navItems.join(" · ")}), nothing clipped`)
     : fail(`nav ${width}px: ${JSON.stringify(audit.navItems)}, fits=${audit.navFits}`);
