@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { renderInline, renderMarkdown } from "./markdown.ts";
+import { dedent, renderInline, renderMarkdown } from "./markdown.ts";
 
 test("a fenced block becomes one flat code plate, never a highlighted one", () => {
   const html = renderMarkdown("before\n\n```tsx\nconst a = 1;\n```\n");
@@ -29,6 +29,35 @@ test("markup in the source is escaped, not executed", () => {
   expect(html).toContain("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
   expect(html).not.toContain("<img");
   expect(html).toContain("&amp; done");
+});
+
+test("template indentation on later lines is stripped (the ghost-indent bug)", () => {
+  // Exactly the leak shape: first line at column 0, the rest carrying a template's indent.
+  const source = ["```tsx", '- <div className="a">', '    + <div className="b">', "```"].join("\n");
+  const html = renderMarkdown(source);
+  expect(html).toContain(
+    "<code>- &lt;div className=&quot;a&quot;&gt;\n+ &lt;div className=&quot;b&quot;&gt;</code>",
+  );
+  expect(html).not.toContain("\n    +");
+});
+
+test("a uniformly indented block keeps its own indent", () => {
+  expect(dedent(["    a", "    b"])).toEqual(["    a", "    b"]);
+});
+
+test("nested code keeps its relative indentation", () => {
+  const body = ["}", "  word-break: normal;", "  overflow-wrap: anywhere;", "", "}"];
+  expect(dedent([".chat-bubble {", ...body])).toEqual([".chat-bubble {", ...body]);
+});
+
+test("a block that closes at the left margin is left exactly as written", () => {
+  const lines = ["rule {", "      color: red;", "        margin: 0;", "}"];
+  expect(dedent(lines)).toEqual(lines);
+});
+
+test("a leaked block with real nesting keeps its relative indent", () => {
+  const lines = ["rule {", "    color: red;", "        margin: 0;"];
+  expect(dedent(lines)).toEqual(["rule {", "color: red;", "    margin: 0;"]);
 });
 
 test("bullets and headings keep their structure", () => {

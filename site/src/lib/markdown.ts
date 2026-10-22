@@ -32,6 +32,38 @@ export function renderInline(text: string): string {
     .join("");
 }
 
+const leadingSpaces = (line: string): number => line.match(/^ */)?.[0].length ?? 0;
+
+/**
+ * Kill template indentation without touching real nesting.
+ *
+ * A fenced block that was copy-pasted out of an indented template looks like this — the first
+ * line sits at column 0, every later line carries the template's indent:
+ *
+ *     - <div className="…">
+ *         + <div className="…">
+ *
+ * Inside `<pre>` that asymmetry renders as ghost leading whitespace on every line but the first.
+ * So: when no later line returns to the first line's own indent — the signature of template
+ * indentation, since real code closes its blocks back at the left margin — strip the common
+ * indent those later lines share. A block with a line at the left margin (a `}`, a blank, a new
+ * statement) is left exactly as written, and anything stripped is stripped from every line by the
+ * same amount, so nested code keeps its relative indent.
+ */
+export function dedent(lines: string[]): string[] {
+  const first = lines[0];
+  if (first === undefined) return lines;
+  const rest = lines.slice(1).filter((line) => line.trim() !== "");
+  if (rest.length === 0) return lines;
+  const firstIndent = leadingSpaces(first);
+  // A line that returns to the first line's indent means this is real code, not template padding.
+  if (rest.some((line) => leadingSpaces(line) <= firstIndent)) return lines;
+  const minRest = Math.min(...rest.map(leadingSpaces));
+  if (minRest <= firstIndent) return lines;
+  const strip = minRest - firstIndent;
+  return lines.map((line) => line.slice(Math.min(strip, leadingSpaces(line))));
+}
+
 export function renderMarkdown(source: string): string {
   const lines = source.replace(/\r\n/g, "\n").split("\n");
   const out: string[] = [];
@@ -50,7 +82,10 @@ export function renderMarkdown(source: string): string {
         index += 1;
       }
       index += 1; // the closing fence, or one past the end while streaming
-      out.push(`<pre data-md-code="${language}"><code>${escapeHtml(body.join("\n"))}</code></pre>`);
+      // Per-line dedent, then one text node: the code plate stays a single flat slab.
+      out.push(
+        `<pre data-md-code="${language}"><code>${escapeHtml(dedent(body).join("\n"))}</code></pre>`,
+      );
       continue;
     }
 

@@ -164,6 +164,48 @@ chat.inlineFont.includes("QuBlack Mono")
   ? pass("agent chat: inline code renders in QuBlack Mono")
   : fail(`agent chat: inline code font ${chat.inlineFont}`);
 
+// The ghost-indent bug: every rendered code line starts at the same x, and only intentional
+// nesting carries indentation. Measured from the rendered glyphs, not from the source.
+const indentation = await page.evaluate(() => {
+  const plates = [...document.querySelectorAll<HTMLElement>("#agent-thread pre[data-md-code]")];
+  const diff = plates.find((plate) => (plate.textContent ?? "").includes("grid-cols-[1fr_auto]"));
+  const css = plates.find((plate) => (plate.textContent ?? "").includes("word-break"));
+  const lineStarts = (plate: HTMLElement | undefined) => {
+    const code = plate?.querySelector("code");
+    const node = code?.firstChild;
+    if (!code || !node) return { lefts: [] as number[], leading: [] as number[] };
+    const text = code.textContent ?? "";
+    const lefts: number[] = [];
+    const leading: number[] = [];
+    let offset = 0;
+    for (const line of text.split("\n")) {
+      const range = document.createRange();
+      range.setStart(node, offset);
+      range.setEnd(node, offset + Math.max(1, line.length));
+      lefts.push(Math.round(range.getBoundingClientRect().left));
+      leading.push(line.length - line.trimStart().length);
+      offset += line.length + 1;
+    }
+    return { lefts, leading };
+  };
+  return { diff: lineStarts(diff), css: lineStarts(css) };
+});
+const diffAligned =
+  indentation.diff.lefts.length === 2 &&
+  new Set(indentation.diff.lefts).size === 1 &&
+  indentation.diff.leading.every((spaces) => spaces === 0);
+diffAligned
+  ? pass(
+      `agent chat: diff lines share one left edge (${indentation.diff.lefts[0]}px), no ghost indent`,
+    )
+  : fail(
+      `agent chat: diff lefts ${JSON.stringify(indentation.diff.lefts)}, leading ${JSON.stringify(indentation.diff.leading)}`,
+    );
+const cssNesting = indentation.css.leading.slice(1, -1);
+cssNesting.length > 0 && cssNesting.every((spaces) => spaces === 2)
+  ? pass("agent chat: intentional 2-space css nesting survived the dedent")
+  : fail(`agent chat: css leading spaces ${JSON.stringify(indentation.css.leading)}`);
+
 const sizing = await page.evaluate(() => {
   const input = document.getElementById("agent-input") as HTMLElement | null;
   const body = document.querySelector("#agent-thread [data-message-body]") as HTMLElement | null;
