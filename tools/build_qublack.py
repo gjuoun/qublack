@@ -6,6 +6,8 @@ The pipeline is the one that produced the shipped JunHei family, made explicit p
   mono: SarasaTermSC skeleton, ASCII replaced with Recursive **Mono** Linear scaled into the
         500-unit cell, emoji stripped from the cmap, then the upm-833 trick (coordinates
         untouched, unitsPerEm 1000 -> 833) so 汉 = 1.200em and ASCII = 0.600em — a measured 2:1.
+        `@` takes Recursive's `at.alt` alternate (the ss12 lookup target, a single-storey narrow
+        design) instead of the default `at`; the sans family keeps the default.
   sans: SarasaGothicSC skeleton, ASCII replaced with Recursive **Sans** Linear at the donor's own
         advances, emoji stripped, then 0x2500-0x259F copied from the Term skeleton so box drawing
         stays half-width in a proportional face.
@@ -74,10 +76,14 @@ def swap_latin(skeleton: TTFont, latin: TTFont, mode: str) -> int:
     glyf, hmtx = skeleton["glyf"], skeleton["hmtx"]
     cell = latin["hmtx"].metrics[rc_cmap[0x4D]][0] if mode == "mono" else None
     swapped = 0
+    donor_glyphs = set(latin.getGlyphOrder())
     for cp in range(0x20, 0x7F):
         source_name, target_name = st_cmap.get(cp), rc_cmap.get(cp)
         if not (source_name and target_name):
             continue
+        # Mono ships the at.alt alternate: Recursive's GSUB maps `at` -> `at.alt` under ss12.
+        if mode == "mono" and cp == 0x40 and "at.alt" in donor_glyphs:
+            target_name = "at.alt"
         if mode == "mono":
             scale = 500.0 / cell
             width = 500
