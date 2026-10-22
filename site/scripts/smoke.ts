@@ -592,6 +592,22 @@ const scanOverflow = async (width: number) => {
         ),
       ],
       howtoCards: document.querySelectorAll("[data-howto-card]").length,
+      // The top bar is trimmed to three items: home, the install guide, the repo.
+      navItems: [...document.querySelectorAll("#site-header nav a, #site-header nav button")]
+        .filter((item) => item.getBoundingClientRect().width > 0)
+        .map((item) => item.textContent?.trim() ?? ""),
+      navFits: (() => {
+        const nav = document.querySelector<HTMLElement>("#site-header nav");
+        return nav ? nav.scrollWidth <= nav.clientWidth + 1 : false;
+      })(),
+      // Download: the zip list and the install/sha block must end on the same line when two-up.
+      downloadBottoms: (() => {
+        const grid = document.querySelector("#download [data-two-column]");
+        if (!grid) return null;
+        const kids = [...grid.children].map((child) => child.getBoundingClientRect());
+        const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
+        return twoUp ? Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10 : null;
+      })(),
     };
   });
 };
@@ -627,10 +643,17 @@ for (const width of [390, 834, 1440]) {
     : fail(
         `how-to ${width}px: fits=${audit.howtoListFits}, ${audit.howtoCards} cards, heights ${JSON.stringify(audit.howtoHeights)}`,
       );
+  const NAV = ["Home", "How to use", "GitHub"];
+  JSON.stringify(audit.navItems) === JSON.stringify(NAV) && audit.navFits
+    ? pass(`nav ${width}px: exactly three items (${audit.navItems.join(" · ")}), nothing clipped`)
+    : fail(`nav ${width}px: ${JSON.stringify(audit.navItems)}, fits=${audit.navFits}`);
   if (width === 1440) {
     audit.howtoRows === 1
       ? pass("how-to 1440px: four tabs on one row")
       : fail(`how-to 1440px: ${audit.howtoRows} tab rows`);
+    audit.downloadBottoms !== null && audit.downloadBottoms <= 2
+      ? pass(`download 1440px: both blocks end on one line (${audit.downloadBottoms}px apart)`)
+      : fail(`download 1440px: bottoms differ by ${audit.downloadBottoms}px`);
   }
 }
 await page.setViewport({ width: 1440, height: 900 });
@@ -683,11 +706,19 @@ const narrow = await page.evaluate(() => {
   const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
   const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
   const heading = document.querySelector("#specimen h1")!.getBoundingClientRect();
+  // 1024 is above the 900px two-up breakpoint, so the download columns must share a bottom too.
+  const download = [...document.querySelector("#download [data-two-column]")!.children].map(
+    (child) => child.getBoundingClientRect(),
+  );
   return {
     chat: Math.round(chat.width),
     wrap: Math.round(wrap.width),
     singleColumn: Math.round(chat.x) === Math.round(heading.x),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
+    downloadDelta:
+      download.length === 2 && Math.abs(download[0]!.top - download[1]!.top) < 2
+        ? Math.round(Math.abs(download[0]!.bottom - download[1]!.bottom) * 10) / 10
+        : null,
   };
 });
 narrow.singleColumn && narrow.chat === narrow.wrap && narrow.overflow === 0
@@ -695,6 +726,9 @@ narrow.singleColumn && narrow.chat === narrow.wrap && narrow.overflow === 0
   : fail(
       `agent chat: 1024px single=${narrow.singleColumn}, chat ${narrow.chat} vs wrap ${narrow.wrap}`,
     );
+narrow.downloadDelta !== null && narrow.downloadDelta <= 2
+  ? pass(`download 1024px: both blocks end on one line (${narrow.downloadDelta}px apart)`)
+  : fail(`download 1024px: bottoms differ by ${narrow.downloadDelta}px`);
 
 await page.setViewport({ width: 390, height: 844 });
 await page.reload({ waitUntil: "load" });
