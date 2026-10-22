@@ -1,0 +1,59 @@
+name: Deploy to Cloudflare Pages
+
+# The only deployment: build the site and push it to the qublack Pages project behind
+# https://qublack.qqntt.com/ (root base). The woff2 shards are NOT committed — they are cut from
+# the v1.0.0 release asset on every deploy, so the repo stays source-only.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pages
+  cancel-on-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install fonttools brotli
+
+      - run: bun install --frozen-lockfile
+
+      - name: Fetch the font release
+        run: |
+          set -euo pipefail
+          mkdir -p dist fonts
+          curl -fsSL -o dist/QuBlack-family-1.0.0.zip \
+            https://github.com/gjuoun/qublack/releases/download/v1.0.0/QuBlack-family-1.0.0.zip
+          curl -fsSL -o dist/SHA256SUMS \
+            https://github.com/gjuoun/qublack/releases/download/v1.0.0/SHA256SUMS
+          ( cd dist && shasum -a 256 -c SHA256SUMS )
+          unzip -q -o dist/QuBlack-family-1.0.0.zip -d fonts
+          ls fonts/*.ttf | wc -l
+
+      - name: Cut the web fonts
+        run: bun run fonts:web
+
+      - run: bun run site:build
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 20045ddbb9002faab76593c79956a347
+          command: pages deploy site/dist --project-name qublack --branch main

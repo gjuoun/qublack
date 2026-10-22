@@ -1,0 +1,73 @@
+---
+import { FACE_LIST, MONO, SANS } from "../../data/metrics.ts";
+
+const blocks = [
+  "CJK Unified Ideographs",
+  "CJK punctuation & fullwidth forms",
+  "Latin + typographic punctuation",
+  "Box drawing & block elements",
+  "Geometric shapes & arrows",
+  "Braille (U+2800–U+28FF)",
+];
+const monoFaces = FACE_LIST.filter((name) => name.startsWith("QuBlackMono"));
+const sansFaces = FACE_LIST.filter((name) => name.startsWith("QuBlackSans"));
+---
+
+<section id="coverage" class="scroll-mt-24 py-10">
+  <div class="bf-wrap" data-reveal>
+    <div class="mb-[1.6rem] max-w-[62ch]">
+      <p class="inline-flex items-center gap-2 font-code text-[0.72rem] tracking-[0.16em] text-bf-fg-muted uppercase before:size-[6px] before:rounded-full before:bg-bf-blue before:shadow-[0_0_0_4px_color-mix(in_srgb,var(--bf-blue)_16%,transparent)] before:content-['']">
+        06 — Coverage
+      </p>
+      <h2 class="mt-2 mb-[0.7rem]">What is in the eight faces</h2>
+      <p class="bf-lead">
+        Glyph counts below are read from the built TTFs, not copied by hand. Colour emoji are
+        deliberately absent: the placeholder codepoints are stripped from the cmap so the system
+        emoji font takes over.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-px overflow-hidden rounded-[16px] border border-bf-border min-[760px]:grid-cols-4">
+      <div class="bg-bf-border-muted/80 px-4 py-3">
+        <div class="font-code text-[1.5rem] text-foreground">{MONO.glyphs.toLocaleString("en-US")}</div>
+        <div class="text-[0.78rem] text-bf-dim">Mono glyphs per face</div>
+      </div>
+      <div class="bg-bf-border-muted/80 px-4 py-3">
+        <div class="font-code text-[1.5rem] text-foreground">{SANS.glyphs.toLocaleString("en-US")}</div>
+        <div class="text-[0.78rem] text-bf-dim">Sans glyphs per face</div>
+      </div>
+      <div class="bg-bf-border-muted/80 px-4 py-3">
+        <div class="font-code text-[1.5rem] text-foreground">{monoFaces.length + sansFaces.length}</div>
+        <div class="text-[0.78rem] text-bf-dim">TTF faces in the release</div>
+      </div>
+      <div class="bg-bf-border-muted/80 px-4 py-3">
+        <div class="font-code text-[1.5rem] text-foreground">OFL 1.1</div>
+        <div class="text-[0.78rem] text-bf-dim">Licence for every face</div>
+      </div>
+    </div>
+
+    <div class="mt-4 grid gap-4 min-[900px]:grid-cols-2">
+      <div class="rounded-[16px] border border-bf-border bg-bf-border-muted/70 p-4">
+        <p class="mb-2 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">Blocks shipped</p>
+        <ul class="m-0 grid list-none gap-[0.35rem] p-0 text-[0.86rem] text-bf-fg-muted">
+          {blocks.map((block) => <li class="before:mr-2 before:text-bf-blue before:content-['·']">{block}</li>)}
+        </ul>
+      </div>
+      <div class="rounded-[16px] border border-bf-border bg-bf-border-muted/70 p-4">
+        <p class="mb-2 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">Notes</p>
+        <ul class="m-0 grid list-none gap-[0.35rem] p-0 text-[0.86rem] text-bf-fg-muted">
+          <li class="before:mr-2 before:text-bf-lime before:content-['·']">
+            Emoji=Yes codepoints are stripped (mono 189 / sans 100 per face); the system font draws
+            colour emoji.
+          </li>
+          <li class="before:mr-2 before:text-bf-lime before:content-['·']">
+            Box drawing and block elements stay half-width in both families — tables survive.
+          </li>
+          <li class="before:mr-2 before:text-bf-lime before:content-['·']">
+            Nerd Font variants are not part of v1; they need a Sarasa Term SC NF skeleton.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

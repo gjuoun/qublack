@@ -1,0 +1,23 @@
+---
+import { BGButton } from "./button.tsx";
+
+// The small "copy" pill. Base.astro's delegated click handler copies data-copy and shows the toast;
+// data-swap="off" keeps the label instead of flashing "copied".
+interface Props {
+  value: string;
+  label?: string;
+  swap?: "on" | "off";
+  "aria-label"?: string;
+  class?: string;
+}
+const { value, label = "copy", swap = "off", class: extra = "", ...rest } = Astro.props;
+---
+
+<BGButton
+  tone="copy"
+  className={extra}
+  data-copy={value}
+  data-swap={swap}
+  data-label={swap === "on" ? label : undefined}
+  aria-label={rest["aria-label"]}>{label}</BGButton
+>

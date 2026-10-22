@@ -1,0 +1,16 @@
+---
+import BGEyebrow from "./eyebrow.astro";
+
+// Numbered section heading: kicker, title, lead paragraph.
+interface Props {
+  eyebrow: string;
+  title: string;
+}
+const { eyebrow, title } = Astro.props;
+---
+
+<div class="mb-[1.6rem] max-w-[62ch]" data-reveal>
+  <BGEyebrow>{eyebrow}</BGEyebrow>
+  <h2 class="mt-2 mb-[0.7rem]">{title}</h2>
+  <p class="bf-lead"><slot /></p>
+</div>

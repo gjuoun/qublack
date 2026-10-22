@@ -1,0 +1,16 @@
+---
+// Small mono kicker above a heading, with the blue dot.
+interface Props {
+  class?: string;
+}
+const { class: extra = "" } = Astro.props;
+---
+
+<p
+  class:list={[
+    "inline-flex items-center gap-2 font-code text-[0.72rem] tracking-[0.16em] text-bf-fg-muted uppercase before:size-[6px] before:rounded-full before:bg-bf-blue before:shadow-[0_0_0_4px_color-mix(in_srgb,var(--bf-blue)_16%,transparent)] before:content-['']",
+    extra,
+  ]}
+>
+  <slot />
+</p>

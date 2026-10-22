@@ -43,8 +43,22 @@ TIER_LATIN = [(0x20, 0x7E), (0xA0, 0xFF), (0x2000, 0x206F), (0x2190, 0x21FF), (0
 TIER_GB2312_LEVEL1 = (0xB0A1, 0xD7F9)
 
 
-def ordered_codepoints(cmap: dict[int, str]) -> list[int]:
-    """Tier 1: latin/punctuation/box drawing. Tier 2: GB2312 level-1. Tier 3: the rest, in order."""
+def page_codepoints(site_dir: Path) -> set[int]:
+    """Every character the site's own copy uses, so the first shard covers a first paint."""
+
+    chars: set[int] = set()
+    for path in site_dir.rglob("*"):
+        if path.suffix not in {".astro", ".ts", ".tsx", ".json", ".css", ".md"}:
+            continue
+        if "node_modules" in path.parts or path.name.endswith("qublack-fonts.css"):
+            continue
+        chars.update(ord(char) for char in path.read_text(encoding="utf-8", errors="ignore"))
+    return chars
+
+
+def ordered_codepoints(cmap: dict[int, str], priority: set[int]) -> list[int]:
+    """Tier 0: the site's own text. Tier 1: latin/punctuation/box drawing. Tier 2: GB2312 level-1.
+    Tier 3: the rest, in codepoint order."""
 
     seen: set[int] = set()
     ordered: list[int] = []
@@ -53,6 +67,9 @@ def ordered_codepoints(cmap: dict[int, str]) -> list[int]:
         if cp in cmap and cp not in seen:
             seen.add(cp)
             ordered.append(cp)
+
+    for cp in sorted(priority):
+        take(cp)
 
     for lo, hi in TIER_LATIN:
         for cp in range(lo, hi + 1):
@@ -89,7 +106,7 @@ def subset_shard(job: tuple[str, list[int], str]) -> tuple[str, int]:
     subsetter.subset(font)
     font.flavor = "woff2"
     font.save(out)
-    return out, Path(out).stat().st_size
+    return Path(out).name, Path(out).stat().st_size
 
 
 def css_ranges(codepoints: list[int]) -> str:
@@ -105,7 +122,8 @@ def css_ranges(codepoints: list[int]) -> str:
     return ",".join(parts)
 
 
-def build(fonts_dir: Path, out_dir: Path, css_path: Path, chunk: int, workers: int) -> int:
+def build(fonts_dir: Path, out_dir: Path, css_path: Path, chunk: int, workers: int,
+          site_dir: Path | None = None) -> int:
     if out_dir.exists():
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -117,7 +135,8 @@ def build(fonts_dir: Path, out_dir: Path, css_path: Path, chunk: int, workers: i
         if not source.exists():
             raise SystemExit(f"missing face: {source} — run tools/build_all.py first")
         cmap = TTFont(str(source)).getBestCmap()
-        ordered = ordered_codepoints(cmap)
+        priority = page_codepoints(site_dir) if site_dir else set()
+        ordered = ordered_codepoints(cmap, priority)
         shards: list[tuple[str, list[int]]] = []
         for index in range(0, len(ordered), chunk):
             codepoints = ordered[index : index + chunk]
@@ -150,11 +169,12 @@ def build(fonts_dir: Path, out_dir: Path, css_path: Path, chunk: int, workers: i
     return 0
 
 
-def check(out_dir: Path, css_path: Path, chunk: int, workers: int, fonts_dir: Path) -> int:
+def check(out_dir: Path, css_path: Path, chunk: int, workers: int, fonts_dir: Path,
+          site_dir: Path | None = None) -> int:
     temp = Path("/tmp/jun/qublack-webfonts-check")
     if temp.exists():
         shutil.rmtree(temp)
-    code = build(fonts_dir, temp / "fonts", temp / "fonts.css", chunk, workers)
+    code = build(fonts_dir, temp / "fonts", temp / "fonts.css", chunk, workers, site_dir)
     if code:
         return code
     left = sorted(p.name for p in (temp / "fonts").glob("*.woff2"))
@@ -177,11 +197,12 @@ def main() -> int:
     parser.add_argument("--css", type=Path, default=REPO / "site/src/styles/qublack-fonts.css")
     parser.add_argument("--chunk", type=int, default=700)
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--site", type=Path, default=REPO / "site/src")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     if args.check:
-        return check(args.out, args.css, args.chunk, args.workers, args.fonts)
-    return build(args.fonts, args.out, args.css, args.chunk, args.workers)
+        return check(args.out, args.css, args.chunk, args.workers, args.fonts, args.site)
+    return build(args.fonts, args.out, args.css, args.chunk, args.workers, args.site)
 
 
 if __name__ == "__main__":

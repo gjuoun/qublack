@@ -1,0 +1,44 @@
+---
+import { BGButton } from "./button.tsx";
+
+interface Props {
+  base: string;
+  repo: string;
+}
+const { base, repo } = Astro.props;
+const link =
+  "rounded-full px-3 py-[0.4rem] text-bf-fg-muted no-underline transition-[color,background] duration-200 hover:bg-bf-border/10 hover:text-foreground max-[520px]:px-2";
+const nav = [
+  { href: "#specimen", label: "Specimen" },
+  { href: "#ascii", label: "ASCII" },
+  { href: "#lookalikes", label: "Lookalikes" },
+  { href: "#grid", label: "2:1 grid" },
+  { href: "#download", label: "Download" },
+];
+---
+
+<a
+  class="absolute -left-[9999px] focus:top-4 focus:left-4 focus:z-100 focus:rounded-lg focus:bg-bf-cursor-line focus:px-4 focus:py-2"
+  href="#main">Skip to content</a
+>
+<header
+  id="site-header"
+  class="sticky top-0 z-40 border-b border-transparent transition-[border-color,background] duration-300 ease-bf [&.scrolled]:border-bf-border [&.scrolled]:bg-bf-border-muted/92 [&.scrolled]:backdrop-blur-[18px] [&.scrolled]:backdrop-saturate-150"
+>
+  <div class="bf-wrap flex items-center justify-between gap-4 py-[0.85rem]">
+    <a
+      class="group inline-flex items-center gap-[0.65rem] font-display text-[1.1rem] font-bold tracking-[-0.01em] text-foreground no-underline hover:text-foreground"
+      href={`${base}/`}
+    >
+      <span
+        class="grid size-[34px] place-items-center rounded-[9px] bg-bf-border-muted font-code text-[1.05rem] text-bf-blue shadow-[0_0_0_1px_var(--bf-selection)] transition-transform duration-400 ease-bf group-hover:scale-[1.06] group-hover:-rotate-6"
+        aria-hidden="true">黢</span
+      >
+      <span class="max-[520px]:sr-only">QuBlack</span>
+    </a>
+    <nav aria-label="Main" class="flex items-center gap-[0.4rem] text-[0.9rem] max-[700px]:gap-[0.15rem]">
+      {nav.map((item) => <a class={`${link} max-[700px]:hidden`} href={item.href}>{item.label}</a>)}
+      <BGButton tone="nav" href={repo}>GitHub</BGButton>
+    </nav>
+  </div>
+</header>

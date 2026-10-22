@@ -1,0 +1,85 @@
+---
+import { BGButton } from "./button.tsx";
+import BGCopyButton from "./copy-button.astro";
+import BGEyebrow from "./eyebrow.astro";
+
+interface Props {
+  version: string;
+  releaseUrl: string;
+}
+const { version, releaseUrl } = Astro.props;
+---
+
+<section id="specimen" class="scroll-mt-24 pt-[clamp(1.5rem,5vw,3.5rem)] pb-6">
+  <div class="bf-wrap" data-reveal>
+    <BGEyebrow>SIL OFL 1.1 · two families · eight faces · {version}</BGEyebrow>
+
+    <h1
+      class="mt-[0.6rem] mb-[0.4rem] text-[clamp(3.2rem,8vw,5.6rem)] font-extrabold tracking-[-0.035em]"
+    >
+      <span class="bf-grad">黢黑</span>
+      <span class="text-foreground">QuBlack</span>
+    </h1>
+
+    <p class="bf-lead">
+      A bilingual typeface for code. <strong class="text-foreground">QuBlack Mono</strong> holds a
+      strict <strong class="text-foreground">2:1</strong> grid — one hanzi is exactly two ASCII cells.
+      <strong class="text-foreground">QuBlack Sans</strong> is its proportional sibling.
+    </p>
+
+    <div
+      class="mt-8 rounded-[22px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,3vw,2rem)]"
+    >
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <span class="font-code text-[0.72rem] tracking-[0.14em] text-bf-dim uppercase">
+          editable specimen — click and type, Enter to commit, Esc to revert
+        </span>
+        <span
+          id="face-label"
+          class="font-code text-[0.72rem] text-bf-blue"
+          aria-live="polite">QuBlack Sans Regular</span
+        >
+      </div>
+
+      <p
+        id="hero-specimen"
+        data-specimen
+        contenteditable="true"
+        spellcheck="false"
+        role="textbox"
+        aria-label="Editable specimen"
+        aria-multiline="false"
+        class="m-0 cursor-text text-[clamp(1.9rem,5vw,3.4rem)] leading-[1.25] font-normal outline-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-bf-blue/60"
+        >黢黑 QuBlack 中英混排 2:1 grid · 字体 specimen</p
+      >
+      <p
+        data-specimen
+        class="mt-4 mb-0 text-[clamp(1rem,2vw,1.35rem)] leading-[1.6] text-bf-fg-muted"
+      >
+        汉 a 国 b 图 c 一 d 口 e — the mono face keeps 汉字 twice as wide as ASCII, so code blocks,
+        tables and terminal output line up across languages.
+      </p>
+
+      <div class="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="Specimen controls">
+        <span class="mr-1 font-code text-[0.72rem] text-bf-dim uppercase">family</span>
+        <BGButton tone="chip" data-control="family" data-value="sans" aria-pressed="true">Sans</BGButton>
+        <BGButton tone="chip" data-control="family" data-value="mono" aria-pressed="false">Mono</BGButton>
+        <span class="mx-2 font-code text-[0.72rem] text-bf-dim uppercase">weight</span>
+        <BGButton tone="chip" data-control="weight" data-value="regular" aria-pressed="true">Regular</BGButton>
+        <BGButton tone="chip" data-control="weight" data-value="bold" aria-pressed="false">Bold</BGButton>
+        <span class="mx-2 font-code text-[0.72rem] text-bf-dim uppercase">style</span>
+        <BGButton tone="chip" data-control="italic" data-value="toggle" aria-pressed="false">Italic</BGButton>
+        <span class="ml-auto font-code text-[0.7rem] text-bf-dim">
+          keys: B/L bold · M/S family · I italic · ↓↑ sections · 1–7 jump
+        </span>
+      </div>
+    </div>
+
+    <div class="mt-[1.4rem] flex flex-wrap items-center gap-[0.6rem]">
+      <BGButton tone="glow" href="#download">Download the family</BGButton>
+      <BGButton tone="ghost" href="#grid">See the 2:1 proof</BGButton>
+      <BGButton tone="ghost" href={releaseUrl}>Release {version}</BGButton>
+      <BGCopyButton value="font-family: &quot;QuBlack Sans&quot;, sans-serif;" label="copy CSS" swap="on" />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,22 @@
+---
+import { LOOKALIKES } from "../../data/lookalikes.ts";
+import BGLookalikeRow from "./lookalike-row.astro";
+---
+
+<section id="lookalikes" class="scroll-mt-24 py-10">
+  <div class="bf-wrap" data-reveal>
+    <div class="mb-[1.6rem] max-w-[62ch]">
+      <p class="inline-flex items-center gap-2 font-code text-[0.72rem] tracking-[0.16em] text-bf-fg-muted uppercase before:size-[6px] before:rounded-full before:bg-bf-blue before:shadow-[0_0_0_4px_color-mix(in_srgb,var(--bf-blue)_16%,transparent)] before:content-['']">
+        03 — Lookalikes
+      </p>
+      <h2 class="mt-2 mb-[0.7rem]">Confusables, Latin and Chinese</h2>
+      <p class="bf-lead">
+        Identifiers have to survive a glance. The panel switches with the family controls at the
+        top, so the same row can be read in the Sans and the Mono face.
+      </p>
+    </div>
+    <div class="rounded-[18px] border border-bf-border bg-bf-border-muted/70 px-[clamp(1rem,2.5vw,1.6rem)]">
+      {LOOKALIKES.map((row) => <BGLookalikeRow row={row} />)}
+    </div>
+  </div>
+</section>

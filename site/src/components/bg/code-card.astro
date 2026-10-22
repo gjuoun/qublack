@@ -1,0 +1,20 @@
+---
+import { BGCard } from "./card.tsx";
+import BGCopyButton from "./copy-button.astro";
+
+// The first lines of a generated theme file, with its path and a copy button.
+interface Props {
+  path: string;
+  code: string;
+  truncated: boolean;
+}
+const { path, code, truncated } = Astro.props;
+---
+
+<BGCard tone="plate" className="overflow-hidden p-[0.4rem]">
+  <div class="flex items-center justify-between gap-4 px-2 pt-[0.4rem] pb-2 font-code text-[0.72rem]">
+    <span class="text-bf-dim">{path}</span>
+    <BGCopyButton value={code} />
+  </div>
+  <pre class="m-0 max-h-[420px] overflow-auto bg-bf-border-muted/85"><code>{code}{truncated ? "\n…" : ""}</code></pre>
+</BGCard>

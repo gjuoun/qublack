@@ -1,7 +1,25 @@
 ---
+import BGAsciiTable from "../components/bg/ascii-table.astro";
+import BGCoverage from "../components/bg/coverage.astro";
+import BGDownload from "../components/bg/download.astro";
+import BGGridProof from "../components/bg/grid-proof.astro";
+import BGLookalikes from "../components/bg/lookalikes.astro";
+import BGSpecimenHero from "../components/bg/specimen-hero.astro";
+import BGSpecimenLong from "../components/bg/specimen-long.astro";
+import { RELEASE_URL, VERSION } from "../data/site.ts";
+import Base from "../layouts/Base.astro";
+
+// Printed verbatim from dist/SHA256SUMS; the release audit (plan/scripts/verify-release.sh)
+// recomputes it from the downloaded asset.
+const SHA256 = "eb3adfe3c0ed14673466a4dc6dfb851427a7f4fe3ce4722b122373d27655b8f9";
 ---
 
-<html lang="en">
-  <head><meta charset="utf-8" /><title>QuBlack</title></head>
-  <body><h1>QuBlack</h1></body>
-</html>
+<Base title="黢黑 QuBlack — a bilingual programming typeface">
+  <BGSpecimenHero version={VERSION} releaseUrl={RELEASE_URL} />
+  <BGAsciiTable />
+  <BGLookalikes />
+  <BGGridProof />
+  <BGSpecimenLong />
+  <BGCoverage />
+  <BGDownload sha256={SHA256} />
+</Base>

@@ -1,0 +1,123 @@
+---
+import "../styles/tailwind.css";
+import "../styles/qublack-fonts.css";
+import BGSiteFooter from "../components/bg/site-footer.astro";
+import BGSiteHeader from "../components/bg/site-header.astro";
+import BGToast from "../components/bg/toast.astro";
+import { kebab, palette } from "../data/palette.ts";
+import { REPO } from "../data/site.ts";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const {
+  title,
+  description = "黢黑 QuBlack — a bilingual programming font family with a strict 2:1 grid.",
+} = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const origin = Astro.site ? new URL(Astro.site).origin : "";
+
+// Every colour on this site comes from palette/qublack.json (the Bigface dark palette), exposed
+// under --bf-<colour>; tailwind.css maps shadcn's semantic tokens onto these and nothing else.
+const vars: Record<string, string> = {
+  ...Object.fromEntries(
+    Object.entries(palette.colors).map(([name, color]) => [`--bf-${kebab(name)}`, color.hex]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(palette.ansi).map(([name, color]) => [`--bf-ansi-${kebab(name)}`, color.hex]),
+  ),
+  "--ink-on-bright": "var(--bf-bg)",
+  "--fg-muted": "color-mix(in srgb, var(--bf-fg) 75%, var(--bf-bg))",
+  "--dim": "color-mix(in srgb, var(--bf-fg) 55%, var(--bf-bg))",
+};
+const style = Object.entries(vars)
+  .map(([name, value]) => `${name}:${value}`)
+  .join(";");
+---
+
+<!doctype html>
+<html lang="en" class="dark" style={style}>
+  <head>
+    <meta charset="utf-8" />
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content={palette.colors.bg?.hex} />
+    <title>{title}</title>
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={`${origin}${base}/`} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href={`${origin}${base}/`} />
+    <link rel="preload" href={`${base}/fonts/QuBlackSans-Regular.0.woff2`} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={`${base}/fonts/QuBlackMono-Regular.0.woff2`} as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <BGSiteHeader base={base} repo={REPO} />
+    <main id="main"><slot /></main>
+    <BGSiteFooter base={base} repo={REPO} />
+    <BGToast />
+
+    <script>
+      const toast = document.getElementById("toast");
+      let toastTimer: number | undefined;
+      const say = (message: string) => {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1900);
+      };
+
+      document.addEventListener("click", async (event) => {
+        const trigger = (event.target as HTMLElement | null)?.closest?.<HTMLElement>("[data-copy]");
+        if (!trigger) return;
+        event.preventDefault();
+        const value = trigger.getAttribute("data-copy") ?? "";
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          const box = document.createElement("textarea");
+          box.value = value;
+          document.body.append(box);
+          box.select();
+          document.execCommand("copy");
+          box.remove();
+        }
+        trigger.classList.add("done");
+        say(`copied ${value.length > 44 ? `${value.slice(0, 44)}…` : value}`);
+        window.setTimeout(() => trigger.classList.remove("done"), 1500);
+      });
+
+      const header = document.getElementById("site-header");
+      const onScroll = () => header?.classList.toggle("scrolled", window.scrollY > 8);
+      onScroll();
+      addEventListener("scroll", onScroll, { passive: true });
+
+      const revealables = document.querySelectorAll("[data-reveal]");
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add("in");
+              io.unobserve(entry.target);
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+        );
+        for (const element of revealables) io.observe(element);
+      } else {
+        for (const element of revealables) element.classList.add("in");
+      }
+    </script>
+    <script>
+      import "../scripts/specimen-client.ts";
+    </script>
+  </body>
+</html>

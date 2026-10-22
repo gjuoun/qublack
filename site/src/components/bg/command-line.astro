@@ -1,0 +1,21 @@
+---
+import BGCopyButton from "./copy-button.astro";
+
+// The pill-shaped one-line command with a prompt sigil and a copy button.
+interface Props {
+  command: string;
+  copyLabel?: string;
+}
+const { command, copyLabel } = Astro.props;
+---
+
+<div
+  class="flex max-w-full items-center gap-3 overflow-hidden rounded-full border border-bf-selection bg-bf-border-muted/75 py-[0.6rem] pr-[0.7rem] pl-4 font-code text-[0.82rem]"
+>
+  <span class="text-bf-green">❯</span>
+  <span
+    class="min-w-0 flex-1 overflow-x-auto text-[0.72rem] leading-[1.4] whitespace-nowrap text-bf-fg [scrollbar-width:none] max-[1100px]:whitespace-normal [&::-webkit-scrollbar]:hidden"
+    >{command}</span
+  >
+  <BGCopyButton value={command} aria-label={copyLabel} class="flex-none px-[0.72rem] py-[0.32rem]" />
+</div>

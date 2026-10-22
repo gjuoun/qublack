@@ -1,0 +1,81 @@
+---
+import { MONO, SANS } from "../../data/metrics.ts";
+
+// The claim this family exists for, rendered as a comparison rather than asserted as a number.
+const han = "汉国图一永口";
+const latin = "abcdefghijkl";
+---
+
+<section id="grid" class="scroll-mt-24 py-10">
+  <div class="bf-wrap" data-reveal>
+    <div class="mb-[1.6rem] max-w-[62ch]">
+      <p class="inline-flex items-center gap-2 font-code text-[0.72rem] tracking-[0.16em] text-bf-fg-muted uppercase before:size-[6px] before:rounded-full before:bg-bf-blue before:shadow-[0_0_0_4px_color-mix(in_srgb,var(--bf-blue)_16%,transparent)] before:content-['']">
+        04 — The grid
+      </p>
+      <h2 class="mt-2 mb-[0.7rem]">One hanzi is two ASCII cells</h2>
+      <p class="bf-lead">
+        QuBlack Mono is built on a 1000-unit Sarasa cell with <code class="font-code">unitsPerEm</code>
+        set to 833: glyphs never move, the em shrinks, and the 1000-unit hanzi cell reads as
+        1.200em while the 500-unit ASCII cell reads as 0.600em.
+      </p>
+    </div>
+
+    <div class="grid gap-4 min-[900px]:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      <div class="rounded-[18px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,2.5vw,1.6rem)]">
+        <p class="mb-3 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">
+          QuBlack Mono — hanzi over two latin cells
+        </p>
+        <div class="overflow-x-auto">
+          <div class="font-code text-[clamp(1.5rem,3.4vw,2.2rem)] leading-[1.35] whitespace-pre">
+            <div>{han}</div>
+            <div class="text-bf-blue">{latin}</div>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[12px] border border-bf-border">
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <div class="font-code text-[0.62rem] text-bf-dim uppercase">hanzi advance</div>
+            <div class="font-code text-[1.05rem] text-foreground">{MONO.han.toFixed(3)}em</div>
+          </div>
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <div class="font-code text-[0.62rem] text-bf-dim uppercase">ascii advance</div>
+            <div class="font-code text-[1.05rem] text-foreground">{MONO.ascii.toFixed(3)}em</div>
+          </div>
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <div class="font-code text-[0.62rem] text-bf-dim uppercase">ratio</div>
+            <div id="ratio-value" class="font-code text-[1.05rem] text-bf-lime">
+              {MONO.ratio.toFixed(3)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-[18px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,2.5vw,1.6rem)]">
+        <p class="mb-3 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">
+          QuBlack Sans — proportional
+        </p>
+        <div class="text-[clamp(1.15rem,2.6vw,1.5rem)] leading-[1.6]">
+          中英混排时，比例家族让正文更自然：<code class="font-code">className</code> 与
+          <code class="font-code">app.pak</code> 仍然留在等宽家族里。
+        </div>
+        <dl class="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-bf-border text-[0.82rem]">
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">upm</dt>
+            <dd class="m-0 font-code text-foreground">{SANS.upm}</dd>
+          </div>
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">hanzi</dt>
+            <dd class="m-0 font-code text-foreground">{SANS.han.toFixed(3)}em</dd>
+          </div>
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">ascii</dt>
+            <dd class="m-0 font-code text-foreground">{SANS.ascii.toFixed(3)}em</dd>
+          </div>
+          <div class="bg-bf-border-muted/80 px-3 py-2">
+            <dt class="font-code text-[0.62rem] text-bf-dim uppercase">line height</dt>
+            <dd class="m-0 font-code text-foreground">{SANS.lineHeight.toFixed(3)}em</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,16 @@
+---
+// One cell of the home stats band: a big gradient number over a short label.
+interface Props {
+  value: string | number;
+  label: string;
+}
+const { value, label } = Astro.props;
+---
+
+<div class="flex flex-col gap-[0.15rem] bg-bf-border-muted/72 px-[1.1rem] py-[1.2rem]">
+  <strong
+    class="bg-linear-120/srgb from-bf-caret to-bf-blue bg-clip-text font-display text-[1.9rem] leading-[1.1] font-bold tracking-[-0.03em] text-transparent"
+    >{value}</strong
+  >
+  <span class="text-[0.82rem] text-bf-fg-muted">{label}</span>
+</div>

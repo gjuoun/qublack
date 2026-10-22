@@ -1,0 +1,41 @@
+---
+import { ASCII_CELLS } from "../../data/ascii.ts";
+
+// The backbone of a programming font: all 95 printable ASCII cells, with their codepoints.
+---
+
+<section id="ascii" class="scroll-mt-24 py-10">
+  <div class="bf-wrap" data-reveal>
+    <div class="mb-[1.6rem] max-w-[62ch]">
+      <p class="inline-flex items-center gap-2 font-code text-[0.72rem] tracking-[0.16em] text-bf-fg-muted uppercase before:size-[6px] before:rounded-full before:bg-bf-blue before:shadow-[0_0_0_4px_color-mix(in_srgb,var(--bf-blue)_16%,transparent)] before:content-['']">
+        02 — ASCII
+      </p>
+      <h2 class="mt-2 mb-[0.7rem]">Ninety-five cells, one width</h2>
+      <p class="bf-lead">
+        Every printable ASCII codepoint at the mono face's 0.600em advance. Punctuation sits on the
+        same cell as <code class="font-code">M</code>, which is what keeps columns straight.
+      </p>
+    </div>
+
+    <div
+      id="ascii-grid"
+      class="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-px overflow-hidden rounded-[14px] border border-bf-border bg-bf-border/60"
+    >
+      {
+        ASCII_CELLS.map((cell) => (
+          <div class="group flex flex-col items-center justify-between gap-1 bg-bf-border-muted px-1 py-2 transition-colors duration-200 hover:bg-bf-cursor-line">
+            <span class="font-code text-[1.45rem] leading-none text-foreground" data-ascii-char={cell.hex}>
+              {cell.char === " " ? "␠" : cell.char}
+            </span>
+            <span class="font-code text-[0.6rem] tracking-[0.06em] text-bf-dim uppercase">
+              {cell.hex}
+            </span>
+            <span class="max-w-full truncate font-code text-[0.55rem] text-bf-dim/70" title={cell.name}>
+              {cell.name}
+            </span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
