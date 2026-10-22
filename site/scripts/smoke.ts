@@ -227,6 +227,58 @@ sizing.placeholder === 0 || sizing.placeholder === sizing.input
   ? pass(`agent chat: placeholder keeps the input size (${sizing.input}px)`)
   : fail(`agent chat: placeholder ${sizing.placeholder}px vs input ${sizing.input}px`);
 
+// Alignment audit (delta 3): the specimen header, the control strip, the lookalike table and the
+// CTA row are measured in the DOM, not eyeballed. Tolerance is 2px everywhere.
+const alignment = await page.evaluate(() => {
+  const box = (el: Element) => el.getBoundingClientRect();
+  const cy = (el: Element) => (box(el).top + box(el).bottom) / 2;
+  const spread = (values: number[]) => Math.max(...values) - Math.min(...values);
+  const header = document.querySelector("[data-specimen-header]")!;
+  const groups = [...document.querySelectorAll("[data-control-group]")];
+  const metrics = document.querySelector("[data-control-metrics]")!;
+  const chips = [...document.querySelectorAll("#specimen [data-control]")];
+  const labels = [...document.querySelectorAll("[data-testid=lookalike-label]")];
+  const ctas = [
+    ...document.querySelector('#specimen a[href="#download"]')!.parentElement!.children,
+  ];
+  const sameRow = ctas.filter((cta) => Math.abs(box(cta).top - box(ctas[0]!).top) < 1);
+  return {
+    headerDelta: Math.abs(cy(header.children[0]!) - cy(header.children[1]!)),
+    groupGaps: groups.slice(1).map((group, index) => box(group).left - box(groups[index]!).right),
+    metricsDelta: Math.abs(cy(metrics) - cy(groups[0]!)),
+    chipDelta: spread(chips.map(cy)),
+    labelSpread: spread(labels.map((label) => box(label).left)),
+    labelCount: labels.length,
+    ctaGaps: sameRow.slice(1).map((cta, index) => box(cta).left - box(sameRow[index]!).right),
+    ctaRowWidths: [...new Set(ctas.map((cta) => Math.round(box(cta).top)))].length,
+  };
+});
+alignment.headerDelta <= 2
+  ? pass(`alignment: specimen header is centred (${alignment.headerDelta.toFixed(1)}px apart)`)
+  : fail(`alignment: header centres are ${alignment.headerDelta.toFixed(1)}px apart`);
+Math.max(...alignment.groupGaps) - Math.min(...alignment.groupGaps) <= 2
+  ? pass(
+      `alignment: control groups share one gap (${alignment.groupGaps.map((gap) => gap.toFixed(1)).join("/")}px)`,
+    )
+  : fail(`alignment: group gaps ${JSON.stringify(alignment.groupGaps)}`);
+alignment.chipDelta <= 2 && alignment.metricsDelta <= 2
+  ? pass(
+      `alignment: controls and metrics share one centreline (chips ±${alignment.chipDelta.toFixed(1)}px, metrics ${alignment.metricsDelta.toFixed(1)}px)`,
+    )
+  : fail(
+      `alignment: chips ${alignment.chipDelta.toFixed(1)}px, metrics ${alignment.metricsDelta.toFixed(1)}px`,
+    );
+alignment.labelCount >= 12 && alignment.labelSpread <= 2
+  ? pass(
+      `alignment: lookalike labels sit on one column (${alignment.labelSpread.toFixed(1)}px spread)`,
+    )
+  : fail(`alignment: ${alignment.labelCount} labels, spread ${alignment.labelSpread.toFixed(1)}px`);
+alignment.ctaGaps.every((gap) => Math.abs(gap - 9.6) <= 2)
+  ? pass(
+      `alignment: CTA gaps are even (${alignment.ctaGaps.map((gap) => gap.toFixed(1)).join("/")}px; ${alignment.ctaRowWidths - 1} button wraps to a second row) — measured, unchanged`,
+    )
+  : fail(`alignment: CTA gaps ${JSON.stringify(alignment.ctaGaps)}`);
+
 // The editable specimen compensates Mono's upm-833 cell: font-size × 0.833 so one hanzi keeps
 // the same optical size, and nothing outside the specimen (ASCII table, 2:1 proof) rescales.
 await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
@@ -291,10 +343,16 @@ await page.reload({ waitUntil: "load" });
 const mobile = await page.evaluate(() => {
   const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
   const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
+  const header = document.querySelector("[data-specimen-header]")!;
+  const centre = (el: Element) => {
+    const box = el.getBoundingClientRect();
+    return (box.top + box.bottom) / 2;
+  };
   return {
     chat: Math.round(chat.width),
     wrap: Math.round(wrap.width),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
+    headerDelta: Math.abs(centre(header.children[0]!) - centre(header.children[1]!)),
   };
 });
 mobile.chat === mobile.wrap && mobile.overflow === 0
@@ -302,6 +360,11 @@ mobile.chat === mobile.wrap && mobile.overflow === 0
   : fail(
       `agent chat: 390px chat ${mobile.chat} vs wrap ${mobile.wrap}, overflow ${mobile.overflow}`,
     );
+mobile.headerDelta <= 2
+  ? pass(
+      `alignment: specimen header stays centred on 390px (${mobile.headerDelta.toFixed(1)}px apart)`,
+    )
+  : fail(`alignment: 390px header centres are ${mobile.headerDelta.toFixed(1)}px apart`);
 await page.setViewport({ width: 1440, height: 900 });
 chat.title.includes("for your agent")
   ? pass('positioning: the title says "a modern font for your agent"')
