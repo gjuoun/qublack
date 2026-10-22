@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Strict audit of a built family: name table, OFL surface, cmap, grid.
+"""Strict audit of a built family: name table, OFL surface, cmap, 2:1 grid.
 
-Every fact the release and the site claim is checked here, so a wrong family name or a stray
-emoji codepoint fails the build instead of shipping.
+Delta 12 cleared the upstream name records, so the audit now also holds the cleanliness line:
+no upstream strings outside the OFL attribution ids (0 and 7), no empty records, Mac and Windows
+carrying the same ids, a zh-CN localization naming the QuBlack families, and a version string that
+matches package.json.
 
 usage: name_audit.py --strict <dir-or-face...>
 """
@@ -10,6 +12,7 @@ usage: name_audit.py --strict <dir-or-face...>
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -20,10 +23,12 @@ from qublack_font import open_font  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 EXPECTED = {
-    "QuBlackMono": {"display": "QuBlack Mono", "slug": "QuBlackMono", "upm": 833, "han": 1200, "ascii": 600},
-    "QuBlackSans": {"display": "QuBlack Sans", "slug": "QuBlackSans", "upm": 1000, "han": 1000, "ascii": 600},
+    "QuBlackMono": {"display": "QuBlack Mono", "zh": "黢黑等宽", "upm": 833, "han": 1200, "ascii": 600},
+    "QuBlackSans": {"display": "QuBlack Sans", "zh": "黢黑比例", "upm": 1000, "han": 1000, "ascii": 600},
 }
-RESERVED = ("Source", "Sarasa", "Recursive")
+RESERVED = ("Source", "Sarasa", "Recursive", "ttfautohint", "1.0.42")
+ATTRIBUTION_IDS = (0, 7)
+NAME_IDS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16, 17}
 
 
 def faces(targets: list[Path]) -> list[Path]:
@@ -33,90 +38,127 @@ def faces(targets: list[Path]) -> list[Path]:
     return out
 
 
-def audit(path: Path, emoji: set[int]) -> list[str]:
+def name_map(font) -> dict[tuple[int, int, int], dict[int, str]]:
+    table: dict[tuple[int, int, int], dict[int, str]] = {}
+    for record in font["name"].names:
+        table.setdefault((record.platformID, record.platEncID, record.langID), {})[record.nameID] = (
+            record.toUnicode()
+        )
+    return table
+
+
+def audit_names(path: Path, spec: dict, version: str) -> list[str]:
+    font = open_font(path)
+    table = name_map(font)
+    problems: list[str] = []
+
+    mac = table.get((1, 0, 0), {})
+    win = table.get((3, 1, 0x409), {})
+    zh = table.get((3, 1, 0x804), {})
+    if not mac or not win:
+        return ["name table missing the Mac or Windows English platform"]
+
+    for label, platform in (("mac", mac), ("win", win), ("zh-CN", zh)):
+        if set(platform) != NAME_IDS:
+            problems.append(label + " name ids " + str(sorted(set(platform))) + " != " + str(sorted(NAME_IDS)))
+
+    for label, platform in (("mac", mac), ("win", win), ("zh-CN", zh)):
+        for nid, value in platform.items():
+            if value == "":
+                problems.append(label + " name id " + str(nid) + " is empty")
+            if nid in ATTRIBUTION_IDS:
+                continue
+            for reserved in RESERVED:
+                if reserved.lower() in value.lower():
+                    problems.append(label + " id " + str(nid) + " still mentions " + reserved + ": " + repr(value))
+
+    style = path.stem.split("-")[1]
+    display = spec["display"]
+    expected = {
+        1: display,
+        2: style,
+        4: display + " " + style,
+        6: path.stem,
+        16: display,
+        17: style,
+    }
+    for label, platform in (("mac", mac), ("win", win)):
+        for nid, want in expected.items():
+            if platform.get(nid) != want:
+                problems.append(label + " id " + str(nid) + " = " + repr(platform.get(nid)) + ", expected " + repr(want))
+
+    zh_family = spec["zh"] + " " + display
+    if zh.get(1) != zh_family:
+        problems.append("zh-CN family " + repr(zh.get(1)) + " != " + repr(zh_family))
+    if not str(zh.get(16, "")).startswith(spec["zh"]):
+        problems.append("zh-CN typographic family " + repr(zh.get(16)) + " is not localized")
+
+    version_string = "Version " + version
+    if win.get(5) != version_string:
+        problems.append("version string " + repr(win.get(5)) + " != " + repr(version_string))
+    unique = str(win.get(3, "")).strip().lower()
+    if unique in ("jun", ""):
+        problems.append("unique ID is the old leftover: " + repr(win.get(3)))
+
+    notice = " ".join([win.get(0, ""), win.get(7, ""), win.get(13, "")])
+    if "SIL Open Font License" not in notice:
+        problems.append("OFL attribution missing from the name table")
+    return problems
+
+
+def audit(path: Path, emoji: set[int], version: str) -> list[str]:
     font = open_font(path)
     upm = font["head"].unitsPerEm
     cmap = font.getBestCmap()
     hmtx = font["hmtx"].metrics
-    name = font["name"]
-    problems: list[str] = []
-
-    family_slug, _, style = path.stem.partition("-")
+    family_slug = path.stem.partition("-")[0]
     spec = EXPECTED.get(family_slug)
     if spec is None:
-        return [f"unknown family slug {family_slug!r}"]
+        return ["unknown family slug " + repr(family_slug)]
 
-    display = name.getDebugName(1) or ""
-    full = name.getDebugName(4) or ""
-    postscript = name.getDebugName(6) or ""
-    notice = " ".join(filter(None, [name.getDebugName(0), name.getDebugName(7), name.getDebugName(13)]))
-
-    if display != spec["display"]:
-        problems.append(f"name ID 1 {display!r} != {spec['display']!r}")
-    if full != f"{spec['display']} {style}":
-        problems.append(f"name ID 4 {full!r} != {spec['display']} {style!r}")
-    if postscript != f"{spec['slug']}-{style}":
-        problems.append(f"name ID 6 {postscript!r} != {spec['slug']}-{style}")
-    if (name.getDebugName(16) or "") != spec["display"]:
-        problems.append("name ID 16 (typographic family) missing")
-    if (name.getDebugName(17) or "") != style:
-        problems.append("name ID 17 (typographic subfamily) missing")
-    for platform in [(3, 1, 0x409), (1, 0, 0)]:
-        for nid in (1, 2, 4, 6):
-            if not name.getName(nid, *platform):
-                problems.append(f"missing name ID {nid} on platform {platform}")
-    if "SIL Open Font License" not in notice:
-        problems.append("OFL notice missing from the name table")
-    if "Derived from Sarasa Gothic and Recursive" not in notice:
-        problems.append("derivation statement missing from the name table")
-    for reserved in RESERVED:
-        if reserved.lower() in display.lower() or reserved.lower() in postscript.lower():
-            problems.append(f"reserved upstream name {reserved!r} used in a family/PostScript name")
-
+    problems = audit_names(path, spec, version)
     if upm != spec["upm"]:
-        problems.append(f"upm {upm} != {spec['upm']}")
+        problems.append("upm " + str(upm) + " != " + str(spec["upm"]))
     han = hmtx[cmap[0x6C49]][0] * 1000 / upm
     ascii_advance = hmtx[cmap[0x61]][0] * 1000 / upm
     if round(han) != spec["han"]:
-        problems.append(f"汉 advance {han / 1000:.3f}em != {spec['han'] / 1000:.3f}em")
+        problems.append("han advance " + str(round(han)) + " != " + str(spec["han"]))
     if round(ascii_advance) != spec["ascii"]:
-        problems.append(f"a advance {ascii_advance / 1000:.3f}em != {spec['ascii'] / 1000:.3f}em")
+        problems.append("a advance " + str(round(ascii_advance)) + " != " + str(spec["ascii"]))
     if family_slug == "QuBlackMono" and round(han) / round(ascii_advance) != 2:
         problems.append("the 2:1 grid does not hold")
 
     stripped = sum(1 for cp in cmap if cp in emoji and not keep_codepoint(cp))
     if stripped:
-        problems.append(f"{stripped} Emoji=Yes codepoints still in the cmap")
-    # Box drawing must stay at half a hanzi cell in both families (0.600em mono, 0.500em sans).
+        problems.append(str(stripped) + " Emoji=Yes codepoints still in the cmap")
     for cp in (0x2502, 0x2500):
         if cp not in cmap:
-            problems.append(f"box drawing U+{cp:04X} missing from the cmap")
+            problems.append("box drawing U+" + format(cp, "04X") + " missing from the cmap")
             continue
         width = hmtx[cmap[cp]][0] * 1000 / upm
         if abs(width - spec["han"] / 2) > 0.5:
-            problems.append(
-                f"box drawing U+{cp:04X} advances {width / 1000:.3f}em, not half a hanzi cell"
-            )
+            problems.append("box drawing U+" + format(cp, "04X") + " is not half a hanzi cell")
     return problems
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("targets", nargs="+", type=Path)
-    parser.add_argument("--strict", action="store_true", help="fail on any problem (the gate)")
+    parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
+    version = json.loads((REPO / "package.json").read_text(encoding="utf-8"))["version"]
     emoji = emoji_codepoints(REPO)
     built = faces(args.targets)
     failures = 0
     for path in built:
-        problems = audit(path, emoji)
+        problems = audit(path, emoji, version)
         if problems:
             failures += 1
-            print(f"FAIL  {path.name}: " + "; ".join(problems[:6]))
+            print("FAIL  " + path.name + ": " + "; ".join(problems[:6]))
         else:
-            print(f"PASS  {path.name}: name/OFL/cmap ok")
-    print(f"name/OFL/cmap ok ({len(built) - failures}/{len(built)} faces), emoji-free cmap checked")
+            print("PASS  " + path.name + ": name/OFL/cmap ok")
+    print("name/OFL/cmap ok (" + str(len(built) - failures) + "/" + str(len(built)) + " faces), emoji-free cmap checked")
     return 1 if failures else 0
 
 

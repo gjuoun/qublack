@@ -162,8 +162,8 @@ Math.max(...heroCopy.ctaHeights) - Math.min(...heroCopy.ctaHeights) <= 2
   ? pass(`copy: the CTA row shares one height (${heroCopy.ctaHeights.join("/")}px)`)
   : fail(`copy: CTA heights ${JSON.stringify(heroCopy.ctaHeights)}`);
 
-counts.download.some((href) => href?.includes("/releases/tag/v1.0.3"))
-  ? pass("download: links the v1.0.3 release")
+counts.download.some((href) => href?.includes("/releases/tag/v1.0.4"))
+  ? pass("download: links the v1.0.4 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
 // The hero's copy-CSS pill is gone: the How-to section below the fold owns the instructions.

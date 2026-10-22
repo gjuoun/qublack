@@ -148,6 +148,31 @@ def apply_upm_trick(font: TTFont, new_upm: int = 833) -> None:
     os2.sTypoLineGap = round(os2.sTypoLineGap * scale)
 
 
+def strip_overlap_flags(font: TTFont) -> int:
+    """Drop OVERLAP_SIMPLE (0x40) from every simple glyph.
+
+    Chrome's OTS rejects a glyph whose flag stream carries bit 6 on any point but the first
+    ("Bad glyph flag (115), bit 6 must be set to zero for flag 1"), which is exactly what the
+    transplanted/decomposed outlines end up with. The flag is only a rasteriser hint, so clearing
+    it costs nothing and makes the whole family loadable in Chrome.
+    """
+    cleared = 0
+    for name in font.getGlyphOrder():
+        glyph = font["glyf"][name]
+        if getattr(glyph, "numberOfContours", 0) <= 0:
+            continue
+        if getattr(glyph, "overlap", False):
+            glyph.overlap = False
+            cleared += 1
+        flags = getattr(glyph, "flags", None)
+        if flags is None:
+            continue
+        for index in range(len(flags)):
+            if int(flags[index]) & 0x40:
+                flags[index] = int(flags[index]) & ~0x40
+    return cleared
+
+
 def _ink_units(glyph) -> tuple[float, float, float]:
     """(top, bottom, height) in font units for a simple glyph."""
     top, bottom = float(glyph.yMax), float(glyph.yMin)
@@ -249,6 +274,7 @@ def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path) -> Pat
             flush=True,
         )
 
+    print(f"[{slug}-{style}] overlap flags cleared {strip_overlap_flags(skeleton)}", flush=True)
     write_names(skeleton, display, slug, style)
     skeleton["maxp"].numGlyphs = len(skeleton.getGlyphOrder())
 

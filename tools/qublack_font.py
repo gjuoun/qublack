@@ -8,6 +8,8 @@ from pathlib import Path
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.ttLib import TTFont
 
+REPO = Path(__file__).resolve().parent.parent
+
 VERTICAL_TABLES = ("vmtx", "vhea", "VORG")
 CJK_SAMPLE = "汉国图一永口"
 LATIN_SAMPLE = "axH"
@@ -74,32 +76,75 @@ def measure(path: str | Path) -> dict:
     }
 
 
+ZH_PREFIX = {"QuBlack Mono": "黢黑等宽", "QuBlack Sans": "黢黑比例"}
+
+
+def _release_version() -> str:
+    return json.loads((REPO / "package.json").read_text(encoding="utf-8"))["version"]
+
+
 def write_names(font: TTFont, display_family: str, slug: str, style: str) -> None:
-    """Name table: new family, OFL notice, derivation statement — the OFL compliance surface."""
-    name = font["name"]
+    """Rebuild the whole name table: QuBlack names, OFL attribution, nothing inherited.
+
+    The upstream Sarasa records (its 1.0.42 version string, the zh-CN localization saying
+    "Sarasa Term SC", an empty nameID 11) were left behind by the earlier pass; a localized match
+    could even collide with a real Sarasa install. The table is wiped and written from scratch:
+
+      - ids 0 and 7 keep the OFL derivative attribution (copyright + derivation statement);
+      - ids 1/4/16 carry the family, ids 2/17 the style, 6 the PostScript name;
+      - id 3 is a real unique ID, id 5 the QuBlack version, 8/9 the manufacturer and designer;
+      - the Windows zh-CN (0x804) records carry 黢黑等宽 QuBlack Mono / 黢黑比例 QuBlack Sans;
+      - no empty records, and the Mac and Windows tables hold the same ids.
+    """
+    version = _release_version()
+    zh_family = f"{ZH_PREFIX[display_family]} {display_family}"
     full = f"{display_family} {style}"
     postscript = f"{slug}-{style}"
-    for plat in [(3, 1, 0x409), (1, 0, 0)]:
-        for nid, val in [
-            (0, COPYRIGHT),
-            (1, display_family),
-            (2, style),
-            (3, "Jun"),
-            (4, full),
-            (6, postscript),
-            (7, DERIVATION),
-            (8, display_family),
-            (9, "qublack build pipeline"),
-            (11, ""),
-            (13, "This font is licensed under the SIL Open Font License 1.1"),
-            (14, "https://openfontlicense.org"),
-            (16, display_family),
-            (17, style),
-        ]:
-            name.setName(val, nid, *plat)
+    zh_full = f"{zh_family} {style}"
+    license_text = "This font is licensed under the SIL Open Font License 1.1"
+
+    common = [
+        (0, COPYRIGHT),
+        (1, display_family),
+        (2, style),
+        (3, f"{version}; gjuoun; {postscript}"),
+        (4, full),
+        (5, f"Version {version}"),
+        (6, postscript),
+        (7, DERIVATION),
+        (8, "gjuoun"),
+        (9, "Jun Guo"),
+        (13, license_text),
+        (14, "https://openfontlicense.org"),
+        (16, display_family),
+        (17, style),
+    ]
+    localized = [
+        (0, COPYRIGHT),
+        (1, zh_family),
+        (2, style),
+        (3, f"{version}; gjuoun; {postscript}"),
+        (4, zh_full),
+        (5, f"Version {version}"),
+        (6, postscript),
+        (7, DERIVATION),
+        (8, "gjuoun"),
+        (9, "Jun Guo"),
+        (13, license_text),
+        (14, "https://openfontlicense.org"),
+        (16, zh_family),
+        (17, style),
+    ]
+
+    name = font["name"]
+    name.names = []  # nothing from the upstream font survives
+    for platform, records in [((3, 1, 0x409), common), ((1, 0, 0), common), ((3, 1, 0x804), localized)]:
+        for nid, value in records:
+            name.setName(value, nid, *platform)
 
 
 def baseline_entry(path: str | Path) -> dict:
+
     data = measure(path)
     data.pop("file", None)
     return data
