@@ -26,7 +26,7 @@ const installLinux = `mkdir -p ~/.local/share/fonts && unzip -o ${ZIP_NAME} -d ~
       </p>
     </div>
 
-    <div class="bf-cols items-start" data-two-column>
+    <div class="bf-cols" data-two-column>
       <div class="grid gap-3">
         <BGDownloadCard href={`${RELEASE_URL}`} label={ZIP_NAME} detail={`release ${VERSION} · TTFs + OFL + README`} />
         <BGDownloadCard href={`https://github.com/gjuoun/qublack/releases`} label="All releases" detail="tag history, checksums, notes" />
@@ -34,7 +34,7 @@ const installLinux = `mkdir -p ~/.local/share/fonts && unzip -o ${ZIP_NAME} -d ~
         <BGDownloadCard href="https://github.com/gjuoun/qublack/blob/main/NOTICE.md" label="NOTICE.md" detail="provenance: Sarasa Gothic + Recursive" />
       </div>
 
-      <div class="rounded-[18px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,2.5vw,1.5rem)]">
+      <div class="flex h-full flex-col rounded-[18px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,2.5vw,1.5rem)]">
         <p class="mb-2 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">Install</p>
         <div class="grid gap-2">
           <div class="flex items-center gap-2 overflow-hidden rounded-[10px] border border-bf-selection bg-bf-border-muted/85 py-2 pr-2 pl-3">
@@ -50,7 +50,7 @@ const installLinux = `mkdir -p ~/.local/share/fonts && unzip -o ${ZIP_NAME} -d ~
         </div>
         <p class="mt-4 mb-1 font-code text-[0.7rem] tracking-[0.12em] text-bf-dim uppercase">sha256</p>
         <code class="block overflow-x-auto font-code text-[0.68rem] break-all text-bf-fg-muted">{sha256}</code>
-        <div class="mt-4 flex flex-wrap gap-2">
+        <div class="mt-auto flex flex-wrap gap-2 pt-4">
           <BGButton tone="glow" href={RELEASE_URL}>Open the release</BGButton>
           <BGButton tone="ghost" href="https://github.com/gjuoun/qublack">Source</BGButton>
         </div>
