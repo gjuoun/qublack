@@ -2,7 +2,7 @@ name: Deploy to Cloudflare Pages
 
 # The only deployment: build the site and push it to the qublack Pages project behind
 # https://qublack.qqntt.com/ (root base). The woff2 shards are NOT committed — they are cut from
-# the v1.0.1 release asset on every deploy, so the repo stays source-only.
+# the v1.0.2 release asset on every deploy, so the repo stays source-only.
 
 on:
   push:
@@ -43,12 +43,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist fonts
-          curl -fsSL -o dist/QuBlack-family-1.0.1.zip \
-            https://github.com/gjuoun/qublack/releases/download/v1.0.1/QuBlack-family-1.0.1.zip
+          curl -fsSL -o dist/QuBlack-family-1.0.2.zip \
+            https://github.com/gjuoun/qublack/releases/download/v1.0.2/QuBlack-family-1.0.2.zip
           curl -fsSL -o dist/SHA256SUMS \
-            https://github.com/gjuoun/qublack/releases/download/v1.0.1/SHA256SUMS
+            https://github.com/gjuoun/qublack/releases/download/v1.0.2/SHA256SUMS
           ( cd dist && shasum -a 256 -c SHA256SUMS )
-          unzip -q -o dist/QuBlack-family-1.0.1.zip -d fonts
+          unzip -q -o dist/QuBlack-family-1.0.2.zip -d fonts
           ls fonts/*.ttf | wc -l
 
       - name: Cut the web fonts

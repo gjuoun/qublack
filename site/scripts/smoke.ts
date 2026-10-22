@@ -150,8 +150,8 @@ Math.max(...heroCopy.ctaHeights) - Math.min(...heroCopy.ctaHeights) <= 2
     )
   : fail(`copy: CTA heights ${JSON.stringify(heroCopy.ctaHeights)}`);
 
-counts.download.some((href) => href?.includes("/releases/tag/v1.0.1"))
-  ? pass("download: links the v1.0.1 release")
+counts.download.some((href) => href?.includes("/releases/tag/v1.0.2"))
+  ? pass("download: links the v1.0.2 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
 // 5. The hero's agent container: markdown rendered in QuBlack — bold, inline code and a

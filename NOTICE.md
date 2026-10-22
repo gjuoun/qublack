@@ -20,6 +20,12 @@ QuBlack Mono ships Recursive's `at.alt` alternate for `@` (the target of its `ss
 instead of the default `at` drawing; the outline is imported point for point through the same
 500/600 cell transform as the rest of the ASCII set. QuBlack Sans keeps the default `@`.
 
+QuBlack Mono harmonises the symbols that sit against hanzi — `" ' ( ) [ ] { } / \ |` — by a
+per-glyph vertical scale and translate that puts their ink boxes on the same top/height ratios as
+the Sarasa Term skeleton (y only; the 500-unit advance is untouched). `tools/symbol_audit.py`
+measures and asserts the result within two points. Deliberately left alone: curly quotes (already
+flush), guillemets, `…`, `< >` and the CJK punctuation the skeleton brings.
+
 QuBlack Mono uses the upm-833 technique: glyph coordinates stay untouched, `unitsPerEm` is 833,
 so the Sarasa 1000-unit cell reads as 1.200em and the 500-unit ASCII cell as 0.600em — a measured
 2:1 ratio.

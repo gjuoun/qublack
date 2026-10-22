@@ -6,7 +6,7 @@ documents, web and UI. Both carry Source Han Sans hanzi (via Sarasa Gothic) and 
 Latin, so the whole family is redistributable under the SIL Open Font License 1.1.
 
 Site: **https://qublack.qqntt.com/** — specimen, measurements and downloads.
-Release: **[v1.0.1](https://github.com/gjuoun/qublack/releases/tag/v1.0.1)** · CI:
+Release: **[v1.0.2](https://github.com/gjuoun/qublack/releases/tag/v1.0.2)** · CI:
 ![CI](https://github.com/gjuoun/qublack/actions/workflows/ci.yml/badge.svg)
 
 ## Family
@@ -20,8 +20,9 @@ Four styles each: Regular, Italic, Bold, BoldItalic.
 
 ## Download
 
-`v1.0.1` assets on the GitHub release page: eight TTFs plus `OFL.txt` and `README.txt`.
-v1.0.1 swaps the mono `@` for Recursive's `at.alt` alternate; everything else is unchanged.
+`v1.0.2` assets on the GitHub release page: eight TTFs plus `OFL.txt` and `README.txt`.
+v1.0.2 harmonises the mono symbols that sit next to hanzi (quotes, brackets, braces, slashes, bar).
+v1.0.1 swapped the mono `@` for Recursive's `at.alt` alternate.
 
 ## Build
 

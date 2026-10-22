@@ -1,6 +1,6 @@
 {
   "name": "qublack",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "黢黑 QuBlack — a strict 2:1 bilingual programming font family (SIL OFL 1.1)",
@@ -23,7 +23,8 @@
     "fonts:audit": "python3 tools/name_audit.py --strict fonts/",
     "fonts:web": "python3 tools/web_fonts.py --out site/public/fonts --css site/src/styles/qublack-fonts.css",
     "fonts:web:check": "python3 tools/web_fonts.py --check --out site/public/fonts --css site/src/styles/qublack-fonts.css",
-    "fonts:release": "python3 tools/pack_release.py --tag v1.0.1",
+    "fonts:release": "python3 tools/pack_release.py --tag v1.0.2",
+    "fonts:symbols": "python3 tools/symbol_audit.py --check",
     "fonts:at": "python3 tools/check_at.py",
     "metrics": "python3 tools/metrics_json.py --out site/src/data/metrics.generated.json fonts/"
   },
