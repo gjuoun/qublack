@@ -50,17 +50,23 @@ const md =
     </span>
   </div>
 
+  <!-- A chat thread reads bottom-up: the messages ride the input row, and any spare height the
+       stretched card hands the thread pools above the FIRST message (it reads as "scrolled to the
+       end"). margin-top: auto on the first bubble does that without justify-end's unreachable
+       overflow; the bottom padding matches the inter-message gap so the last bubble sits exactly
+       one gap above the form. -->
   <div
     id="agent-thread"
-    class="grid max-h-[460px] min-h-0 flex-1 grid-cols-1 gap-[0.7rem] overflow-x-hidden overflow-y-auto px-[0.8rem] py-[0.9rem] min-[1180px]:max-h-none"
+    class="flex max-h-[460px] min-h-0 flex-1 flex-col gap-[0.7rem] overflow-x-hidden overflow-y-auto px-[0.8rem] pt-[0.9rem] pb-[0.7rem] min-[1180px]:max-h-none"
     data-agent-thread
     aria-live="polite"
   >
     {
-      THREAD.map((message) => (
+      THREAD.map((message, index) => (
         <div
           class:list={[
             "min-w-0 max-w-[92%] rounded-[14px] border px-[0.75rem] py-[0.6rem]",
+            index === 0 && "mt-auto",
             message.role === "user"
               ? "ml-auto border-bf-border bg-bf-border/12"
               : "mr-auto border-bf-border bg-bf-border-muted",
