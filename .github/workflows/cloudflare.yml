@@ -35,7 +35,7 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install fonttools brotli
+      - run: pip install -r tools/requirements.txt
 
       - run: bun install --frozen-lockfile
 
