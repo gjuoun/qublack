@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Build all eight QuBlack faces in family order. usage: build_all.py [--out fonts] [--only mono|sans]"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from build_qublack import DEFAULT_SOURCES, build  # noqa: E402
+
+REPO = Path(__file__).resolve().parent.parent
+STYLES = ["Regular", "Bold", "Italic", "BoldItalic"]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", type=Path, default=REPO / "fonts")
+    parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES)
+    parser.add_argument("--only", choices=["mono", "sans"], default=None)
+    args = parser.parse_args()
+
+    modes = [args.only] if args.only else ["mono", "sans"]
+    started = time.time()
+    built: list[Path] = []
+    for mode in modes:
+        for style in STYLES:
+            built.append(build(mode, style, args.sources, args.out, REPO))
+    print(f"built {len(built)} faces in {time.time() - started:.0f}s -> {args.out}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
