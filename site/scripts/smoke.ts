@@ -934,7 +934,7 @@ const cta = await page.evaluate(() => {
     releaseBtnGone: !buttons.some((a) => a.textContent?.includes("Open the release")),
   };
 });
-cta.label && cta.href.includes("/releases/download/") && cta.releaseBtnGone
+cta.label && cta.href.includes("/releases/tag/") && cta.releaseBtnGone
   ? pass(`download CTA: "${cta.label}" → ${cta.href}`)
   : fail(
       `download CTA: label="${cta.label}" href=${cta.href} releaseBtnGone=${cta.releaseBtnGone}`,

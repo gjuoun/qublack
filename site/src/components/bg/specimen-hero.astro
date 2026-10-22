@@ -1,6 +1,6 @@
 ---
 import { MONO, SANS } from "../../data/metrics.ts";
-import { DOWNLOAD_URL } from "../../data/site.ts";
+import { RELEASE_URL } from "../../data/site.ts";
 import BGAgentChat from "./agent-chat.astro";
 import { BGButton } from "./button.tsx";
 import BGEyebrow from "./eyebrow.astro";
@@ -42,7 +42,7 @@ const stats = [
         </p>
 
         <div class="mt-[1.4rem] flex flex-wrap items-center gap-[0.6rem]">
-          <BGButton tone="glow" href={DOWNLOAD_URL}>Download v{version}</BGButton>
+          <BGButton tone="glow" href={RELEASE_URL}>Download v{version}</BGButton>
           <BGButton tone="ghost" href="#grid">See the 2:1 proof</BGButton>
           <BGButton tone="ghost" href="#howto">How to use</BGButton>
         </div>
