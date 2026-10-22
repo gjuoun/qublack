@@ -31,7 +31,8 @@ if (form && input && thread && dataNode) {
     "[&_[data-md-inline-code]]:px-[0.3em] [&_[data-md-inline-code]]:py-[0.05em] " +
     "[&_[data-md-inline-code]]:font-code [&_[data-md-inline-code]]:text-[0.9em] " +
     "[&_[data-md-list]]:my-0 [&_[data-md-list]]:ml-[1.05rem] [&_[data-md-list]]:list-disc [&_[data-md-list]]:p-0 " +
-    "[&_pre[data-md-code]]:mt-0 [&_pre[data-md-code]]:mb-0 [&_pre[data-md-code]]:overflow-x-auto " +
+    "[&_pre[data-md-code]]:mt-0 [&_pre[data-md-code]]:mb-0 [&_pre[data-md-code]]:max-w-full " +
+    "[&_pre[data-md-code]]:overflow-x-auto " +
     "[&_pre[data-md-code]]:rounded-[9px] [&_pre[data-md-code]]:border [&_pre[data-md-code]]:border-bf-border/80 " +
     "[&_pre[data-md-code]]:bg-bf-bg/70 [&_pre[data-md-code]]:px-[0.6rem] [&_pre[data-md-code]]:py-[0.5rem] " +
     "[&_pre[data-md-code]]:font-code [&_pre[data-md-code]]:text-[0.72rem] [&_pre[data-md-code]]:leading-[1.55] " +
@@ -50,7 +51,7 @@ if (form && input && thread && dataNode) {
     const wrapper = document.createElement("div");
     wrapper.dataset.message = role;
     wrapper.className = [
-      "max-w-[92%] rounded-[14px] border px-[0.75rem] py-[0.6rem]",
+      "min-w-0 max-w-[92%] rounded-[14px] border px-[0.75rem] py-[0.6rem]",
       role === "user"
         ? "ml-auto border-bf-border bg-bf-border/12"
         : "mr-auto border-bf-border bg-bf-border-muted",
