@@ -1,16 +1,8 @@
 """Where the hanzi-adjacent symbols belong — one target shared by the build and the audit.
 
-Two references disagree in a 2:1 cell:
-
-- **hanzi-flush** (blend 1.0): Sarasa's ink ratios measured against its own hanzi box. Perfect in
-  Chinese, but the hanzi is 1.2em here, so the same symbols sit ~40% of the cap height above the
-  Latin caps and read oversized in pure English.
-- **cap-relative** (blend 0.0): Sarasa's ink relationships measured against its own cap box. Natural
-  in English, but the delimiters fall short of the hanzi top in Chinese and mixed lines.
-
-The v1.0.2 three-scene audit (gemini-4-argon ranking cap-leaning / middle / hanzi-flush variants
-per scene) picked 0.75 for the quote marks and 0.9 for the delimiters: the delimiters bracket the
-hanzi, the marks stay near the cap, and the runner-up (0.5 / 0.7) lost on the mixed scene.
+Two references disagree in a 2:1 cell: hanzi-flush is perfect in Chinese but oversized in English;
+cap-relative is the reverse. Delta 8 blended the brackets; delta 10 extended the same treatment to
+every census mark that measured more than 6 points off Sarasa.
 """
 
 from __future__ import annotations
@@ -20,10 +12,19 @@ import os
 from fontTools.ttLib import TTFont
 
 QUOTES = ('"', "'")
-FIXED_SYMBOLS = ['"', "'", "(", ")", "[", "]", "{", "}", "/", "\\", "|"]
+BRACKETS = ['"', "'", "(", ")", "[", "]", "{", "}", "/", "\\", "|"]
+MARKS = ["`", "*", "!", "%", "&", "?", "@", "$", "#", "<", ">", "^", "+", ":", ";", "-", "=", "_"]
+# Comma, period and tilde were ruled normal against the 6-point trigger, but the bold faces still
+# sat 4-8 points out; the nudge is sub-percent and lets the census hold one 2-point line.
+BASELINE_MARKS = [",", ".", "~"]
+FIXED_SYMBOLS = BRACKETS + MARKS + BASELINE_MARKS
 
-# Defaults are the shipped pose; the env overrides exist so the three-scene sweep can build
-# alternates without touching the tree.
+# Every printable ASCII punctuation mark, the common Latin-1 symbols and the arrows.
+ASCII_PUNCTUATION = list("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
+LATIN1 = list("§¶°±×÷•")
+ARROWS = list("←↑→↓↔")
+CENSUS = ASCII_PUNCTUATION + LATIN1 + ARROWS
+
 QUOTE_BLEND = float(os.environ.get("QUBLACK_QUOTE_BLEND", "0.75"))
 SYMBOL_BLEND = float(os.environ.get("QUBLACK_SYMBOL_BLEND", "0.9"))
 
@@ -49,7 +50,7 @@ def boxes(font: TTFont) -> tuple[float, float, float, float]:
 
 
 def target(font: TTFont, reference: TTFont, char: str) -> tuple[float, float] | None:
-    """(ink top, ink height) in font units for one symbol, blended between the two references."""
+    """(ink top, ink height) in font units, blended between the two references."""
     ref_han_top, ref_han_h, ref_cap_top, ref_cap_h = boxes(reference)
     han_top, han_h, cap_top, cap_h = boxes(font)
     ref_name = reference.getBestCmap().get(ord(char))

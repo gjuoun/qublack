@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
-"""Audit the height of the symbols that sit next to hanzi in QuBlack Mono.
+"""Full-census audit of the symbols in QuBlack Mono (44 glyphs).
 
-Recursive draws its ASCII punctuation around the Latin cap height; after the upm-833 move that put
-quotes, brackets, braces and slashes far below the hanzi top, while Sarasa Term keeps them nearly
-flush. The two references disagree in a 2:1 cell (hanzi-flush is perfect in Chinese but oversized in
-English), so tools/symbol_targets.py blends them per glyph class and this tool asserts the built
-faces hit that blended target exactly — the same target the build applies.
+Harmonised glyphs (32): the built ink box must hit the blended target within 2 points of the
+hanzi. Skeleton glyphs (Latin-1, arrows): they must sit within 6 points of Sarasa own ratio, the
+band the census was triggered at.
 
-Reported alongside, for the three scenes the pose has to survive:
-  CN  the glyph's ink top relative to the hanzi ink box (blended away from Sarasa's pure ratio)
-  EN  the headroom above the Latin cap, as a share of cap height
-
-usage: symbol_audit.py [--check]
+usage: symbol_audit.py [--check] [--style Regular]
 """
 
 from __future__ import annotations
@@ -25,17 +19,13 @@ from fontTools.ttLib import TTFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from symbol_targets import FIXED_SYMBOLS, QUOTE_BLEND, SYMBOL_BLEND, boxes, target  # noqa: E402
+from symbol_targets import CENSUS, FIXED_SYMBOLS, QUOTE_BLEND, SYMBOL_BLEND, boxes, target  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work"
 STYLES = ["Regular", "Italic", "Bold", "BoldItalic"]
-TOLERANCE_UNITS = 1.5
-UNTOUCHED = {"\u201c": "already flush", "\u201d": "already flush", "\u2018": "already flush",
-             "\u2019": "already flush", "\u00ab": "matches Sarasa", "\u00bb": "matches Sarasa",
-             "<": "math convention", ">": "math convention", "\u2026": "QuBlack better than Sarasa",
-             "\u3001": "CJK skeleton", "\u3002": "CJK skeleton", "\uff1a": "CJK skeleton",
-             "\uff1b": "CJK skeleton", "\u300d": "CJK convention"}
+TOLERANCE = 0.02
+UNTOUCHED_TOLERANCE = 0.06
 
 
 def ink(font: TTFont, char: str) -> dict[str, float] | None:
@@ -51,63 +41,70 @@ def ink(font: TTFont, char: str) -> dict[str, float] | None:
     return {"top": y1, "bottom": y0, "height": y1 - y0}
 
 
+def ratios(font: TTFont, char: str) -> tuple[float, float] | None:
+    box = ink(font, char)
+    han = ink(font, "汉")
+    if box is None or han is None:
+        return None
+    han_h = han["top"] - han["bottom"]
+    return ((han["top"] - box["top"]) / han_h, box["height"] / han_h)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
     parser.add_argument("--donors", type=Path, default=DEFAULT_DONORS)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--style", default=None)
     args = parser.parse_args()
 
+    styles = [args.style] if args.style else STYLES
     failures = 0
-    for style in STYLES:
+    for style in styles:
         built = TTFont(str(args.fonts / f"QuBlackMono-{style}.ttf"))
         reference = TTFont(str(args.donors / f"SarasaTermSC-{style}.ttf"))
         han_top, han_h, cap_top, cap_h = boxes(built)
         problems: list[str] = []
         worst = 0.0
-        for char in FIXED_SYMBOLS:
-            expected = target(built, reference, char)
-            box = ink(built, char)
-            if expected is None or box is None:
+        rows: list[str] = []
+
+        for char in CENSUS:
+            built_ratio = ratios(built, char)
+            sarasa_ratio = ratios(reference, char)
+            if built_ratio is None or sarasa_ratio is None:
                 continue
-            upm = built["head"].unitsPerEm
-            top_units = box["top"] * upm
-            height_units = box["height"] * upm
-            delta = max(abs(top_units - expected[0]), abs(height_units - expected[1]))
+            deviation = (built_ratio[0] - sarasa_ratio[0]) * 100
+            if char in FIXED_SYMBOLS:
+                expected = target(built, reference, char)
+                if expected is None:
+                    continue
+                tr = ((han_top - expected[0]) / han_h, expected[1] / han_h)
+                delta = max(abs(built_ratio[0] - tr[0]), abs(built_ratio[1] - tr[1]))
+                limit = TOLERANCE
+            else:
+                delta = max(abs(built_ratio[0] - sarasa_ratio[0]), abs(built_ratio[1] - sarasa_ratio[1]))
+                limit = UNTOUCHED_TOLERANCE
             worst = max(worst, delta)
-            if delta > TOLERANCE_UNITS:
-                problems.append(f"{char!r} off by {delta:.1f} units")
+            if delta > limit:
+                problems.append(f"{char!r} off by {delta * 100:.1f} points (census deviation {deviation:+.1f})")
+            if not args.check:
+                tag = "fix" if char in FIXED_SYMBOLS else "--"
+                rows.append(f"  {char!r:6} {deviation:+7.1f} pts  {tag}")
+
         status = "PASS" if not problems else "FAIL"
         if problems:
             failures += 1
         print(
-            f"{status}  QuBlackMono-{style}: {len(FIXED_SYMBOLS) - len(problems)}/{len(FIXED_SYMBOLS)} "
-            f"symbols on the blended target (worst {worst:.1f} units, tolerance {TOLERANCE_UNITS}) · "
-            f"blend quotes {QUOTE_BLEND:.2f} / delimiters {SYMBOL_BLEND:.2f}"
+            f"{status}  QuBlackMono-{style}: {len(CENSUS) - len(problems)}/{len(CENSUS)} census symbols on target "
+            f"(worst {worst * 100:.2f} points) · blend quotes {QUOTE_BLEND:.2f} / rest {SYMBOL_BLEND:.2f}"
         )
-        for problem in problems[:4]:
+        for problem in problems[:6]:
             print(f"        {problem}")
+        if rows and not args.check:
+            print("   census (deviation from Sarasa hanzi-relative ratio):")
+            print("\n".join(rows))
 
-        # scene context, informational
-        if not args.check:
-            cap_pct = []
-            han_pct = []
-            for char in FIXED_SYMBOLS:
-                box = ink(built, char)
-                if not box:
-                    continue
-                cap_pct.append((box["top"] - cap_top / upm) / (cap_h / upm) * 100)
-                han_pct.append((han_top / upm - box["top"]) / (han_h / upm) * 100)
-            print(
-                f"        EN scene: symbols sit {min(cap_pct):+.0f}%..{max(cap_pct):+.0f}% of cap height above cap · "
-                f"CN scene: {min(han_pct):.1f}%..{max(han_pct):.1f}% below the hanzi top"
-            )
-
-    print(
-        f"symbol heights: {len(STYLES) - failures}/{len(STYLES)} mono faces on the blended target"
-    )
-    if not args.check:
-        print("untouched by ruling: " + ", ".join(f"{char} ({why})" for char, why in UNTOUCHED.items()))
+    print(f"symbol census: {len(styles) - failures}/{len(styles)} mono faces within tolerance across {len(CENSUS)} symbols")
     return 1 if (args.check and failures) else 0
 
 

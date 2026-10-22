@@ -177,7 +177,13 @@ def harmonize_symbols(font: TTFont, reference_path: Path) -> int:
         if name is None:
             continue
         glyph = font["glyf"][name]
-        if getattr(glyph, "numberOfContours", 0) <= 0 or not hasattr(glyph, "coordinates"):
+        if getattr(glyph, "numberOfContours", 0) <= 0:
+            # Composites (percent, dollar, …) are flattened before scaling; hmtx keeps the advance.
+            pen = TTGlyphPen(font.getGlyphSet())
+            font.getGlyphSet()[name].draw(pen)
+            glyph = pen.glyph()
+            font["glyf"][name] = glyph
+        if not hasattr(glyph, "coordinates"):
             continue
         glyph.recalcBounds(font["glyf"])
         target = symbol_target(font, reference, char)
