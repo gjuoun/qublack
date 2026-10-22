@@ -74,9 +74,14 @@ const stats = [
     <div
       class="mt-[clamp(1.6rem,4vw,2.6rem)] rounded-[22px] border border-bf-border bg-bf-border-muted/70 p-[clamp(1rem,3vw,2rem)]"
     >
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <span class="font-code text-[0.72rem] tracking-[0.14em] text-bf-dim uppercase">
-          editable specimen — click and type, Enter to commit, Esc to revert
+      <div
+        class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1"
+        data-specimen-header
+      >
+        <span class="font-code text-[0.72rem] tracking-[0.14em] text-bf-fg-muted uppercase">
+          editable specimen<span class="hidden min-[760px]:inline"
+            > — click and type, Enter to commit, Esc to revert</span
+          >
         </span>
         <span id="face-label" class="font-code text-[0.72rem] text-bf-blue" aria-live="polite"
           >QuBlack Sans Regular</span
@@ -105,20 +110,39 @@ const stats = [
         tables and terminal output line up across languages.
       </p>
 
-      <div class="mt-6 flex flex-wrap items-center gap-2" role="group" aria-label="Specimen controls">
-        <span class="mr-1 font-code text-[0.72rem] text-bf-dim uppercase">family</span>
-        <BGButton tone="chip" data-control="family" data-value="sans" aria-pressed="true">Sans</BGButton>
-        <BGButton tone="chip" data-control="family" data-value="mono" aria-pressed="false">Mono</BGButton>
-        <span class="mx-2 font-code text-[0.72rem] text-bf-dim uppercase">weight</span>
-        <BGButton tone="chip" data-control="weight" data-value="regular" aria-pressed="true"
-          >Regular</BGButton
-        >
-        <BGButton tone="chip" data-control="weight" data-value="bold" aria-pressed="false">Bold</BGButton>
-        <span class="mx-2 font-code text-[0.72rem] text-bf-dim uppercase">style</span>
-        <BGButton tone="chip" data-control="italic" data-value="toggle" aria-pressed="false"
-          >Italic</BGButton
-        >
-        <span class="ml-auto font-code text-[0.7rem] text-bf-dim">
+      <div
+        class="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
+        role="group"
+        aria-label="Specimen controls"
+        data-control-strip
+      >
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2" data-control-groups>
+          <div class="flex items-center gap-2" data-control-group="family">
+            <span class="font-code text-[0.72rem] text-bf-dim uppercase">family</span>
+            <BGButton tone="chip" data-control="family" data-value="sans" aria-pressed="true"
+              >Sans</BGButton
+            >
+            <BGButton tone="chip" data-control="family" data-value="mono" aria-pressed="false"
+              >Mono</BGButton
+            >
+          </div>
+          <div class="flex items-center gap-2" data-control-group="weight">
+            <span class="font-code text-[0.72rem] text-bf-dim uppercase">weight</span>
+            <BGButton tone="chip" data-control="weight" data-value="regular" aria-pressed="true"
+              >Regular</BGButton
+            >
+            <BGButton tone="chip" data-control="weight" data-value="bold" aria-pressed="false"
+              >Bold</BGButton
+            >
+          </div>
+          <div class="flex items-center gap-2" data-control-group="style">
+            <span class="font-code text-[0.72rem] text-bf-dim uppercase">style</span>
+            <BGButton tone="chip" data-control="italic" data-value="toggle" aria-pressed="false"
+              >Italic</BGButton
+            >
+          </div>
+        </div>
+        <span class="ml-auto font-code text-[0.7rem] text-bf-dim" data-control-metrics>
           keys: B/L bold · M/N mono · S sans · I italic · ↓↑ sections · 1–7 jump
         </span>
       </div>
