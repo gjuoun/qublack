@@ -361,10 +361,8 @@ const sizing = await page.evaluate(() => {
     body: body ? Number.parseFloat(getComputedStyle(body).fontSize) : 0,
   };
 });
-sizing.input >= 14 && sizing.input >= sizing.body
-  ? pass(
-      `agent chat: input is ${sizing.input}px, not smaller than the ${sizing.body}px message body`,
-    )
+sizing.input > 0 && sizing.input === sizing.body
+  ? pass(`agent chat: input is exactly the message body size (${sizing.input}px)`)
   : fail(`agent chat: input ${sizing.input}px vs body ${sizing.body}px`);
 sizing.placeholder === 0 || sizing.placeholder === sizing.input
   ? pass(`agent chat: placeholder keeps the input size (${sizing.input}px)`)
@@ -600,6 +598,15 @@ const scanOverflow = async (width: number) => {
         const nav = document.querySelector<HTMLElement>("#site-header nav");
         return nav ? nav.scrollWidth <= nav.clientWidth + 1 : false;
       })(),
+      // Hero: the left column and the chat card must end on the same line when two-up. The card is
+      // taken out of flow at >=1180px precisely so the left column keeps setting that line.
+      heroBottoms: (() => {
+        const grid = document.querySelector("#specimen [data-two-column]");
+        if (!grid) return null;
+        const kids = [...grid.children].map((child) => child.getBoundingClientRect());
+        const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
+        return twoUp ? Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10 : null;
+      })(),
       // Download: the zip list and the install/sha block must end on the same line when two-up.
       downloadBottoms: (() => {
         const grid = document.querySelector("#download [data-two-column]");
@@ -647,7 +654,17 @@ for (const width of [390, 834, 1440]) {
   JSON.stringify(audit.navItems) === JSON.stringify(NAV) && audit.navFits
     ? pass(`nav ${width}px: exactly three items (${audit.navItems.join(" · ")}), nothing clipped`)
     : fail(`nav ${width}px: ${JSON.stringify(audit.navItems)}, fits=${audit.navFits}`);
+  audit.heroBottoms === null
+    ? pass(`hero ${width}px: one column, so bottom alignment does not apply`)
+    : audit.heroBottoms <= 2
+      ? pass(
+          `hero ${width}px: the chat card ends on the left column's line (${audit.heroBottoms}px apart)`,
+        )
+      : fail(`hero ${width}px: the columns end ${audit.heroBottoms}px apart`);
   if (width === 1440) {
+    audit.heroBottoms !== null && audit.heroBottoms <= 2
+      ? pass(`hero 1440px: two-up and flush (${audit.heroBottoms}px apart)`)
+      : fail(`hero 1440px: bottoms differ by ${audit.heroBottoms}px`);
     audit.howtoRows === 1
       ? pass("how-to 1440px: four tabs on one row")
       : fail(`how-to 1440px: ${audit.howtoRows} tab rows`);
@@ -729,6 +746,24 @@ narrow.singleColumn && narrow.chat === narrow.wrap && narrow.overflow === 0
 narrow.downloadDelta !== null && narrow.downloadDelta <= 2
   ? pass(`download 1024px: both blocks end on one line (${narrow.downloadDelta}px apart)`)
   : fail(`download 1024px: bottoms differ by ${narrow.downloadDelta}px`);
+
+// The hero's exact two-up breakpoint: the chat card must already be flush at 1180px, not just 1440.
+await page.setViewport({ width: 1180, height: 900 });
+await page.reload({ waitUntil: "load" });
+await page.evaluate(() => document.fonts.ready.then(() => undefined));
+const heroEdge = await page.evaluate(() => {
+  const kids = [...document.querySelector("#specimen [data-two-column]")!.children].map((child) =>
+    child.getBoundingClientRect(),
+  );
+  const twoUp = kids.length === 2 && Math.abs(kids[0]!.top - kids[1]!.top) < 2;
+  return {
+    twoUp,
+    delta: Math.round(Math.abs(kids[0]!.bottom - kids[1]!.bottom) * 10) / 10,
+  };
+});
+heroEdge.twoUp && heroEdge.delta <= 2
+  ? pass(`hero 1180px: flush at the two-up breakpoint (${heroEdge.delta}px apart)`)
+  : fail(`hero 1180px: twoUp=${heroEdge.twoUp}, delta ${heroEdge.delta}px`);
 
 await page.setViewport({ width: 390, height: 844 });
 await page.reload({ waitUntil: "load" });
