@@ -144,7 +144,7 @@ chat.codeBlocks >= 2 && chat.codeFont.includes("QuBlack Mono")
   ? pass(`agent chat: ${chat.codeBlocks} code blocks render in QuBlack Mono`)
   : fail(`agent chat: ${chat.codeBlocks} code blocks, font ${chat.codeFont}`);
 chat.title.includes("for your agent")
-  ? pass("positioning: the title says \"a modern font for your agent\"")
+  ? pass('positioning: the title says "a modern font for your agent"')
   : fail(`positioning: title is ${JSON.stringify(chat.title)}`);
 
 const beforeSend = chat.messages;
@@ -157,7 +157,9 @@ await page
     { timeout: 8_000 },
     beforeSend + 2,
   )
-  .then(() => pass(`agent chat: message sent, streamed reply appended (${beforeSend} -> ${beforeSend + 2})`))
+  .then(() =>
+    pass(`agent chat: message sent, streamed reply appended (${beforeSend} -> ${beforeSend + 2})`),
+  )
   .catch(() => fail(`agent chat: no reply after sending (still ${beforeSend})`));
 
 // 6. Fonts: both families resolve, the initial payload stays small, nothing shifts.
