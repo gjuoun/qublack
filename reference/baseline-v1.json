@@ -2,8 +2,8 @@
   "QuBlackMono-Bold": {
     "upm": 833,
     "glyphs": 57129,
-    "family": "JunHeiMono",
-    "postscript": "JunHeiMono-Bold",
+    "family": "QuBlack Mono",
+    "postscript": "QuBlackMono-Bold",
     "advances": {
       "a": 0.6002,
       "H": 0.6002,
@@ -81,8 +81,8 @@
   "QuBlackMono-BoldItalic": {
     "upm": 833,
     "glyphs": 57149,
-    "family": "JunHeiMono",
-    "postscript": "JunHeiMono-BoldItalic",
+    "family": "QuBlack Mono",
+    "postscript": "QuBlackMono-BoldItalic",
     "advances": {
       "a": 0.6002,
       "H": 0.6002,
@@ -136,21 +136,21 @@
         "y": -0.084
       },
       "a": {
-        "w": 0.5277,
+        "w": 0.5554,
         "h": 0.5594,
-        "x": 0.0431,
+        "x": 0.0344,
         "y": -0.0096
       },
       "x": {
-        "w": 0.5838,
+        "w": 0.6185,
         "h": 0.5582,
-        "x": 0.0021,
+        "x": -0.0164,
         "y": -0.0096
       },
       "H": {
-        "w": 0.5955,
+        "w": 0.6445,
         "h": 0.6999,
-        "x": 0.0163,
+        "x": -0.002,
         "y": 0.0
       }
     },
@@ -160,8 +160,8 @@
   "QuBlackMono-Italic": {
     "upm": 833,
     "glyphs": 57149,
-    "family": "JunHeiMono",
-    "postscript": "JunHeiMono-Italic",
+    "family": "QuBlack Mono",
+    "postscript": "QuBlackMono-Italic",
     "advances": {
       "a": 0.6002,
       "H": 0.6002,
@@ -215,21 +215,21 @@
         "y": -0.066
       },
       "a": {
-        "w": 0.4999,
+        "w": 0.5273,
         "h": 0.5534,
-        "x": 0.0517,
+        "x": 0.0426,
         "y": -0.0096
       },
       "x": {
-        "w": 0.5682,
+        "w": 0.6038,
         "h": 0.5522,
-        "x": 0.0096,
+        "x": -0.0088,
         "y": -0.0096
       },
       "H": {
-        "w": 0.5758,
+        "w": 0.6253,
         "h": 0.6999,
-        "x": 0.0276,
+        "x": 0.0082,
         "y": 0.0
       }
     },
@@ -239,8 +239,8 @@
   "QuBlackMono-Regular": {
     "upm": 833,
     "glyphs": 57129,
-    "family": "JunHeiMono",
-    "postscript": "JunHeiMono-Regular",
+    "family": "QuBlack Mono",
+    "postscript": "QuBlackMono-Regular",
     "advances": {
       "a": 0.6002,
       "H": 0.6002,
@@ -318,8 +318,8 @@
   "QuBlackSans-Bold": {
     "upm": 1000,
     "glyphs": 48741,
-    "family": "JunHeiSans",
-    "postscript": "JunHeiSans-Bold",
+    "family": "QuBlack Sans",
+    "postscript": "QuBlackSans-Bold",
     "advances": {
       "a": 0.6,
       "H": 0.65,
@@ -397,8 +397,8 @@
   "QuBlackSans-BoldItalic": {
     "upm": 1000,
     "glyphs": 48702,
-    "family": "JunHeiSans",
-    "postscript": "JunHeiSans-BoldItalic",
+    "family": "QuBlack Sans",
+    "postscript": "QuBlackSans-BoldItalic",
     "advances": {
       "a": 0.6,
       "H": 0.65,
@@ -476,8 +476,8 @@
   "QuBlackSans-Italic": {
     "upm": 1000,
     "glyphs": 48702,
-    "family": "JunHeiSans",
-    "postscript": "JunHeiSans-Italic",
+    "family": "QuBlack Sans",
+    "postscript": "QuBlackSans-Italic",
     "advances": {
       "a": 0.6,
       "H": 0.65,
@@ -555,8 +555,8 @@
   "QuBlackSans-Regular": {
     "upm": 1000,
     "glyphs": 48741,
-    "family": "JunHeiSans",
-    "postscript": "JunHeiSans-Regular",
+    "family": "QuBlack Sans",
+    "postscript": "QuBlackSans-Regular",
     "advances": {
       "a": 0.6,
       "H": 0.65,
