@@ -1,0 +1,23 @@
+---
+import { HOW_TO_TABS } from "../../data/how-to.ts";
+import BGEyebrow from "./eyebrow.astro";
+import { BGHowToTabs } from "./how-to-tabs.tsx";
+
+// One tab per place the family has to work: the desktop, the browser, the terminal, the build.
+// Snippets come from data/how-to.ts so the release URL and the family names live in one place.
+---
+
+<section id="howto" class="scroll-mt-24 py-10">
+  <div class="bf-wrap" data-reveal>
+    <div class="mb-[1.6rem] max-w-[62ch]">
+      <BGEyebrow>07 — How to use</BGEyebrow>
+      <h2 class="mt-2 mb-[0.7rem]">Eight faces, four routes in</h2>
+      <p class="bf-lead">
+        Install the family on your machine, self-host the TTFs on a page, point a terminal at
+        QuBlack Mono, or wire it into a framework. Every snippet below is copy-ready.
+      </p>
+    </div>
+
+    <BGHowToTabs client:load tabs={HOW_TO_TABS} />
+  </div>
+</section>
