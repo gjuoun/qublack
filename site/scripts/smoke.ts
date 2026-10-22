@@ -163,6 +163,38 @@ chat.boldWeight === "700" && chat.boldText.includes("Found it")
 chat.inlineFont.includes("QuBlack Mono")
   ? pass("agent chat: inline code renders in QuBlack Mono")
   : fail(`agent chat: inline code font ${chat.inlineFont}`);
+
+const sizing = await page.evaluate(() => {
+  const input = document.getElementById("agent-input") as HTMLElement | null;
+  const body = document.querySelector("#agent-thread [data-message-body]") as HTMLElement | null;
+  return {
+    input: input ? Number.parseFloat(getComputedStyle(input).fontSize) : 0,
+    body: body ? Number.parseFloat(getComputedStyle(body).fontSize) : 0,
+  };
+});
+sizing.input >= 14 && sizing.input >= sizing.body
+  ? pass(
+      `agent chat: input is ${sizing.input}px, not smaller than the ${sizing.body}px message body`,
+    )
+  : fail(`agent chat: input ${sizing.input}px vs body ${sizing.body}px`);
+
+await page.setViewport({ width: 390, height: 844 });
+await page.reload({ waitUntil: "load" });
+const mobile = await page.evaluate(() => {
+  const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
+  const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
+  return {
+    chat: Math.round(chat.width),
+    wrap: Math.round(wrap.width),
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  };
+});
+mobile.chat === mobile.wrap && mobile.overflow === 0
+  ? pass(`agent chat: full width on 390px (${mobile.chat}px = wrap), no overflow`)
+  : fail(
+      `agent chat: 390px chat ${mobile.chat} vs wrap ${mobile.wrap}, overflow ${mobile.overflow}`,
+    );
+await page.setViewport({ width: 1440, height: 900 });
 chat.title.includes("for your agent")
   ? pass('positioning: the title says "a modern font for your agent"')
   : fail(`positioning: title is ${JSON.stringify(chat.title)}`);
