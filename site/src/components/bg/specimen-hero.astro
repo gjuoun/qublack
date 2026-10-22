@@ -2,7 +2,6 @@
 import { MONO, SANS } from "../../data/metrics.ts";
 import BGAgentChat from "./agent-chat.astro";
 import { BGButton } from "./button.tsx";
-import BGCopyButton from "./copy-button.astro";
 import BGEyebrow from "./eyebrow.astro";
 
 interface Props {
@@ -36,8 +35,8 @@ const stats = [
 
         <p class="bf-lead">
           Your agent answers in English, 中文 and code — in the same message. QuBlack renders all
-          three on one grid: <strong class="text-foreground">QuBlack Mono</strong> keeps a measured
-          <strong class="text-foreground">2:1</strong> cell (汉 1.200em, ASCII 0.600em), so diffs,
+          three on one grid: <strong class="text-foreground">QuBlack Mono</strong> keeps a
+          measured <strong class="text-foreground">2:1</strong> cell (汉 1.200em, ASCII 0.600em), so diffs,
           tables and logs stay aligned; <strong class="text-foreground">QuBlack Sans</strong> keeps
           the prose readable next to them.
         </p>
@@ -46,11 +45,13 @@ const stats = [
           <BGButton tone="glow" href="#download">Download the family</BGButton>
           <BGButton tone="ghost" href="#grid">See the 2:1 proof</BGButton>
           <BGButton tone="ghost" href={releaseUrl}>Release {version}</BGButton>
-          <BGCopyButton
-            value={'font-family: "QuBlack Sans", sans-serif;'}
-            label="copy CSS"
-            swap="on"
-          />
+          <BGButton
+            tone="ghost"
+            className="min-h-[49.2px]"
+            data-copy={'font-family: "QuBlack Sans", sans-serif;'}
+            data-swap="on"
+            data-label="copy CSS">copy CSS</BGButton
+          >
         </div>
 
         <dl
