@@ -55,6 +55,53 @@ test("Ghostty is the first terminal, and the terminal notes keep the 1.2x cell h
   expect(kitty?.code).toContain("bold_italic_font QuBlack Mono Bold Italic");
 });
 
+test("both families are taught, not just the mono one", () => {
+  const sans = (code.join("\n").match(/QuBlack Sans/g) ?? []).length;
+  const mono = (code.join("\n").match(/QuBlack Mono/g) ?? []).length;
+  expect(sans).toBeGreaterThanOrEqual(6);
+  expect(mono).toBeGreaterThan(sans);
+
+  const web = new Map(
+    (HOW_TO_TABS.find((tab) => tab.id === "web")?.cards ?? []).map((card) => [
+      card.id,
+      card.code ?? "",
+    ]),
+  );
+  const faces = web.get("faces") ?? "";
+  expect(faces).toContain('font-family: "QuBlack Mono"');
+  expect(faces).toContain('font-family: "QuBlack Sans"');
+  expect(faces).toContain("body {");
+  expect(faces).toContain('"QuBlack Sans", -apple-system');
+  expect(faces).toContain('"QuBlack Mono", ui-monospace');
+  const stack = web.get("stack") ?? "";
+  expect(stack).toContain("--font-mono:");
+  expect(stack).toContain("--font-sans:");
+
+  const terminals = HOW_TO_TABS.find((tab) => tab.id === "terminals");
+  expect(terminals?.blurb).toContain("not a terminal face");
+});
+
+test("framework snippets wire Sans for body and Mono for code", () => {
+  const frameworks = new Map(
+    (HOW_TO_TABS.find((tab) => tab.id === "frameworks")?.cards ?? []).map((card) => [
+      card.id,
+      card.code ?? "",
+    ]),
+  );
+  for (const id of ["next", "astro"]) {
+    expect(frameworks.get(id)).toContain("--font-qublack-sans");
+    expect(frameworks.get(id)).toContain("--font-qublack-mono");
+    expect(frameworks.get(id)).toContain("QuBlack Sans");
+  }
+  const vite = frameworks.get("vite") ?? "";
+  expect(vite).toContain("--font-sans:");
+  expect(vite).toContain("--font-mono:");
+  expect(vite).toContain("QuBlack Sans");
+  const tailwind = frameworks.get("tailwind") ?? "";
+  expect(tailwind).toContain("--font-sans:");
+  expect(tailwind).toContain("--font-mono:");
+});
+
 test("framework snippets cover the five environments the card asks for", () => {
   const frameworks = HOW_TO_TABS.find((tab) => tab.id === "frameworks")?.cards ?? [];
   expect(frameworks.map((card) => card.id)).toEqual([
