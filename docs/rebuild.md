@@ -51,12 +51,12 @@ deploys the result; locally the same command writes into the git-ignored `site/p
 ## 4. Package the release
 
 ```sh
-python3 tools/pack_release.py --tag v1.0.0
-# dist/QuBlack-family-1.0.0.zip, dist/SHA256SUMS
+python3 tools/pack_release.py --tag v1.0.1
+# dist/QuBlack-family-1.0.1.zip, dist/SHA256SUMS
 ```
 
 The zip is deterministic (sorted entries, fixed timestamps). Publish with
-`gh release create v1.0.0 dist/QuBlack-family-1.0.0.zip dist/SHA256SUMS dist/README-release.txt`.
+`gh release create v1.0.1 dist/QuBlack-family-1.0.1.zip dist/SHA256SUMS dist/README-release.txt`.
 
 ## 5. Site
 

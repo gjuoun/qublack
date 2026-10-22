@@ -16,6 +16,10 @@ codepoints are removed from the cmap (keeping ASCII, © ® ™, arrows, box draw
 geometric shapes, braille and PUA) so colour emoji fall through to the system font. Name tables
 carry the OFL notice and this derivation statement.
 
+QuBlack Mono ships Recursive's `at.alt` alternate for `@` (the target of its `ss12` lookup)
+instead of the default `at` drawing; the outline is imported point for point through the same
+500/600 cell transform as the rest of the ASCII set. QuBlack Sans keeps the default `@`.
+
 QuBlack Mono uses the upm-833 technique: glyph coordinates stay untouched, `unitsPerEm` is 833,
 so the Sarasa 1000-unit cell reads as 1.200em and the 500-unit ASCII cell as 0.600em — a measured
 2:1 ratio.

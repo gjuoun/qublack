@@ -122,8 +122,8 @@ counts.lookalikes >= 12
 counts.ratio === "2.000"
   ? pass("2:1 grid: ratio cell reads 2.000")
   : fail(`2:1 grid: ratio cell reads ${JSON.stringify(counts.ratio)}`);
-counts.download.some((href) => href?.includes("/releases/tag/v1.0.0"))
-  ? pass("download: links the v1.0.0 release")
+counts.download.some((href) => href?.includes("/releases/tag/v1.0.1"))
+  ? pass("download: links the v1.0.1 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
 // 5. The hero's agent container: markdown rendered in QuBlack — bold, inline code and a

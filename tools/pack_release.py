@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pack the release: eight TTFs + OFL + README into a deterministic zip, plus SHA256SUMS.
 
-usage: pack_release.py --tag v1.0.0 [--fonts fonts] [--dist dist]
+usage: pack_release.py --tag v1.0.1 [--fonts fonts] [--dist dist]
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ def render_readme(version: str, zipname: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tag", default="v1.0.0")
+    parser.add_argument("--tag", default="v1.0.1")
     parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
     parser.add_argument("--dist", type=Path, default=REPO / "dist")
     args = parser.parse_args()
