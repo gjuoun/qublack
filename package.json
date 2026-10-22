@@ -1,0 +1,34 @@
+{
+  "name": "qublack",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "黢黑 QuBlack — a strict 2:1 bilingual programming font family (SIL OFL 1.1)",
+  "license": "OFL-1.1",
+  "workspaces": [
+    "site"
+  ],
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src",
+    "check": "bun run lint && bun run typecheck && bun test src && bun run site:build && echo 'check: ok'",
+    "site:dev": "bun run --cwd site dev",
+    "site:build": "bun run --cwd site build",
+    "site:preview": "bun run --cwd site preview",
+    "site:typecheck": "bun run --cwd site typecheck",
+    "fonts:build": "python3 tools/build_all.py",
+    "fonts:verify": "python3 tools/verify_family.py fonts/ --against reference/baseline-v1.json",
+    "fonts:audit": "python3 tools/name_audit.py --strict fonts/",
+    "fonts:web": "python3 tools/web_fonts.py --out site/public/fonts --css site/src/styles/qublack-fonts.css",
+    "fonts:web:check": "python3 tools/web_fonts.py --check --out site/public/fonts --css site/src/styles/qublack-fonts.css",
+    "fonts:release": "python3 tools/pack_release.py --tag v1.0.0",
+    "metrics": "python3 tools/metrics_json.py --out site/src/data/metrics.generated.json fonts/"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@types/bun": "latest",
+    "typescript": "^5.9.0"
+  }
+}

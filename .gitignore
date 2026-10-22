@@ -1,0 +1,12 @@
+node_modules/
+bun.lock
+dist/
+site/dist/
+site/.astro/
+site/public/fonts/
+fonts/
+out/
+__pycache__/
+*.pyc
+.DS_Store
+.tmp/
