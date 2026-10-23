@@ -34,11 +34,11 @@ jobs:
           TAG="${{ inputs.tag }}"
           curl -fsSL -o dist/family.zip \
             "https://github.com/gjuoun/qublack/releases/download/${TAG}/QuBlack-family-${TAG#v}.zip"
-          unzip -q -o dist/family.zip '*.ttf' -d fonts
-          ls fonts/*.ttf | wc -l
+          unzip -q -o dist/family.zip '*.ttf' -d fonts/ttf
+          ls fonts/ttf/*.ttf | wc -l
 
       - name: Build TTC + WOFF2 + SHA256SUMS
-        run: python3 tools/pack_release.py --tag "${{ inputs.tag }}" --fonts fonts
+        run: python3 tools/pack_release.py --tag "${{ inputs.tag }}" --fonts fonts/ttf
 
       - name: Upload the formats
         env:

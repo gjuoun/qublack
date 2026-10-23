@@ -1,0 +1,7 @@
+# Google Fonts readiness toolchain (see tools/gf_setup.sh).
+gftools==0.10.4
+fontbakery==1.1.0
+shaperglot>=0.6
+fonttools>=4.60
+brotli>=1.1
+protobuf>=5.29

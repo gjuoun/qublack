@@ -317,7 +317,7 @@
   },
   "QuBlackSans-Bold": {
     "upm": 1000,
-    "glyphs": 48741,
+    "glyphs": 53716,
     "family": "QuBlack Sans",
     "postscript": "QuBlackSans-Bold",
     "advances": {
@@ -392,11 +392,11 @@
       }
     },
     "lineHeight": 1.21,
-    "codepoints": 46207
+    "codepoints": 51138
   },
   "QuBlackSans-BoldItalic": {
     "upm": 1000,
-    "glyphs": 48702,
+    "glyphs": 53677,
     "family": "QuBlack Sans",
     "postscript": "QuBlackSans-BoldItalic",
     "advances": {
@@ -471,11 +471,11 @@
       }
     },
     "lineHeight": 1.21,
-    "codepoints": 46207
+    "codepoints": 51138
   },
   "QuBlackSans-Italic": {
     "upm": 1000,
-    "glyphs": 48702,
+    "glyphs": 53677,
     "family": "QuBlack Sans",
     "postscript": "QuBlackSans-Italic",
     "advances": {
@@ -550,11 +550,11 @@
       }
     },
     "lineHeight": 1.21,
-    "codepoints": 46207
+    "codepoints": 51138
   },
   "QuBlackSans-Regular": {
     "upm": 1000,
-    "glyphs": 48741,
+    "glyphs": 53716,
     "family": "QuBlack Sans",
     "postscript": "QuBlackSans-Regular",
     "advances": {
@@ -629,6 +629,6 @@
       }
     },
     "lineHeight": 1.21,
-    "codepoints": 46207
+    "codepoints": 51138
   }
 }
