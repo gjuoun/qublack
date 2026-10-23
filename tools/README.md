@@ -10,6 +10,7 @@ The build and verification toolchain behind the QuBlack release. Python 3.9+ wit
 | `build_all.py`     | build all eight faces into `fonts/` (`python3 tools/build_all.py`)                                        |
 | `verify_family.py` | compare a build against `reference/baseline-v1.json` (metrics, never hashes)                              |
 | `name_audit.py`    | strict gate: name table, OFL notice, derivation, reserved names, cmap, 2:1 grid                           |
+| `cjk_weight.py`    | report/assert CJK weight ratios and whether Regular and Bold CJK share a point structure                  |
 | `probe_metrics.py` | print the per-glyph measurements that decide whether a face is acceptable                                 |
 | `cell_geometry.py` | running-text ink/advance comparison across faces                                                          |
 | `metrics_json.py`  | emit the numbers the site prints, straight from the faces                                                 |
