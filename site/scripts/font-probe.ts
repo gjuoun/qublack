@@ -19,6 +19,7 @@ import puppeteer from "puppeteer-core";
 
 const args = process.argv.slice(2);
 const selfTest = args.includes("--self-test");
+const variation = args.includes("--vf");
 const fontsDir = resolve(args.find((arg) => !arg.startsWith("--")) ?? "fonts");
 const chromePath =
   process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -156,6 +157,74 @@ async function probe(url: string, names: string[]): Promise<FaceResult[]> {
   }
 }
 
+type VariationResult = { name: string; loaded: boolean; error: string; inks: number[] };
+
+const WEIGHTS = [400, 550, 700];
+
+/** Render one face at three axis values through FontFace variation settings, count ink pixels. */
+async function probeVariations(url: string, names: string[]): Promise<VariationResult[]> {
+  const browser = await puppeteer.launch({
+    executablePath: chromePath,
+    headless: true,
+    args: ["--no-sandbox", "--disable-dev-shm-usage", "--font-render-hinting=none"],
+  });
+  try {
+    const page = await browser.newPage();
+    await page.goto(url);
+    return await page.evaluate(
+      async (targets: { name: string; url: string }[], weights: number[]) => {
+        const ink = (family: string): number => {
+          const canvas = document.createElement("canvas");
+          canvas.width = 900;
+          canvas.height = 220;
+          const context = canvas.getContext("2d")!;
+          context.fillStyle = "#fff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.fillStyle = "#000";
+          context.font = `96px "${family}"`;
+          context.fillText("汉一|a", 20, 140);
+          const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+          let count = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i] < 128) count += 1;
+          }
+          return count;
+        };
+        const results = [];
+        for (const target of targets) {
+          const result = { name: target.name, loaded: false, error: "", inks: [] as number[] };
+          try {
+            const buffer = await (await fetch(target.url)).arrayBuffer();
+            for (const weight of weights) {
+              const face = new FontFace(`var-${target.name}-${weight}`, buffer.slice(0), {
+                variationSettings: `"wght" ${weight}`,
+              } as FontFaceDescriptors);
+              await face.load();
+              document.fonts.add(face);
+              result.inks.push(ink(face.family));
+            }
+            result.loaded = true;
+          } catch (error) {
+            result.error = String(error);
+          }
+          results.push(result);
+        }
+        return results;
+      },
+      names.map((name) => ({ name, url: `${url}/${name}` })),
+      WEIGHTS,
+    );
+  } finally {
+    await browser.close();
+  }
+}
+
+function monotone(result: VariationResult): boolean {
+  if (!result.loaded || result.inks.length !== WEIGHTS.length) return false;
+  const [light, middle, heavy] = result.inks;
+  return light > 0 && light < middle && middle < heavy;
+}
+
 function distinct(result: FaceResult): boolean {
   const { custom, fallback } = result;
   if (custom.ink === 0) return false;
@@ -164,6 +233,78 @@ function distinct(result: FaceResult): boolean {
     Math.abs(custom.height - fallback.height) > 2 ||
     Math.abs(custom.ink - fallback.ink) / Math.max(custom.ink, fallback.ink) > 0.02
   );
+}
+
+/** Drop fvar from a copy: the axis is declared nowhere, so all three weights must render alike. */
+function stripAxis(source: string, target: string): void {
+  const script = [
+    "import sys",
+    "from fontTools.ttLib import TTFont",
+    "font = TTFont(sys.argv[1])",
+    'if "fvar" in font:',
+    '    del font["fvar"]',
+    'if "STAT" in font:',
+    '    del font["STAT"]',
+    "font.save(sys.argv[2])",
+  ].join("\n");
+  const run = Bun.spawnSync(["python3", "-c", script, source, target]);
+  if (run.exitCode !== 0) {
+    throw new Error(`could not strip the axis from ${basename(source)}: ${run.stderr.toString()}`);
+  }
+}
+
+async function mainVariations(): Promise<number> {
+  const names = facesIn(fontsDir).filter((name) => name.includes("[wght]"));
+  if (names.length === 0) {
+    console.error(`no variable faces in ${fontsDir}`);
+    return 2;
+  }
+
+  const server = serve(fontsDir);
+  try {
+    const results = await probeVariations(`http://127.0.0.1:${server.port}`, names);
+    for (const result of results) {
+      const detail = result.loaded
+        ? `ink ${result.inks.join(" < ")} at wght ${WEIGHTS.join("/")}`
+        : result.error.slice(0, 120);
+      console.log(`${monotone(result) ? "PASS" : "FAIL"}  ${result.name}: ${detail}`);
+    }
+    const good = results.filter(monotone);
+    console.log(
+      `${good.length === results.length ? "PASS" : "FAIL"} ${good.length}/${results.length} VF faces: wght 400/550/700 distinct, stem width monotone`,
+    );
+    return good.length === results.length ? 0 : 1;
+  } finally {
+    server.stop(true);
+  }
+}
+
+async function runVariationSelfTest(): Promise<number> {
+  const dir = mkdtempSync(join(tmpdir(), "qublack-vf-probe-"));
+  const names = facesIn(fontsDir).filter((name) => name.includes("[wght]"));
+  console.log(`[self-test] stripping the axis from ${names.length} faces into ${dir}`);
+  for (const name of names) {
+    stripAxis(join(fontsDir, name), join(dir, name));
+  }
+  const server = serve(dir);
+  try {
+    const results = await probeVariations(`http://127.0.0.1:${server.port}`, facesIn(dir));
+    const rejected = results.filter((result) => !monotone(result));
+    for (const result of results) {
+      console.log(
+        `${monotone(result) ? "FAIL" : "PASS"}  ${result.name}: ${
+          monotone(result) ? "axis-less face still varied" : `flat at ${result.inks.join("/")}`
+        }`,
+      );
+    }
+    const ok = rejected.length === results.length;
+    console.log(
+      `${ok ? "PASS" : "FAIL"} negative control rejected (${rejected.length}/${results.length} axis-less copies fail)`,
+    );
+    return ok ? 0 : 1;
+  } finally {
+    server.stop(true);
+  }
 }
 
 async function main(): Promise<number> {
@@ -223,4 +364,12 @@ async function runSelfTest(): Promise<number> {
   }
 }
 
-process.exit(selfTest ? await runSelfTest() : await main());
+process.exit(
+  variation
+    ? selfTest
+      ? await runVariationSelfTest()
+      : await mainVariations()
+    : selfTest
+      ? await runSelfTest()
+      : await main(),
+);

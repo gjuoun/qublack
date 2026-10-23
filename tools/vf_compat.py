@@ -55,13 +55,20 @@ BLOCKS = [
 
 
 def signature(font: TTFont, name: str) -> tuple:
+    """Everything varLib needs to agree on: contour count, point count, contour ends, on/off curve.
+
+    The on/off-curve bits matter: two glyphs can share every count and still fail the merge when a
+    point switches type, which is how U+4DB9 and a handful of Ext-B glyphs escaped the first pass.
+    """
     glyph = font["glyf"][name]
     if glyph.isComposite():
         return ("composite", tuple((part.glyphName, part.x, part.y) for part in glyph.components))
     contours = getattr(glyph, "numberOfContours", 0)
     if contours <= 0:
         return ("empty",)
-    return ("simple", contours, len(glyph.coordinates), tuple(glyph.endPtsOfContours))
+    flags = getattr(glyph, "flags", None)
+    on_curve = tuple(int(value) & 1 for value in flags) if flags is not None else None
+    return ("simple", contours, len(glyph.coordinates), tuple(glyph.endPtsOfContours), on_curve)
 
 
 def block_for(codepoint: int) -> str:
@@ -80,7 +87,7 @@ def main() -> int:
     parser.add_argument("--noto", type=Path, default=DEFAULT_SOURCES / "NotoSansSC-VF.ttf")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--report", action="store_true")
-    parser.add_argument("--max-freeze", type=int, default=13_600)
+    parser.add_argument("--max-freeze", type=int, default=16_500)
     parser.add_argument("--max-noto", type=int, default=8)
     args = parser.parse_args()
 
