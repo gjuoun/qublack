@@ -9,7 +9,11 @@
       "!site/.astro",
       "!site/src/components/ui",
       "!site/src/lib/utils.ts",
-      "!fonts"
+      "!fonts",
+      "!google-fonts",
+      "!.venv-gf",
+      "!.tools",
+      "!sources"
     ]
   },
   "formatter": {

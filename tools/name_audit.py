@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from build_qublack import emoji_codepoints, keep_codepoint  # noqa: E402
-from qublack_font import open_font  # noqa: E402
+from qublack_font import COPYRIGHT, LICENSE, open_font  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 EXPECTED = {
@@ -27,7 +27,8 @@ EXPECTED = {
     "QuBlackSans": {"display": "QuBlack Sans", "zh": "黢黑比例", "upm": 1000, "han": 1000, "ascii": 600},
 }
 RESERVED = ("Source", "Sarasa", "Recursive", "ttfautohint", "1.0.42")
-ATTRIBUTION_IDS = (0, 7)
+# Only the derivation record (7) may name upstream projects; id 0 is the GF copyright line now.
+ATTRIBUTION_IDS = (7,)
 NAME_IDS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 16, 17}
 
 
@@ -73,14 +74,15 @@ def audit_names(path: Path, spec: dict, version: str) -> list[str]:
                     problems.append(label + " id " + str(nid) + " still mentions " + reserved + ": " + repr(value))
 
     style = path.stem.split("-")[1]
+    style_display = style.replace("BoldItalic", "Bold Italic")
     display = spec["display"]
     expected = {
         1: display,
-        2: style,
-        4: display + " " + style,
+        2: style_display,
+        4: display + " " + style_display,
         6: path.stem,
         16: display,
-        17: style,
+        17: style_display,
     }
     for label, platform in (("mac", mac), ("win", win)):
         for nid, want in expected.items():
@@ -90,8 +92,8 @@ def audit_names(path: Path, spec: dict, version: str) -> list[str]:
     zh_family = spec["zh"] + " " + display
     if zh.get(1) != zh_family:
         problems.append("zh-CN family " + repr(zh.get(1)) + " != " + repr(zh_family))
-    if not str(zh.get(16, "")).startswith(spec["zh"]):
-        problems.append("zh-CN typographic family " + repr(zh.get(16)) + " is not localized")
+    if zh.get(16) != display:
+        problems.append("zh-CN typographic family " + repr(zh.get(16)) + " != " + repr(display) + " (GF compares it across platforms)")
 
     version_string = "Version " + version
     if win.get(5) != version_string:
@@ -100,7 +102,11 @@ def audit_names(path: Path, spec: dict, version: str) -> list[str]:
     if unique in ("jun", ""):
         problems.append("unique ID is the old leftover: " + repr(win.get(3)))
 
-    notice = " ".join([win.get(0, ""), win.get(7, ""), win.get(13, "")])
+    if win.get(0) != COPYRIGHT:
+        problems.append("copyright " + repr(win.get(0)) + " != " + repr(COPYRIGHT))
+    if win.get(13) != LICENSE:
+        problems.append("license " + repr(win.get(13)) + " != the GF fixed string")
+    notice = " ".join([win.get(7, ""), win.get(13, "")])
     if "SIL Open Font License" not in notice:
         problems.append("OFL attribution missing from the name table")
     return problems

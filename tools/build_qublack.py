@@ -31,6 +31,11 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 
 import cjk_masters
+from gf_tables import write_base, write_vertical, write_win_metrics
+from latin_core import ensure as ensure_latin_core
+from latin_core import ensure_repertoire
+from mark_attach import attach as attach_marks
+from normalize_outlines import normalize
 from qublack_font import VERTICAL_TABLES, write_names
 
 REPO = Path(__file__).resolve().parent.parent
@@ -275,6 +280,12 @@ def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path, cjk_vf
 
     slug, display = SLUGS[mode], DISPLAY[mode]
     print(f"[{slug}-{style}] latin swapped {swap_latin(skeleton, latin, mode)}", flush=True)
+    term = sources / f"SarasaTermSC-{style}.ttf"
+    core_filled = ensure_latin_core(skeleton, term)
+    if core_filled:
+        print(f"[{slug}-{style}] GF Latin Core filled {len(core_filled)}: {' '.join(core_filled)}", flush=True)
+    if mode == "sans":
+        print(f"[{slug}-{style}] repertoire aligned to Term +{ensure_repertoire(skeleton, term)}", flush=True)
     print(f"[{slug}-{style}] emoji cmap entries removed {strip_emoji(skeleton, emoji_codepoints(repo))}", flush=True)
 
     if cjk_vf is not None:
@@ -297,7 +308,19 @@ def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path, cjk_vf
         )
 
     print(f"[{slug}-{style}] overlap flags cleared {strip_overlap_flags(skeleton)}", flush=True)
+    print(f"[{slug}-{style}] outlines normalised {normalize(skeleton)}", flush=True)
+    print(f"[{slug}-{style}] marks attached {attach_marks(skeleton)}", flush=True)
     write_names(skeleton, display, slug, style)
+
+    # GF CJK tables. The line height is captured before the rewrite so it survives:
+    # hhea and OS/2 typo metrics are made to agree without changing their sum.
+    hhea = skeleton["hhea"]
+    line_height = (hhea.ascent - hhea.descent + hhea.lineGap) / skeleton["head"].unitsPerEm
+    write_base(skeleton)
+    write_vertical(skeleton)
+    write_win_metrics(skeleton, line_height)
+    print(f"[{slug}-{style}] GF metrics written (line height {line_height:.4f} em)", flush=True)
+
     skeleton["maxp"].numGlyphs = len(skeleton.getGlyphOrder())
 
     outdir.mkdir(parents=True, exist_ok=True)

@@ -1,12 +1,8 @@
-Copyright 2026 Jun Guo (https://github.com/gjuoun)
+Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)
 
-QuBlack Sans, QuBlack Mono and their derivatives are licensed under the SIL Open Font License,
-Version 1.1. This family is a derivative of Sarasa Gothic / Sarasa Term (which carries Source Han
-Sans outlines) and Recursive Linear, both released under the SIL OFL 1.1; see NOTICE.md. No
-Reserved Font Name of any upstream project is used by this family.
-
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
-https://scripts.sil.org/OFL
+https://openfontlicense.org
 
 
 -----------------------------------------------------------
