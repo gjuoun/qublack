@@ -16,7 +16,7 @@ unpacked.
 | Hanzi weight axis     | `NotoSansSC-VF.ttf`                                 | `python3 tools/fetch_cjk_vf.py` — pinned Noto Sans SC VF (OFL 1.1)          |
 | Emoji table           | `assets/emoji-data.txt`                             | vendored from the Unicode character database                                |
 
-`--sources` defaults to `~/code/gjuoun/lishu-mono/assets/work`; any directory with the layout in
+`--sources` defaults to `sources/upstream` (override with `QUBLACK_SOURCES`); any directory with the layout in
 `tools/README.md` works. The one input that is scripted rather than hand-unpacked is the hanzi
 weight axis: `python3 tools/fetch_cjk_vf.py` downloads `NotoSansSC-VF.ttf` from a pinned google/fonts
 commit into that directory and verifies its SHA-256. Every face instances it (400 for Regular and

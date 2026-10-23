@@ -203,7 +203,7 @@ def check(out_dir: Path, css_path: Path, chunk: int, workers: int, fonts_dir: Pa
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
+    parser.add_argument("--fonts", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument("--out", type=Path, default=REPO / "site/public/fonts")
     parser.add_argument("--css", type=Path, default=REPO / "site/src/styles/qublack-fonts.css")
     parser.add_argument("--chunk", type=int, default=700)

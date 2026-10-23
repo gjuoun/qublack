@@ -22,7 +22,8 @@ The build and verification toolchain behind the QuBlack release. Python 3.9+ wit
 `qublack_font.py` holds the shared loading/measuring/naming helpers.
 
 Inputs are the upstream OFL sources (Sarasa Gothic / Sarasa Term 1.0.42, Recursive 1.085
-Linear statics, and Noto Sans SC VF as the hanzi weight axis). `--sources` defaults to `~/code/gjuoun/lishu-mono/assets/work`; pass
+Linear statics, the Recursive VF as the Latin weight axis, and Noto Sans SC VF as the hanzi weight
+axis). `--sources` defaults to `sources/upstream` (`QUBLACK_SOURCES` overrides it); pass
 `--sources <dir>` to point at your own copy. The layout it expects:
 
 ```

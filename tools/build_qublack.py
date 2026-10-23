@@ -39,7 +39,9 @@ from normalize_outlines import normalize
 from qublack_font import VERTICAL_TABLES, write_names
 
 REPO = Path(__file__).resolve().parent.parent
-DEFAULT_SOURCES = Path.home() / "code/gjuoun/lishu-mono/assets/work"
+# The pinned inputs live in the repo (sources/upstream) since the lishu-mono work directory went
+# away; QUBLACK_SOURCES points at an unpacked upstream tree for a from-scratch rebuild.
+DEFAULT_SOURCES = Path(os.environ.get("QUBLACK_SOURCES") or REPO / "sources/upstream")
 # CJK outlines come from the variable donor so Regular and Bold share one master design. The
 # donor is looked up as <sources>/NotoSansSC-VF.ttf unless --cjk-vf points somewhere else.
 USE_CJK_DONOR = True
@@ -335,7 +337,7 @@ def main() -> int:
     parser.add_argument("--mode", choices=sorted(SLUGS), required=True)
     parser.add_argument("--style", choices=["Regular", "Italic", "Bold", "BoldItalic"], required=True)
     parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES)
-    parser.add_argument("--out", type=Path, default=REPO / "fonts")
+    parser.add_argument("--out", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument(
         "--cjk-vf",
         nargs="?",

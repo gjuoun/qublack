@@ -23,7 +23,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from symbol_targets import FIXED_SYMBOLS, QUOTE_BLEND, SYMBOL_BLEND, target  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work"
+from build_qublack import DEFAULT_SOURCES  # noqa: E402
+
+DONORS = DEFAULT_SOURCES
 BG = (37, 41, 37)
 FG = (217, 217, 212)
 DIM = (140, 140, 136)
