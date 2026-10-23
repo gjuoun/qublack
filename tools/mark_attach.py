@@ -145,7 +145,32 @@ def attach(font) -> dict[str, int]:
             record.Feature.LookupCount = len(record.Feature.LookupListIndex)
 
     _attach_mark_to_mark(font, marks)
+    _ensure_features_everywhere(font)
     return {"marks": len(marks), "bases": len(bases)}
+
+
+def _ensure_features_everywhere(font) -> None:
+    """Every script must reference the mark/mkmk features.
+
+    Sarasa wires the Cyrillic and Greek LangSys records without them, so a mark over a
+    Cyrillic base has no positioning at all; this adds the feature indices where missing.
+    """
+    gpos = font["GPOS"].table
+    wanted = [
+        index
+        for index, record in enumerate(gpos.FeatureList.FeatureRecord)
+        if record.FeatureTag in ("mark", "mkmk")
+    ]
+    for script in gpos.ScriptList.ScriptRecord:
+        systems = [script.Script.DefaultLangSys] if script.Script.DefaultLangSys else []
+        systems += [record.LangSys for record in script.Script.LangSysRecord]
+        for langsys in systems:
+            if not langsys:
+                continue
+            for index in wanted:
+                if index not in langsys.FeatureIndex:
+                    langsys.FeatureIndex.append(index)
+            langsys.FeatureCount = len(langsys.FeatureIndex)
 
 
 def _attach_mark_to_mark(font, marks: dict) -> None:
