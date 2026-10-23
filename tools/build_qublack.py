@@ -46,9 +46,11 @@ DEFAULT_SOURCES = Path(os.environ.get("QUBLACK_SOURCES") or REPO / "sources/upst
 # CJK outlines come from the variable donor so Regular and Bold share one master design. The
 # donor is looked up as <sources>/NotoSansSC-VF.ttf unless --cjk-vf points somewhere else.
 USE_CJK_DONOR = True
-# From v1.2.0 every face takes its Latin from the Recursive variable donor, instanced per style:
-# the statics are independently drawn per weight and cannot carry a weight axis.
-USE_LATIN_VF = True
+# Measured 2026-10-23: the Recursive VF instance is NOT the static drawing. At wght 400 its 'l'
+# is 4 units narrower (68..532 vs 72..534) and carries the overlaps the statics had removed, which
+# shifts thin stems by a pixel at 24 ppem. The statics therefore keep the static donor; only the
+# VF masters take the instanced one (--latin-vf), where the requirement is interpolability.
+USE_LATIN_VF = False
 SLUGS = {"mono": "QuBlackMono", "sans": "QuBlackSans"}
 DISPLAY = {"mono": "QuBlack Mono", "sans": "QuBlack Sans"}
 # Symbols that sit against hanzi: Recursive draws them at Latin cap height, which after the
