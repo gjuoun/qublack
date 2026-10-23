@@ -4,14 +4,28 @@ v1.2.0 adds two weight-axis variable fonts to the eight static faces. They are *
 committed files**: `fonts/` is fully git-ignored, the binaries are produced locally by
 `bun run fonts:vf`, and they ship inside the release zip only.
 
-| family          | file                             | name ID 1       | PostScript              | glyphs | size         |
-| --------------- | -------------------------------- | --------------- | ----------------------- | ------ | ------------ |
-| QuBlack Mono VF | `fonts/vf/QuBlackMono[wght].ttf` | QuBlack Mono VF | `QuBlackMonoVF-Regular` | 57,129 | 22,573,948 B |
-| QuBlack Sans VF | `fonts/vf/QuBlackSans[wght].ttf` | QuBlack Sans VF | `QuBlackSansVF-Regular` | 53,716 | 22,166,280 B |
+| family       | file                             | PostScript              | instances                                          | glyphs | size              |
+| ------------ | -------------------------------- | ----------------------- | -------------------------------------------------- | ------ | ----------------- |
+| QuBlack Mono | `fonts/vf/QuBlackMono[wght].ttf` | `QuBlackMonoVF-Regular` | Regular 400 · Medium 500 · SemiBold 600 · Bold 700 | 57,129 | 22,574,360 B      |
+| QuBlack Sans | `fonts/vf/QuBlackSans[wght].ttf` | `QuBlackSansVF-Regular` | same ladder                                        | 53,716 | see the build log |
 
-The family string carries the `VF` marker on purpose: the static `QuBlack Mono` already owns
+The family string is the unmarked name — Google Fonts rejects `VF` as an illegal particle — while
+the PostScript name keeps the marker. That marker is deliberate: the static faces already own
 `QuBlackMono-Regular`, and two installed fonts with one PostScript name collide in every font
-manager. The file name keeps the Google Fonts convention.
+manager. The cost is one waived Google Fonts check (`font_names` expects family + style); the
+alternative is a name collision or dropping the statics from the release.
+
+## Google Fonts profile
+
+```sh
+.tools/fontspector -p googlefonts --skip-network \
+  -x family_name_compliance -x cjk_vertical_metrics -x file_size -x font_names \
+  'fonts/vf/QuBlackMono[wght].ttf'
+```
+
+Result: **FAIL 0 / FATAL 0** for both families (WARN-only). The four waivers are the three the
+static gate already carries — `QuBlack` is CamelCase, the 1.25 em line box is a design decision,
+CJK families exceed the 9 MB file-size limit — plus `font_names` for the PostScript marker above.
 
 ## Masters
 

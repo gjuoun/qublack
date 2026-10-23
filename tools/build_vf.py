@@ -124,7 +124,8 @@ def build_family(
             if tag in light:
                 merged[tag] = light[tag]
     merged["name"].names = []
-    prepare(merged, f"{display} VF", f"{slug}VF", release_version())
+    # GF rejects "VF" as an illegal particle in a family name; the file name carries the marker.
+    prepare(merged, display, f"{slug}VF", release_version())
     write_base(merged)
     merged["maxp"].numGlyphs = len(merged.getGlyphOrder())
 
