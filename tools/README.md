@@ -6,6 +6,7 @@ The build and verification toolchain behind the QuBlack release. Python 3.9+ wit
 | Script             | What it does                                                                                              |
 | ------------------ | --------------------------------------------------------------------------------------------------------- |
 | `fetch_cjk_vf.py`  | download the pinned CJK variable donor (`NotoSansSC-VF.ttf`) into `--sources`, verify size + SHA-256      |
+| `fetch_recursive_vf.py` | download the pinned Latin variable donor (`Recursive_VF_1.085.ttf`), verify size + SHA-256             |
 | `build_qublack.py` | build one face: `--mode mono\|sans --style …` (Latin swap, emoji strip, names, then the mode's post step) |
 | `build_all.py`     | build all eight faces into `fonts/ttf/` (`python3 tools/build_all.py`)                                    |
 | `verify_family.py` | compare a build against `reference/baseline-v1.json` (metrics, never hashes)                              |
