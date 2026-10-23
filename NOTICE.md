@@ -3,11 +3,11 @@
 QuBlack is a derivative work. Every outline in it comes from an upstream project released under
 the SIL Open Font License 1.1:
 
-| Layer             | Upstream                                                                     | Version      | Licence     |
-| ----------------- | ---------------------------------------------------------------------------- | ------------ | ----------- |
-| Hanzi             | Sarasa Gothic / Sarasa Term (be5invis), outlines from Source Han Sans        | 1.0.42       | SIL OFL 1.1 |
-| Hanzi weight axis | Noto Sans SC variable font (Google / Adobe, the same Source Han Sans design) | wght 100–900 | SIL OFL 1.1 |
-| Latin             | Recursive **Linear** (ArrowType), Sans and Mono — statics up to v1.1.0, the variable source from v1.2.0 | 1.085 | SIL OFL 1.1 |
+| Layer             | Upstream                                                                                                | Version      | Licence     |
+| ----------------- | ------------------------------------------------------------------------------------------------------- | ------------ | ----------- |
+| Hanzi             | Sarasa Gothic / Sarasa Term (be5invis), outlines from Source Han Sans                                   | 1.0.42       | SIL OFL 1.1 |
+| Hanzi weight axis | Noto Sans SC variable font (Google / Adobe, the same Source Han Sans design)                            | wght 100–900 | SIL OFL 1.1 |
+| Latin             | Recursive **Linear** (ArrowType), Sans and Mono — statics up to v1.1.0, the variable source from v1.2.0 | 1.085        | SIL OFL 1.1 |
 
 Derivation: the hanzi and the non-ASCII glyph set come from the Sarasa skeleton (Term SC for the
 mono family, Gothic SC for the sans family), with one exception: from v1.1.0 the hanzi outlines are

@@ -31,6 +31,7 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 
 import cjk_masters
+import latin_masters
 from gf_tables import write_base, write_vertical, write_win_metrics
 from latin_core import ensure as ensure_latin_core
 from latin_core import ensure_repertoire
@@ -45,6 +46,9 @@ DEFAULT_SOURCES = Path(os.environ.get("QUBLACK_SOURCES") or REPO / "sources/upst
 # CJK outlines come from the variable donor so Regular and Bold share one master design. The
 # donor is looked up as <sources>/NotoSansSC-VF.ttf unless --cjk-vf points somewhere else.
 USE_CJK_DONOR = True
+# The Latin comes from the Recursive statics until Step 7 of the v1.2.0 plan flips this on, so a
+# rebuild can be compared before and after the donor swap.
+USE_LATIN_VF = False
 SLUGS = {"mono": "QuBlackMono", "sans": "QuBlackSans"}
 DISPLAY = {"mono": "QuBlack Mono", "sans": "QuBlack Sans"}
 # Symbols that sit against hanzi: Recursive draws them at Latin cap height, which after the
@@ -254,6 +258,16 @@ def resolve_donor(value: str | None, sources: Path, disabled: bool) -> Path | No
     return donor
 
 
+def resolve_latin_donor(value: str | None, sources: Path, disabled: bool) -> Path | None:
+    """Turn the --latin-vf flag into a donor to instance per style (None = the Recursive statics)."""
+    if disabled or not (value or USE_LATIN_VF):
+        return None
+    donor = Path(value) if value and value != "auto" else latin_masters.donor_for(sources)
+    if not donor.exists():
+        raise SystemExit(f"missing Latin donor: {donor} (run python3 tools/fetch_recursive_vf.py)")
+    return donor
+
+
 def donor_paths(mode: str, style: str, sources: Path) -> tuple[Path, Path]:
     if mode == "mono":
         skeleton = sources / f"SarasaTermSC-{style}.ttf"
@@ -268,14 +282,23 @@ def donor_paths(mode: str, style: str, sources: Path) -> tuple[Path, Path]:
     return skeleton, latin
 
 
-def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path, cjk_vf: Path | None = None) -> Path:
+def build(
+    mode: str,
+    style: str,
+    sources: Path,
+    outdir: Path,
+    repo: Path,
+    cjk_vf: Path | None = None,
+    latin_vf: Path | None = None,
+) -> Path:
     skeleton_path, latin_path = donor_paths(mode, style, sources)
-    for path in (skeleton_path, latin_path):
-        if not path.exists():
-            raise SystemExit(f"missing donor: {path}")
+    if not skeleton_path.exists():
+        raise SystemExit(f"missing donor: {skeleton_path}")
+    if latin_vf is None and not latin_path.exists():
+        raise SystemExit(f"missing donor: {latin_path}")
 
     skeleton = TTFont(str(skeleton_path))
-    latin = TTFont(str(latin_path))
+    latin = TTFont(str(latin_path)) if latin_vf is None else latin_masters.instance(latin_vf, mode, style)
     for font in (skeleton, latin):
         drop_vertical(font)
     assert skeleton["head"].unitsPerEm == 1000 and latin["head"].unitsPerEm == 1000
@@ -347,9 +370,19 @@ def main() -> int:
         help="install CJK outlines from this variable donor (no value = <sources>/NotoSansSC-VF.ttf)",
     )
     parser.add_argument("--no-cjk-vf", action="store_true", help="keep the skeleton CJK outlines")
+    parser.add_argument(
+        "--latin-vf",
+        nargs="?",
+        const="auto",
+        default=None,
+        metavar="PATH",
+        help="instance the Latin donor from this VF (no value = <sources>/Recursive_VF_1.085.ttf)",
+    )
+    parser.add_argument("--no-latin-vf", action="store_true", help="keep the Recursive static donors")
     args = parser.parse_args()
     donor = resolve_donor(args.cjk_vf, args.sources, args.no_cjk_vf)
-    build(args.mode, args.style, args.sources, args.out, REPO, cjk_vf=donor)
+    latin = resolve_latin_donor(args.latin_vf, args.sources, args.no_latin_vf)
+    build(args.mode, args.style, args.sources, args.out, REPO, cjk_vf=donor, latin_vf=latin)
     return 0
 
 
