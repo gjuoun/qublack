@@ -25,7 +25,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from symbol_targets import FIXED_SYMBOLS, boxes, target  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work"
+from build_qublack import DEFAULT_SOURCES  # noqa: E402
+
+DONORS = DEFAULT_SOURCES
 HEADROOM = 0.05
 
 
@@ -45,7 +47,7 @@ def bounds(font: TTFont, char: str) -> dict[str, float] | None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--style", default="Regular")
-    parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
+    parser.add_argument("--fonts", type=Path, default=REPO / "fonts/ttf")
     args = parser.parse_args()
 
     qublack = TTFont(str(args.fonts / f"QuBlackMono-{args.style}.ttf"))

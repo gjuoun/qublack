@@ -103,7 +103,7 @@ def sha256(path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", default="v1.0.4")
-    parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
+    parser.add_argument("--fonts", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument("--dist", type=Path, default=REPO / "dist")
     parser.add_argument("--skip-woff2", action="store_true", help="reuse existing .woff2 files")
     args = parser.parse_args()

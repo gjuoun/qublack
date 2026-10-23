@@ -18,7 +18,9 @@ from fontTools.ttLib import TTFont
 
 REPO = Path(__file__).resolve().parent.parent
 STYLES = ["Regular", "Italic", "Bold", "BoldItalic"]
-DEFAULT_DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work/rec_mono"
+from build_qublack import DEFAULT_SOURCES  # noqa: E402
+
+DEFAULT_DONORS = DEFAULT_SOURCES / "rec_mono"
 
 
 def points(font: TTFont, name: str) -> list[tuple[float, float]]:
@@ -38,7 +40,7 @@ def profile(points: list[tuple[float, float]]) -> list[float]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
+    parser.add_argument("--fonts", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument("--donors", type=Path, default=DEFAULT_DONORS)
     args = parser.parse_args()
 
