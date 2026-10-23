@@ -17,7 +17,7 @@ from pathlib import Path
 
 from fontTools.otlLib.builder import buildStatTable
 from fontTools.ttLib import newTable
-from fontTools.ttLib.tables import otTables as ot
+from fontTools.ttLib.tables._f_v_a_r import Axis, NamedInstance
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -81,17 +81,17 @@ def prepare(font, display: str, slug: str, version: str, default_weight: int = 4
     # fresh id for Bold so the instances read "Regular" / "Bold" in every picker.
     _add(font, INSTANCE_NAME_IDS[700], "Bold")
     fvar = newTable("fvar")
-    axis = ot.Axis()
+    axis = Axis()
     axis.axisTag = "wght"
     axis.minValue = 400.0
     axis.defaultValue = float(default_weight)
     axis.maxValue = 700.0
     axis.flags = 0
-    axis.axisNameID = font["name"].addName("Weight", 3, 1, 0x409) or 256
+    axis.axisNameID = font["name"].addName("Weight")
     fvar.axes = [axis]
     fvar.instances = []
     for weight, style_name in WEIGHTS.items():
-        instance = ot.Instance()
+        instance = NamedInstance()
         instance.coordinates = {"wght": float(weight)}
         instance.subfamilyNameID = 2 if weight == default_weight else INSTANCE_NAME_IDS[700]
         instance.postscriptNameID = 0xFFFF

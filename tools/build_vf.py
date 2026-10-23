@@ -26,6 +26,7 @@ import time
 from pathlib import Path
 
 from fontTools import varLib
+from fontTools.varLib.errors import VarLibError
 from fontTools.designspaceLib import AxisDescriptor, DesignSpaceDocument, SourceDescriptor
 from fontTools.ttLib import TTFont
 
@@ -37,6 +38,16 @@ from vf_masters import freeze  # noqa: E402
 from vf_tables import prepare, release_version  # noqa: E402
 
 WEIGHTS = {400: "Regular", 700: "Bold"}
+
+
+def strip_layout(paths: list[Path]) -> None:
+    """Remove GDEF/GSUB/GPOS from master files so varLib has nothing to merge."""
+    for path in paths:
+        font = TTFont(str(path))
+        for tag in ("GDEF", "GSUB", "GPOS"):
+            if tag in font:
+                del font[tag]
+        font.save(str(path))
 
 
 def designspace(light: Path, heavy: Path, target: Path) -> Path:
@@ -58,10 +69,23 @@ def designspace(light: Path, heavy: Path, target: Path) -> Path:
     return target
 
 
-def build_family(mode: str, sources: Path, outdir: Path, workdir: Path, latin_vf: Path, cjk_vf: Path) -> Path:
+def build_family(
+    mode: str,
+    sources: Path,
+    outdir: Path,
+    workdir: Path,
+    latin_vf: Path,
+    cjk_vf: Path,
+    masters_from: Path | None = None,
+) -> Path:
     slug, display = SLUGS[mode], DISPLAY[mode]
     masters: dict[int, Path] = {}
     for weight, style in WEIGHTS.items():
+        if masters_from is not None:
+            masters[weight] = masters_from / f"{slug}-{style}.ttf"
+            if not masters[weight].exists():
+                raise SystemExit(f"missing master {masters[weight]}")
+            continue
         masters[weight] = build(
             mode, style, sources, workdir / f"wght{weight}", REPO, cjk_vf=cjk_vf, latin_vf=latin_vf
         )
@@ -70,9 +94,35 @@ def build_family(mode: str, sources: Path, outdir: Path, workdir: Path, latin_vf
     heavy = TTFont(str(masters[700]))
     buckets = freeze(light, heavy)
     frozen = sum(buckets.values())
-    heavy.save(str(masters[700]))
 
-    merged = varLib.build(str(designspace(masters[400], masters[700], workdir / f"{slug}.designspace")), exclude=["BASE"])[0]
+    # Freeze into the work directory, never into the masters we were handed: --masters is an
+    # input, and silently rewriting the 700 master would make the next run report 0 frozen.
+    frozen_dir = workdir / f"{slug}-frozen"
+    frozen_dir.mkdir(parents=True, exist_ok=True)
+    light_path = frozen_dir / masters[400].name
+    heavy_path = frozen_dir / masters[700].name
+    light.save(str(light_path))
+    heavy.save(str(heavy_path))
+
+    ds = str(designspace(light_path, heavy_path, workdir / f"{slug}.designspace"))
+    try:
+        merged = varLib.build(ds, exclude=["BASE"])[0]
+    except VarLibError as error:
+        # Measured on the sans pair: a GPOS PairPos subtable lists its glyphs in a different order
+        # per master (InconsistentGlyphOrder) and varLib has no way to canonicalise it. varLib
+        # cannot skip OTL merging on request, so strip the layout tables from both master files,
+        # merge the outlines, then put the wght 400 tables back: kerning and anchors stay correct
+        # at every weight, they simply do not vary.
+        print(
+            f"[{slug}] layout merge refused ({type(error).__name__}): keeping the wght 400 "
+            "GPOS/GSUB tables for the whole axis",
+            flush=True,
+        )
+        strip_layout([light_path, heavy_path])
+        merged = varLib.build(ds, exclude=["BASE"])[0]
+        for tag in ("GDEF", "GSUB", "GPOS"):
+            if tag in light:
+                merged[tag] = light[tag]
     merged["name"].names = []
     prepare(merged, f"{display} VF", f"{slug}VF", release_version())
     write_base(merged)
@@ -100,11 +150,17 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=REPO / "fonts/vf")
     parser.add_argument("--only", choices=sorted(SLUGS), default=None)
     parser.add_argument("--keep-masters", type=Path, default=None, help="copy the two masters here")
+    parser.add_argument(
+        "--masters",
+        type=Path,
+        default=None,
+        help="reuse already-built <slug>-{Regular,Bold}.ttf instead of rebuilding them",
+    )
     args = parser.parse_args()
 
     cjk_vf = resolve_donor(None, args.sources, False)
     latin_vf = resolve_latin_donor("auto", args.sources, False)
-    if latin_vf is None:
+    if latin_vf is None and args.masters is None:
         raise SystemExit("no Latin donor resolved; pass --latin-vf or fetch Recursive_VF_1.085.ttf")
 
     modes = [args.only] if args.only else ["mono", "sans"]
@@ -113,7 +169,9 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="qublack-vf-") as temp:
         workdir = Path(temp)
         for mode in modes:
-            built.append(build_family(mode, args.sources, args.out, workdir, latin_vf, cjk_vf))
+            built.append(
+                build_family(mode, args.sources, args.out, workdir, latin_vf, cjk_vf, args.masters)
+            )
         if args.keep_masters:
             args.keep_masters.mkdir(parents=True, exist_ok=True)
             for mode in modes:
