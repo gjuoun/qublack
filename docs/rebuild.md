@@ -26,9 +26,12 @@ not copied from the donor, so grid metrics never depend on it.
 ## 2. Build the eight faces
 
 ```sh
-python3 tools/build_all.py --out fonts
-python3 tools/verify_family.py fonts/          # metrics against reference/baseline-v1.json
+python3 tools/build_all.py --out fonts        # ~230 s with the CJK donor
+python3 tools/verify_family.py fonts/          # metrics against reference/baseline-v2.json
+python3 tools/verify_family.py fonts/ --against reference/baseline-v1.json --grid-only
+python3 tools/cjk_weight.py --check fonts/     # CJK weight ratios + Regular/Bold interpolability
 python3 tools/name_audit.py --strict fonts/    # name table, OFL notice, cmap, 2:1 grid
+bun run site/scripts/font-probe.ts fonts/      # Chrome OTS load + canvas render, 8/8
 ```
 
 Each face is one `build_qublack.py` run (~10 s). The mono pipeline applies the upm-833 trick after
@@ -38,6 +41,13 @@ sans pipeline copies `0x2500–0x259F` from the Term skeleton, so box drawing st
 `verify_family.py` compares metrics, never hashes: a rebuild differs in glyph order and name
 records. `reference/shipped-v1.json` records the 2026-10-21 build that shipped as JunHei;
 `reference/DRIFT.md` explains the two mono italics whose Latin ink differs by ~5%.
+
+`baseline-v1.json` is the v1.0.4 build and stays the **grid** reference (`--grid-only`: upm,
+advances, line height, glyph count, codepoint count — none of which a re-weight may move).
+`baseline-v2.json` is the ink reference for the v1.1.0 VF-master build; re-record it with
+`verify_family.py fonts/ --record reference/baseline-v2.json` only when an ink delta is expected and
+reviewed. The weight and interpolability assertions, and the hanzi boundary the donor does not
+cover, are described in `reference/CJK.md`.
 
 ## 3. Cut the web fonts
 
