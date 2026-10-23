@@ -6,7 +6,7 @@ documents, web and UI. Both carry Source Han Sans hanzi (via Sarasa Gothic) and 
 Latin, so the whole family is redistributable under the SIL Open Font License 1.1.
 
 Site: **https://qublack.qqntt.com/** — specimen, measurements and downloads.
-Release: **[v1.0.4](https://github.com/gjuoun/qublack/releases/tag/v1.0.4)** · CI:
+Release: **[v1.0.4](https://github.com/gjuoun/qublack/releases/tag/v1.0.4)** · next: v1.1.0 (in review, not released) · CI:
 ![CI](https://github.com/gjuoun/qublack/actions/workflows/ci.yml/badge.svg)
 
 ## Family
@@ -21,6 +21,11 @@ Four styles each: Regular, Italic, Bold, BoldItalic.
 ## Download
 
 `v1.0.4` assets on the GitHub release page: eight TTFs plus `OFL.txt` and `README.txt`.
+- **v1.1.0 (unreleased)** — hanzi outlines now come from one weight-axis donor (Noto Sans SC VF,
+  instanced at `wght` 400/700) instead of the two static Sarasa weights, so Regular and Bold share
+  an interpolatable master design — the prerequisite for a variable font. Grid metrics, names and
+  coverage are unchanged; `reference/CJK.md` records the measurements, the 2,482-codepoint donor
+  boundary and the 0.0024 em worst-case ink delta.
 - **v1.0.4** — clean name tables (the zh-CN records now read 黢黑等宽 QuBlack Mono / 黢黑比例
   QuBlack Sans, no Sarasa version strings or empty records) and an OTS fix that lets Chrome load the
   TTFs directly.
@@ -42,8 +47,12 @@ No OTF: the outlines are `glyf`; a CFF conversion would only cost size and hinti
 
 ```sh
 bun install
-python3 tools/build_all.py      # eight faces into fonts/ from the Sarasa + Recursive sources
+python3 tools/fetch_cjk_vf.py   # pinned Noto Sans SC VF -> the sources dir (17.7 MB, SHA-256 checked)
+python3 tools/build_all.py      # eight faces into fonts/ from Sarasa + Recursive + the CJK donor
+bun run fonts:verify            # metrics against reference/baseline-v2.json
+bun run fonts:weight            # CJK weight ratios + Regular/Bold interpolability
 bun run fonts:audit             # name table, OFL notice, cmap, metrics
+bun run fonts:probe             # load every face in Chrome (OTS) and render it
 bun run fonts:web               # woff2 shards + unicode-range CSS for the site
 bun run check                   # lint, typecheck, tests, site build
 ```
@@ -63,6 +72,8 @@ QuBlack is a derivative work, and it also borrows ideas. With thanks:
   skeleton and CJK cells both families are built on (SIL OFL 1.1).
 - [Source Han Sans](https://github.com/adobe-fonts/source-han-sans) by Adobe and Google — the hanzi
   ink Sarasa carries (SIL OFL 1.1).
+- [Noto Sans SC](https://github.com/google/fonts/tree/main/ofl/notosanssc) — the variable instance
+  the hanzi outlines are taken from since v1.1.0, same Source Han Sans design (SIL OFL 1.1).
 - [Recursive](https://github.com/arrowtype/recursive) by ArrowType — every Latin outline, Mono and
   Sans (SIL OFL 1.1).
 
