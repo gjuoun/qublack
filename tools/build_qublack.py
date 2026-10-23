@@ -30,10 +30,14 @@ from fontTools.pens.transformPen import TransformPointPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 
+import cjk_masters
 from qublack_font import VERTICAL_TABLES, write_names
 
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCES = Path.home() / "code/gjuoun/lishu-mono/assets/work"
+# CJK outlines come from the variable donor so Regular and Bold share one master design. The
+# donor is looked up as <sources>/NotoSansSC-VF.ttf unless --cjk-vf points somewhere else.
+USE_CJK_DONOR = False
 SLUGS = {"mono": "QuBlackMono", "sans": "QuBlackSans"}
 DISPLAY = {"mono": "QuBlack Mono", "sans": "QuBlack Sans"}
 # Symbols that sit against hanzi: Recursive draws them at Latin cap height, which after the
@@ -231,6 +235,18 @@ def harmonize_symbols(font: TTFont, reference_path: Path) -> int:
     return moved
 
 
+def resolve_donor(value: str | None, sources: Path, disabled: bool) -> Path | None:
+    """Turn the --cjk-vf flag into a donor path (None = keep the skeleton CJK)."""
+    if disabled:
+        return None
+    donor = Path(value) if value and value != "auto" else cjk_masters.donor_for(sources)
+    if not (value or USE_CJK_DONOR):
+        return None
+    if not donor.exists():
+        raise SystemExit(f"missing CJK donor: {donor} (run python3 tools/fetch_cjk_vf.py)")
+    return donor
+
+
 def donor_paths(mode: str, style: str, sources: Path) -> tuple[Path, Path]:
     if mode == "mono":
         skeleton = sources / f"SarasaTermSC-{style}.ttf"
@@ -245,7 +261,7 @@ def donor_paths(mode: str, style: str, sources: Path) -> tuple[Path, Path]:
     return skeleton, latin
 
 
-def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path) -> Path:
+def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path, cjk_vf: Path | None = None) -> Path:
     skeleton_path, latin_path = donor_paths(mode, style, sources)
     for path in (skeleton_path, latin_path):
         if not path.exists():
@@ -260,6 +276,12 @@ def build(mode: str, style: str, sources: Path, outdir: Path, repo: Path) -> Pat
     slug, display = SLUGS[mode], DISPLAY[mode]
     print(f"[{slug}-{style}] latin swapped {swap_latin(skeleton, latin, mode)}", flush=True)
     print(f"[{slug}-{style}] emoji cmap entries removed {strip_emoji(skeleton, emoji_codepoints(repo))}", flush=True)
+
+    if cjk_vf is not None:
+        weight = cjk_masters.style_weight(style)
+        master = cjk_masters.instance(cjk_vf, weight)
+        installed = cjk_masters.install(skeleton, master, style)
+        print(f"[{slug}-{style}] cjk installed {installed} (wght {weight})", flush=True)
 
     if mode == "sans":
         term = TTFont(str(sources / f"SarasaTermSC-{style}.ttf"))
@@ -291,8 +313,18 @@ def main() -> int:
     parser.add_argument("--style", choices=["Regular", "Italic", "Bold", "BoldItalic"], required=True)
     parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES)
     parser.add_argument("--out", type=Path, default=REPO / "fonts")
+    parser.add_argument(
+        "--cjk-vf",
+        nargs="?",
+        const="auto",
+        default=None,
+        metavar="PATH",
+        help="install CJK outlines from this variable donor (no value = <sources>/NotoSansSC-VF.ttf)",
+    )
+    parser.add_argument("--no-cjk-vf", action="store_true", help="keep the skeleton CJK outlines")
     args = parser.parse_args()
-    build(args.mode, args.style, args.sources, args.out, REPO)
+    donor = resolve_donor(args.cjk_vf, args.sources, args.no_cjk_vf)
+    build(args.mode, args.style, args.sources, args.out, REPO, cjk_vf=donor)
     return 0
 
 

@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from build_qublack import DEFAULT_SOURCES, build  # noqa: E402
+from build_qublack import DEFAULT_SOURCES, build, resolve_donor  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 STYLES = ["Regular", "Bold", "Italic", "BoldItalic"]
@@ -21,14 +21,24 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=REPO / "fonts")
     parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES)
     parser.add_argument("--only", choices=["mono", "sans"], default=None)
+    parser.add_argument(
+        "--cjk-vf",
+        nargs="?",
+        const="auto",
+        default=None,
+        metavar="PATH",
+        help="install CJK outlines from this variable donor (no value = <sources>/NotoSansSC-VF.ttf)",
+    )
+    parser.add_argument("--no-cjk-vf", action="store_true", help="keep the skeleton CJK outlines")
     args = parser.parse_args()
+    donor = resolve_donor(args.cjk_vf, args.sources, args.no_cjk_vf)
 
     modes = [args.only] if args.only else ["mono", "sans"]
     started = time.time()
     built: list[Path] = []
     for mode in modes:
         for style in STYLES:
-            built.append(build(mode, style, args.sources, args.out, REPO))
+            built.append(build(mode, style, args.sources, args.out, REPO, cjk_vf=donor))
     print(f"built {len(built)} faces in {time.time() - started:.0f}s -> {args.out}")
     return 0
 
