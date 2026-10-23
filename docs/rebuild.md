@@ -26,6 +26,9 @@ not copied from the donor, so grid metrics never depend on it.
 
 ## 2. Build the eight faces
 
+Font binaries are never committed: `fonts/` is fully git-ignored, so a fresh clone must run the
+build before any font gate. The release zip is the only distribution channel.
+
 ```sh
 bash sources/build.sh                        # ~8 min: pinned sources/ -> fonts/ttf/
 python3 tools/verify_family.py fonts/ttf/          # metrics against reference/baseline-v2.json
@@ -67,10 +70,24 @@ records. `reference/shipped-v1.json` records the 2026-10-21 build that shipped a
 
 `baseline-v1.json` is the v1.0.4 build and stays the **grid** reference (`--grid-only`: upm,
 advances, line height, glyph count, codepoint count — none of which a re-weight may move).
-`baseline-v2.json` is the ink reference for the v1.1.0 VF-master build; re-record it with
-`verify_family.py fonts/ttf/ --record reference/baseline-v2.json` only when an ink delta is expected and
+`baseline-v2.json` is the ink reference for the v1.1.0 VF-master build and
+`baseline-v3.json` for v1.2.0 (identical ink: the statics keep the same donors). Re-record one with
+`verify_family.py fonts/ttf/ --record reference/baseline-v3.json` only when an ink delta is expected and
 reviewed. The weight and interpolability assertions, and the hanzi boundary the donor does not
 cover, are described in `reference/CJK.md`.
+
+## 2c. Build the variable faces
+
+```sh
+bun run fonts:vf                            # ~4 min: two masters per family, then the merge
+python3 tools/vf_audit.py --check fonts/vf  # fvar/STAT/axis/glyph surface
+bash ../../scripts/vf-gate.sh "$PWD"        # axis ends: grid, 44-symbol census, at.alt
+bun run site/scripts/font-probe.ts fonts/vf --vf
+```
+
+Output is `fonts/vf/QuBlackMono[wght].ttf` and `QuBlackSans[wght].ttf` (about 22 MB each), also
+git-ignored. `reference/VF.md` explains the two-master model, the frozen glyphs that cannot
+interpolate, the BASE exclusion and the sans layout fallback.
 
 ## 3. Cut the web fonts
 
