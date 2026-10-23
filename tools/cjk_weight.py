@@ -6,7 +6,9 @@ Two things are measured, both from outlines only (no rasteriser, no new dependen
   weight  — the CJK horizontal stroke (`一` ink height), the CJK vertical stem (`丨` ink width),
             the Latin stem (`|` ink width) and the ratio between the last two. `一` and `丨` are
             plain bars, so their ink box *is* the stroke; `十` is not used because its ink box is
-            the width of the crossbar.
+            the width of the crossbar. The `cjk_area` column counts overlapping contours twice, so
+            it is only comparable between faces drawn in the same contour style (Sarasa flattens its
+            overlaps, the variable donor does not).
   masters — the contour/point signature (numberOfContours, points) of a deterministic 500-glyph
             URO/ExtA sample, compared between the Regular and Bold face of the same family. Two
             masters can only be interpolated when those signatures agree; a mismatch means the
