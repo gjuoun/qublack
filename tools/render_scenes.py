@@ -20,7 +20,9 @@ from PIL import Image, ImageDraw, ImageFont
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 REPO = Path(__file__).resolve().parent.parent
-DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work"
+from build_qublack import DEFAULT_SOURCES  # noqa: E402
+
+DONORS = DEFAULT_SOURCES
 BG = (37, 41, 37)
 FG = (217, 217, 212)
 DIM = (140, 140, 136)

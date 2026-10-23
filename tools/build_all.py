@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from build_qublack import DEFAULT_SOURCES, build, resolve_donor  # noqa: E402
+from build_qublack import DEFAULT_SOURCES, build, resolve_donor, resolve_latin_donor  # noqa: E402
 from gf_tables import align_family_win_metrics  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
@@ -31,8 +31,18 @@ def main() -> int:
         help="install CJK outlines from this variable donor (no value = <sources>/NotoSansSC-VF.ttf)",
     )
     parser.add_argument("--no-cjk-vf", action="store_true", help="keep the skeleton CJK outlines")
+    parser.add_argument(
+        "--latin-vf",
+        nargs="?",
+        const="auto",
+        default=None,
+        metavar="PATH",
+        help="instance the Latin donor from this VF (no value = <sources>/Recursive_VF_1.085.ttf)",
+    )
+    parser.add_argument("--no-latin-vf", action="store_true", help="keep the Recursive static donors")
     args = parser.parse_args()
     donor = resolve_donor(args.cjk_vf, args.sources, args.no_cjk_vf)
+    latin = resolve_latin_donor(args.latin_vf, args.sources, args.no_latin_vf)
 
     modes = [args.only] if args.only else ["mono", "sans"]
     started = time.time()
@@ -40,7 +50,7 @@ def main() -> int:
     for mode in modes:
         family = []
         for style in STYLES:
-            family.append(build(mode, style, args.sources, args.out, REPO, cjk_vf=donor))
+            family.append(build(mode, style, args.sources, args.out, REPO, cjk_vf=donor, latin_vf=latin))
         bottom, top = align_family_win_metrics(family)
         print(f"[{mode}] family win box {bottom}..{top} written to 4 faces", flush=True)
         built.extend(family)

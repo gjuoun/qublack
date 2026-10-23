@@ -1,4 +1,4 @@
-export const VERSION = "1.1.0";
+export const VERSION = "1.2.0";
 export const RELEASE_TAG = `v${VERSION}`;
 export const REPO = "https://github.com/gjuoun/qublack";
 export const RELEASE_URL = `${REPO}/releases/tag/${RELEASE_TAG}`;

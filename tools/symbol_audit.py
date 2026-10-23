@@ -22,7 +22,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from symbol_targets import CENSUS, FIXED_SYMBOLS, QUOTE_BLEND, SYMBOL_BLEND, boxes, target  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-DEFAULT_DONORS = Path.home() / "code/gjuoun/lishu-mono/assets/work"
+from build_qublack import DEFAULT_SOURCES  # noqa: E402
+
+DEFAULT_DONORS = DEFAULT_SOURCES
 STYLES = ["Regular", "Italic", "Bold", "BoldItalic"]
 TOLERANCE = 0.02
 UNTOUCHED_TOLERANCE = 0.06
@@ -52,7 +54,7 @@ def ratios(font: TTFont, char: str) -> tuple[float, float] | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fonts", type=Path, default=REPO / "fonts")
+    parser.add_argument("--fonts", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument("--donors", type=Path, default=DEFAULT_DONORS)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--style", default=None)
