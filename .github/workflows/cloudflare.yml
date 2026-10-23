@@ -53,7 +53,7 @@ jobs:
           ls fonts/ttf/*.ttf | wc -l
 
       - name: Cut the web fonts
-        run: bun run fonts:web
+        run: python3 tools/web_fonts.py --fonts fonts/ttf --out site/public/fonts --css site/src/styles/qublack-fonts.css
 
       - run: bun run site:build
 
