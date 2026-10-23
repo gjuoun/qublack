@@ -4,8 +4,8 @@ v1.2.0 adds two weight-axis variable fonts to the eight static faces. They are *
 committed files**: `fonts/` is fully git-ignored, the binaries are produced locally by
 `bun run fonts:vf`, and they ship inside the release zip only.
 
-| family | file | name ID 1 | PostScript | glyphs | size |
-|---|---|---|---|---|---|
+| family          | file                             | name ID 1       | PostScript              | glyphs | size         |
+| --------------- | -------------------------------- | --------------- | ----------------------- | ------ | ------------ |
 | QuBlack Mono VF | `fonts/vf/QuBlackMono[wght].ttf` | QuBlack Mono VF | `QuBlackMonoVF-Regular` | 57,129 | 22,573,948 B |
 | QuBlack Sans VF | `fonts/vf/QuBlackSans[wght].ttf` | QuBlack Sans VF | `QuBlackSansVF-Regular` | 53,716 | 22,166,280 B |
 
@@ -18,10 +18,10 @@ manager. The file name keeps the Google Fonts convention.
 Two masters per family, both built by the normal pipeline (`build_qublack.build`), so the VF and
 the statics cannot drift:
 
-| layer | wght 400 | wght 700 |
-|---|---|---|
-| CJK | `NotoSansSC-VF.ttf` instanced at 400 | same donor at 700 |
-| Latin | `Recursive_VF_1.085.ttf` at `MONO` 1 (mono) / 0 (sans), `CASL` 0, `CRSV` 0, `slnt` 0 | same at 700 |
+| layer | wght 400                                                                             | wght 700          |
+| ----- | ------------------------------------------------------------------------------------ | ----------------- |
+| CJK   | `NotoSansSC-VF.ttf` instanced at 400                                                 | same donor at 700 |
+| Latin | `Recursive_VF_1.085.ttf` at `MONO` 1 (mono) / 0 (sans), `CASL` 0, `CRSV` 0, `slnt` 0 | same at 700       |
 
 **The static faces do not use the instanced donor.** Measured: at wght 400 the instance's `l` is
 4 units narrower than the static `l` (68..532 vs 72..534) and carries the overlap contours the
@@ -39,13 +39,13 @@ Sarasa's independently drawn Regular/Bold cannot, so the 700 master takes the 40
 `gvar` stores no delta: the glyph keeps its cell and coverage but does not embolden inside the
 variable file. The static Bold faces are unaffected.
 
-| block | mono | sans | | block | mono | sans |
-|---|---|---|---|---|---|---|
-| Hangul | 8,513 | 8,513 | | fullwidth | 108 | 108 |
-| other (symbol donors) | 2,246 | 2,670 | | math | 78 | 68 |
-| CJK not in Noto Sans SC | 2,329 | 2,329 | | latin-ext-b | 69 | 192 |
-| *unencoded (never rendered)* | *2,066* | *1,808* | | misc/cyrillic/ipa/tech/greek/arrows/geometric | ~270 | ~530 |
-| kana | 183 | 183 | | latin-1 / latin-ext-a | 37 | 191 |
+| block                        | mono    | sans    |     | block                                         | mono | sans |
+| ---------------------------- | ------- | ------- | --- | --------------------------------------------- | ---- | ---- |
+| Hangul                       | 8,513   | 8,513   |     | fullwidth                                     | 108  | 108  |
+| other (symbol donors)        | 2,246   | 2,670   |     | math                                          | 78   | 68   |
+| CJK not in Noto Sans SC      | 2,329   | 2,329   |     | latin-ext-b                                   | 69   | 192  |
+| _unencoded (never rendered)_ | _2,066_ | _1,808_ |     | misc/cyrillic/ipa/tech/greek/arrows/geometric | ~270 | ~530 |
+| kana                         | 183     | 183     |     | latin-1 / latin-ext-a                         | 37   | 191  |
 
 Totals: **15,940 of 51,138 mono codepoints** (13,874 reachable) and **16,515** (14,707 reachable).
 The count grew from the first estimate (13,459) because the audit compares on/off-curve bits, not
