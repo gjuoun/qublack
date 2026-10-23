@@ -37,7 +37,12 @@ stage_family() {
   slug=qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')
   stage="$out/stage/ofl/$slug"
   mkdir -p "$stage"
-  cp "$fonts"/QuBlack$family-*.ttf "$stage"/
+  # Statics (v1.x) and the variable faces (QuBlackMono[wght].ttf) share the same gate.
+  shopt -s nullglob
+  for face in "$fonts"/QuBlack$family-*.ttf "$fonts/QuBlack$family[wght].ttf"; do
+    cp "$face" "$stage"/
+  done
+  shopt -u nullglob
   for extra in OFL.txt METADATA.pb DESCRIPTION.en_us.html; do
     if [ -f "$repo/google-fonts/ofl/$slug/$extra" ]; then
       cp "$repo/google-fonts/ofl/$slug/$extra" "$stage"/
@@ -48,7 +53,13 @@ stage_family() {
 # fontspector first — it is the profile GF's CI runs and it finishes in ~30 s.
 for family in Mono Sans; do
   stage_family "$family"
-  files=("$out/stage/ofl/qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')"/QuBlack$family-*.ttf)
+  files=()
+  shopt -s nullglob
+  for face in "$out/stage/ofl/qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')"/QuBlack$family-*.ttf \
+              "$out/stage/ofl/qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')/QuBlack$family[wght].ttf"; do
+    files+=("$face")
+  done
+  shopt -u nullglob
   "$fontspector" -p googlefonts --skip-network --ghmarkdown "$out/fontspector-$family.md" --json "$out/fontspector-$family.json" \
     ${skip[@]+"${skip[@]}"} "${files[@]}" > "$out/fontspector-$family.log" 2>&1 || status=1
   fs_fail=$(grep -oE 'FAIL: [0-9]+' "$out/fontspector-$family.log" | tail -1 | grep -oE '[0-9]+')
@@ -59,7 +70,13 @@ done
 
 # fontbakery is minutes on 57k-glyph faces; --skip-network keeps it from hanging.
 for family in Mono Sans; do
-  files=("$out/stage/ofl/qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')"/QuBlack$family-*.ttf)
+  files=()
+  shopt -s nullglob
+  for face in "$out/stage/ofl/qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')"/QuBlack$family-*.ttf \
+              "$out/stage/ofl/qublack$(printf %s "$family" | tr '[:upper:]' '[:lower:]')/QuBlack$family[wght].ttf"; do
+    files+=("$face")
+  done
+  shopt -u nullglob
   "$venv/bin/fontbakery" check-googlefonts --skip-network \
     ${skip[@]+"${skip[@]}"} "${files[@]}" > "$out/fontbakery-$family.log" 2>&1 || status=1
   fb_fail=$(grep -c -E '^    Result: (FAIL|FATAL)' "$out/fontbakery-$family.log" || true)

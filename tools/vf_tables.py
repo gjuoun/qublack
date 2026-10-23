@@ -23,8 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from qublack_font import COPYRIGHT, DERIVATION, LICENSE, REPO, ZH_PREFIX  # noqa: E402
 
+# Google Fonts expects the standard weight ladder on a 400-700 axis, with PostScript names on
+# every instance and Regular linked to the bold end.
+INSTANCES = {400: "Regular", 500: "Medium", 600: "SemiBold", 700: "Bold"}
 WEIGHTS = {400: "Regular", 700: "Bold"}
-INSTANCE_NAME_IDS = {400: 260, 700: 261}
 
 
 def release_version() -> str:
@@ -40,7 +42,7 @@ def prepare(font, display: str, slug: str, version: str, default_weight: int = 4
     """Write the whole name surface plus fvar and STAT. Returns the axis summary."""
     style = WEIGHTS[default_weight]
     postscript = f"{slug}-{style}"
-    zh_family = f"{ZH_PREFIX[display.removesuffix(' VF')]} {display}"
+    zh_family = f"{ZH_PREFIX[display]} {display}"
 
     font["name"].names = []  # nothing from the donors survives
     common = [
@@ -77,9 +79,8 @@ def prepare(font, display: str, slug: str, version: str, default_weight: int = 4
     font["OS/2"].usWeightClass = default_weight
     font["OS/2"].fsSelection = (font["OS/2"].fsSelection & ~0b100000) | 0b1000000  # REGULAR, not BOLD
 
-    # fvar: one weight axis, two named instances. Names reuse id 2 for the default style and a
-    # fresh id for Bold so the instances read "Regular" / "Bold" in every picker.
-    _add(font, INSTANCE_NAME_IDS[700], "Bold")
+    # fvar: one weight axis and the four instances GF's profile requires, each with the style name
+    # and a PostScript name (0xFFFF is rejected by fvar_instance_ps_names).
     fvar = newTable("fvar")
     axis = Axis()
     axis.axisTag = "wght"
@@ -90,11 +91,11 @@ def prepare(font, display: str, slug: str, version: str, default_weight: int = 4
     axis.axisNameID = font["name"].addName("Weight")
     fvar.axes = [axis]
     fvar.instances = []
-    for weight, style_name in WEIGHTS.items():
+    for weight, style_name in INSTANCES.items():
         instance = NamedInstance()
         instance.coordinates = {"wght": float(weight)}
-        instance.subfamilyNameID = 2 if weight == default_weight else INSTANCE_NAME_IDS[700]
-        instance.postscriptNameID = 0xFFFF
+        instance.subfamilyNameID = font["name"].addName(style_name)
+        instance.postscriptNameID = font["name"].addName(f"{slug}-{style_name}")
         instance.flags = 0
         fvar.instances.append(instance)
     fvar.axisCount = 1
@@ -110,8 +111,10 @@ def prepare(font, display: str, slug: str, version: str, default_weight: int = 4
                 "name": "Weight",
                 "ordering": 0,
                 "values": [
-                    {"value": 400, "name": "Regular", "flags": 0x2, "nominalValue": 400},
-                    {"value": 700, "name": "Bold", "flags": 0x0, "nominalValue": 700, "linkedValue": 400},
+                    {"value": 400, "name": "Regular", "flags": 0x2, "nominalValue": 400, "linkedValue": 700},
+                    {"value": 500, "name": "Medium", "flags": 0x0, "nominalValue": 500},
+                    {"value": 600, "name": "SemiBold", "flags": 0x0, "nominalValue": 600},
+                    {"value": 700, "name": "Bold", "flags": 0x0, "nominalValue": 700},
                 ],
             }
         ],
