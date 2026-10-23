@@ -5,6 +5,7 @@ The build and verification toolchain behind the QuBlack release. Python 3.9+ wit
 
 | Script             | What it does                                                                                              |
 | ------------------ | --------------------------------------------------------------------------------------------------------- |
+| `fetch_cjk_vf.py`  | download the pinned CJK variable donor (`NotoSansSC-VF.ttf`) into `--sources`, verify size + SHA-256      |
 | `build_qublack.py` | build one face: `--mode mono\|sans --style …` (Latin swap, emoji strip, names, then the mode's post step) |
 | `build_all.py`     | build all eight faces into `fonts/` (`python3 tools/build_all.py`)                                        |
 | `verify_family.py` | compare a build against `reference/baseline-v1.json` (metrics, never hashes)                              |
@@ -18,12 +19,18 @@ The build and verification toolchain behind the QuBlack release. Python 3.9+ wit
 
 `qublack_font.py` holds the shared loading/measuring/naming helpers.
 
-Inputs are the upstream OFL sources (Sarasa Gothic / Sarasa Term 1.0.42 and Recursive 1.085
-Linear statics). `--sources` defaults to `~/code/gjuoun/lishu-mono/assets/work`; pass
+Inputs are the upstream OFL sources (Sarasa Gothic / Sarasa Term 1.0.42, Recursive 1.085
+Linear statics, and Noto Sans SC VF as the hanzi weight axis). `--sources` defaults to `~/code/gjuoun/lishu-mono/assets/work`; pass
 `--sources <dir>` to point at your own copy. The layout it expects:
 
 ```
 <SarasaTermSC|SarasaGothicSC>-{Regular,Italic,Bold,BoldItalic}.ttf
+NotoSansSC-VF.ttf                       # python3 tools/fetch_cjk_vf.py runs this one in
 rec_mono/RecursiveMonoLnrSt-{…}.ttf
 ArrowType-Recursive-1.085/Recursive_Desktop/separate_statics/TTF/RecursiveSansLnrSt-{…}.ttf
 ```
+
+Every face takes its hanzi outlines from `NotoSansSC-VF.ttf`, instanced at `wght` 400 for
+Regular/Italic and 700 for Bold/BoldItalic, so the two weights share a point structure and can be
+interpolated later. Glyphs the VF does not carry keep the Sarasa outline. Advances are never
+touched, so the 2:1 grid and the upm-833 move are independent of the donor.
