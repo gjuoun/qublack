@@ -1,5 +1,6 @@
 name: "QuBlack Sans"
 designer: "Jun Guo"
+license: "OFL"
 category: "SANS_SERIF"
 date_added: "2026-10-23"
 fonts {
@@ -57,3 +58,6 @@ subsets: "symbols"
 subsets: "symbols2"
 subsets: "vietnamese"
 primary_script: "Hani"
+source {
+  repository_url: "https://github.com/gjuoun/qublack"
+}
