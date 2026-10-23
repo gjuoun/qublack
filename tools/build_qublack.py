@@ -37,7 +37,7 @@ REPO = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCES = Path.home() / "code/gjuoun/lishu-mono/assets/work"
 # CJK outlines come from the variable donor so Regular and Bold share one master design. The
 # donor is looked up as <sources>/NotoSansSC-VF.ttf unless --cjk-vf points somewhere else.
-USE_CJK_DONOR = False
+USE_CJK_DONOR = True
 SLUGS = {"mono": "QuBlackMono", "sans": "QuBlackSans"}
 DISPLAY = {"mono": "QuBlack Mono", "sans": "QuBlack Sans"}
 # Symbols that sit against hanzi: Recursive draws them at Latin cap height, which after the
