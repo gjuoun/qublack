@@ -1,0 +1,10 @@
+# This is the list of people who have contributed to this project, and includes those not
+# listed in AUTHORS.txt because they are not copyright authors.
+#
+# When adding a contributor's name to this file, either their name or their organization's
+# name should be added to AUTHORS.txt.
+#
+# Names should be added to this file as:
+# Name <email address>
+
+Jun Guo (https://github.com/gjuoun) — design, build pipeline, release

@@ -26,17 +26,39 @@ not copied from the donor, so grid metrics never depend on it.
 ## 2. Build the eight faces
 
 ```sh
-python3 tools/build_all.py --out fonts        # ~230 s with the CJK donor
-python3 tools/verify_family.py fonts/          # metrics against reference/baseline-v2.json
-python3 tools/verify_family.py fonts/ --against reference/baseline-v1.json --grid-only
-python3 tools/cjk_weight.py --check fonts/     # CJK weight ratios + Regular/Bold interpolability
-python3 tools/name_audit.py --strict fonts/    # name table, OFL notice, cmap, 2:1 grid
-bun run site/scripts/font-probe.ts fonts/      # Chrome OTS load + canvas render, 8/8
+bash sources/build.sh                        # ~8 min: pinned sources/ -> fonts/ttf/
+python3 tools/verify_family.py fonts/ttf/          # metrics against reference/baseline-v2.json
+python3 tools/verify_family.py fonts/ttf/ --against reference/baseline-v1.json --grid-only
+python3 tools/cjk_weight.py --check fonts/ttf/     # CJK weight ratios + Regular/Bold interpolability
+python3 tools/name_audit.py --strict fonts/ttf/    # name table, OFL notice, cmap, 2:1 grid
+bun run site/scripts/font-probe.ts fonts/ttf/      # Chrome OTS load + canvas render, 8/8
 ```
 
-Each face is one `build_qublack.py` run (~10 s). The mono pipeline applies the upm-833 trick after
-the Latin swap, so `汉` = 1.200em and ASCII = 0.600em with the glyph coordinates untouched. The
-sans pipeline copies `0x2500–0x259F` from the Term skeleton, so box drawing stays half-width.
+Each face is one `build_qublack.py` run. The mono pipeline applies the upm-833 trick after the
+Latin swap, so `汉` = 1.200em and ASCII = 0.600em with the glyph coordinates untouched. The sans
+pipeline copies `0x2500–0x259F` from the Term skeleton, so box drawing stays half-width, and
+takes Term's full repertoire (Sarasa Gothic is ~4,900 codepoints narrower, mostly combining
+marks). Both families then get the Google Fonts CJK surface: BASE, vmtx/vhea, win metrics that
+agree across the family, GDEF mark classes and one appended MarkBasePos lookup for the marks the
+donors left unattached.
+
+## 2b. Google Fonts gate
+
+```sh
+bash tools/gf_setup.sh        # .venv-gf (gftools 0.10.4, fontbakery 1.1.0) + fontspector 1.9.0
+GF_ALLOW="file_size family_name_compliance cjk_vertical_metrics" \
+  bash tools/gf_gate.sh . fonts/ttf
+```
+
+The gate stages each family in an `ofl/<dirname>/` layout and runs fontspector's googlefonts
+profile (the one Google Fonts' CI uses) plus fontbakery's `check-googlefonts`. Three checks are
+waived, each with a reason that goes into the submission:
+- `file_size` — CJK families exceed the 9 MB limit; Noto Sans SC is 17.7 MB in google/fonts.
+- `family_name_compliance` — "QuBlack" is CamelCase; the submission requests an exception rather
+  than renaming the family.
+- `cjk_vertical_metrics` — GF wants a 1.15 em line box; QuBlack's 1.25 em line height is a design
+  decision. Everything else in that check (BASE, win metrics, hhea/typo agreement, vmtx/vhea) is
+  satisfied, so the waiver covers the two typo ascender/descender comparisons only.
 
 `verify_family.py` compares metrics, never hashes: a rebuild differs in glyph order and name
 records. `reference/shipped-v1.json` records the 2026-10-21 build that shipped as JunHei;
@@ -45,7 +67,7 @@ records. `reference/shipped-v1.json` records the 2026-10-21 build that shipped a
 `baseline-v1.json` is the v1.0.4 build and stays the **grid** reference (`--grid-only`: upm,
 advances, line height, glyph count, codepoint count — none of which a re-weight may move).
 `baseline-v2.json` is the ink reference for the v1.1.0 VF-master build; re-record it with
-`verify_family.py fonts/ --record reference/baseline-v2.json` only when an ink delta is expected and
+`verify_family.py fonts/ttf/ --record reference/baseline-v2.json` only when an ink delta is expected and
 reviewed. The weight and interpolability assertions, and the hanzi boundary the donor does not
 cover, are described in `reference/CJK.md`.
 
@@ -62,7 +84,7 @@ follows the GB2312 level-1 order and then codepoint order. `head.modified`/`crea
 the output is byte-reproducible.
 
 The shards are **not committed**. Cloudflare Pages downloads the release zip, cuts them, and
-deploys the result; locally the same command writes into the git-ignored `site/public/fonts/`.
+deploys the result; locally the same command writes into the git-ignored `site/public/fonts/ttf/`.
 
 ## 4. Package the release
 

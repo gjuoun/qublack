@@ -5,8 +5,11 @@ hanzi = two ASCII cells, measured at 2.000), **QuBlack Sans** is its proportiona
 documents, web and UI. Both carry Source Han Sans hanzi (via Sarasa Gothic) and Recursive Linear
 Latin, so the whole family is redistributable under the SIL Open Font License 1.1.
 
+![QuBlack specimen](documentation/specimen.png)
+
 Site: **https://qublack.qqntt.com/** — specimen, measurements and downloads.
-Release: **[v1.0.4](https://github.com/gjuoun/qublack/releases/tag/v1.0.4)** · next: v1.1.0 (in review, not released) · CI:
+Release: **[v1.1.0](https://github.com/gjuoun/qublack/releases/tag/v1.1.0)** · Google Fonts
+submission in progress (see `google-fonts/`) · CI:
 ![CI](https://github.com/gjuoun/qublack/actions/workflows/ci.yml/badge.svg)
 
 ## Family
@@ -16,11 +19,11 @@ Release: **[v1.0.4](https://github.com/gjuoun/qublack/releases/tag/v1.0.4)** · 
 | QuBlack Mono | terminal, code     | 833  | 1.200em | 0.600em |
 | QuBlack Sans | documents, web, UI | 1000 | 1.000em | 0.600em |
 
-Four styles each: Regular, Italic, Bold, BoldItalic.
+Four styles each: Regular, Italic, Bold, Bold Italic.
 
 ## Download
 
-`v1.0.4` assets on the GitHub release page: eight TTFs plus `OFL.txt` and `README.txt`.
+`v1.1.0` assets on the GitHub release page, and the same eight TTFs in `fonts/ttf/`.
 - **v1.1.0 (unreleased)** — hanzi outlines now come from one weight-axis donor (Noto Sans SC VF,
   instanced at `wght` 400/700) instead of the two static Sarasa weights, so Regular and Bold share
   an interpolatable master design — the prerequisite for a variable font. Grid metrics, names and
@@ -47,8 +50,8 @@ No OTF: the outlines are `glyf`; a CFF conversion would only cost size and hinti
 
 ```sh
 bun install
-python3 tools/fetch_cjk_vf.py   # pinned Noto Sans SC VF -> the sources dir (17.7 MB, SHA-256 checked)
-python3 tools/build_all.py      # eight faces into fonts/ from Sarasa + Recursive + the CJK donor
+python3 -m pip install -r tools/requirements.txt
+bash sources/build.sh           # eight faces into fonts/ttf/ from the pinned sources/ tree
 bun run fonts:verify            # metrics against reference/baseline-v2.json
 bun run fonts:weight            # CJK weight ratios + Regular/Bold interpolability
 bun run fonts:audit             # name table, OFL notice, cmap, metrics
@@ -59,7 +62,7 @@ bun run check                   # lint, typecheck, tests, site build
 
 ## Licence
 
-- Fonts and font derivatives: **SIL Open Font License 1.1** (see `LICENSE`).
+- Fonts and font derivatives: **SIL Open Font License 1.1** (see `OFL.txt`).
 - Site and tooling code: **MIT** (see `LICENSE-MIT`).
 - Provenance and upstream licences: `NOTICE.md`.
 

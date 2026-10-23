@@ -19,16 +19,16 @@
     "site:preview": "bun run --cwd site preview",
     "site:typecheck": "bun run --cwd site typecheck",
     "fonts:build": "python3 tools/build_all.py",
-    "fonts:probe": "bun run site/scripts/font-probe.ts fonts/",
-    "fonts:weight": "python3 tools/cjk_weight.py --check fonts/",
-    "fonts:verify": "python3 tools/verify_family.py fonts/ --against reference/baseline-v2.json",
-    "fonts:audit": "python3 tools/name_audit.py --strict fonts/",
+    "fonts:probe": "bun run site/scripts/font-probe.ts fonts/ttf/",
+    "fonts:weight": "python3 tools/cjk_weight.py --check fonts/ttf/",
+    "fonts:verify": "python3 tools/verify_family.py fonts/ttf/ --against reference/baseline-v2.json",
+    "fonts:audit": "python3 tools/name_audit.py --strict fonts/ttf/",
     "fonts:web": "python3 tools/web_fonts.py --out site/public/fonts --css site/src/styles/qublack-fonts.css",
     "fonts:web:check": "python3 tools/web_fonts.py --check --out site/public/fonts --css site/src/styles/qublack-fonts.css",
     "fonts:release": "python3 tools/pack_release.py --tag v1.1.0",
     "fonts:symbols": "python3 tools/symbol_audit.py --check",
     "fonts:at": "python3 tools/check_at.py",
-    "metrics": "python3 tools/metrics_json.py --out site/src/data/metrics.generated.json fonts/"
+    "metrics": "python3 tools/metrics_json.py --out site/src/data/metrics.generated.json fonts/ttf/"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",

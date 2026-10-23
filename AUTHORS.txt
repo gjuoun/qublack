@@ -1,0 +1,12 @@
+# This is the official list of project authors for copyright purposes. The first name in the
+# list (if there are several authors) appears as "Principal design" in the About section of the
+# font specimen on Google Fonts.
+# This file is distinct from the CONTRIBUTORS.txt file. See the latter for an explanation.
+#
+# Names should be added to this file as:
+# Name or Organization <email address>
+
+Jun Guo (https://github.com/gjuoun)
+Chen Qi and the Sarasa Gothic contributors (https://github.com/be5invis/Sarasa-Gothic)
+ArrowType (https://github.com/arrowtype/recursive)
+Google LLC and Adobe (Source Han Sans / Noto Sans SC, https://github.com/notofonts/noto-cjk)

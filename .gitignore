@@ -3,9 +3,14 @@ dist/
 site/dist/
 site/.astro/
 site/public/fonts/
-fonts/
+# Built binaries live in fonts/ttf/ because Google Fonts requires them in the repo;
+# everything else the build writes stays ignored.
+fonts/*
+!fonts/ttf/
 out/
 __pycache__/
 *.pyc
 .DS_Store
 .tmp/
+.venv-gf/
+.tools/
