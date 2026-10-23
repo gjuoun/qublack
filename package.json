@@ -19,6 +19,7 @@
     "site:preview": "bun run --cwd site preview",
     "site:typecheck": "bun run --cwd site typecheck",
     "fonts:build": "python3 tools/build_all.py",
+    "fonts:vf": "python3 tools/build_vf.py --sources sources/upstream --out fonts/vf",
     "fonts:probe": "bun run site/scripts/font-probe.ts fonts/ttf/",
     "fonts:weight": "python3 tools/cjk_weight.py --check fonts/ttf/",
     "fonts:verify": "python3 tools/verify_family.py fonts/ttf/ --against reference/baseline-v2.json",
