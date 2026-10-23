@@ -162,8 +162,8 @@ Math.max(...heroCopy.ctaHeights) - Math.min(...heroCopy.ctaHeights) <= 2
   ? pass(`copy: the CTA row shares one height (${heroCopy.ctaHeights.join("/")}px)`)
   : fail(`copy: CTA heights ${JSON.stringify(heroCopy.ctaHeights)}`);
 
-counts.download.some((href) => href?.includes("/releases/tag/v1.0.4"))
-  ? pass("download: links the v1.0.4 release")
+counts.download.some((href) => href?.includes("/releases/tag/v1.1.0"))
+  ? pass("download: links the v1.1.0 release")
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
 // The hero's copy-CSS pill is gone: the How-to section below the fold owns the instructions.
@@ -384,9 +384,9 @@ const alignment = await page.evaluate(() => {
   const metrics = document.querySelector("[data-control-metrics]")!;
   const chips = [...document.querySelectorAll("#specimen [data-control]")];
   const labels = [...document.querySelectorAll("[data-testid=lookalike-label]")];
-  const ctas = [
-    ...document.querySelector('#specimen a[href="#download"]')!.parentElement!.children,
-  ];
+  // The hero CTA row: Download the release + How to use (v1.0.4 replaced the old #download
+  // button, so the audit anchors on the row itself rather than on one button's href).
+  const ctas = [...document.querySelector("[data-cta-row]")!.children];
   const sameRow = ctas.filter((cta) => Math.abs(box(cta).top - box(ctas[0]!).top) < 1);
   return {
     headerDelta: Math.abs(cy(header.children[0]!) - cy(header.children[1]!)),
