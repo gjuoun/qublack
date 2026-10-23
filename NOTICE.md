@@ -7,7 +7,7 @@ the SIL Open Font License 1.1:
 | ----------------- | ---------------------------------------------------------------------------- | ------------ | ----------- |
 | Hanzi             | Sarasa Gothic / Sarasa Term (be5invis), outlines from Source Han Sans        | 1.0.42       | SIL OFL 1.1 |
 | Hanzi weight axis | Noto Sans SC variable font (Google / Adobe, the same Source Han Sans design) | wght 100–900 | SIL OFL 1.1 |
-| Latin             | Recursive **Linear** statics (ArrowType), Sans and Mono                      | 1.085        | SIL OFL 1.1 |
+| Latin             | Recursive **Linear** (ArrowType), Sans and Mono — statics up to v1.1.0, the variable source from v1.2.0 | 1.085 | SIL OFL 1.1 |
 
 Derivation: the hanzi and the non-ASCII glyph set come from the Sarasa skeleton (Term SC for the
 mono family, Gothic SC for the sans family), with one exception: from v1.1.0 the hanzi outlines are
@@ -16,7 +16,11 @@ instanced from the Noto Sans SC variable font (Regular/Italic at `wght` 400, Bol
 design under the same licence; the move exists because Sarasa's Regular and Bold hanzi are
 independently drawn and cannot be interpolated, while a single variable source can. Codepoints the
 variable font does not carry (2,482 of them, mostly CJK Extension B) keep the Sarasa outline. The
-sources are pinned and hash-checked by `tools/fetch_cjk_vf.py`. ASCII is replaced with Recursive Linear outlines
+From v1.2.0 the Latin outlines of every face are instanced from `Recursive_VF_1.085.ttf`
+(`wght` 400 and 700, with `MONO`, `CASL`, `slnt`, `CRSV` pinned per style) instead of copied from
+the four static faces, so the family has one interpolatable Latin master set like its hanzi. The
+two variable donors are pinned and hash-checked by `tools/fetch_cjk_vf.py` and
+`tools/fetch_recursive_vf.py`. ASCII is replaced with Recursive Linear outlines
 (scaled into the mono cell for QuBlack Mono). Box drawing 0x2500–0x259F is copied from the Term
 skeleton into the sans family so tables and code blocks keep half-width cells. `Emoji=Yes`
 codepoints are removed from the cmap (keeping ASCII, © ® ™, arrows, box drawing, blocks,

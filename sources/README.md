@@ -10,6 +10,13 @@ expects. Everything here is upstream, SIL OFL 1.1, and hash-pinned:
 | Hanzi weight axis | `NotoSansSC-VF.ttf` (Google/Adobe, wght 100–900) |
 | Latin (mono) | `rec_mono/RecursiveMonoLnrSt-{…}.ttf` (ArrowType Recursive 1.085) |
 | Latin (sans) | `ArrowType-Recursive-1.085/…/RecursiveSansLnrSt-{…}.ttf` |
+| Latin weight axis | `Recursive_VF_1.085.ttf` (the same release, variable source; `MONO`/`CASL`/`wght`/`slnt`/`CRSV` axes) |
+
+From v1.2.0 the Latin outlines of every face come from `Recursive_VF_1.085.ttf`, instanced per
+style instead of copied from the four statics: the statics are independently drawn per weight and
+cannot be interpolated. `python3 tools/fetch_recursive_vf.py` writes it (2,379,132 bytes, SHA-256
+`653221ca…f7c`); the four statics stay in the tree because the symbol census and the `at.alt`
+guard still reference them.
 
 `MANIFEST.sha256` pins all 17 files. Build with:
 
