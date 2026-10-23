@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from build_qublack import DEFAULT_SOURCES, build, resolve_donor  # noqa: E402
+from gf_tables import align_family_win_metrics  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 STYLES = ["Regular", "Bold", "Italic", "BoldItalic"]
@@ -18,7 +19,7 @@ STYLES = ["Regular", "Bold", "Italic", "BoldItalic"]
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--out", type=Path, default=REPO / "fonts")
+    parser.add_argument("--out", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument("--sources", type=Path, default=DEFAULT_SOURCES)
     parser.add_argument("--only", choices=["mono", "sans"], default=None)
     parser.add_argument(
@@ -37,8 +38,12 @@ def main() -> int:
     started = time.time()
     built: list[Path] = []
     for mode in modes:
+        family = []
         for style in STYLES:
-            built.append(build(mode, style, args.sources, args.out, REPO, cjk_vf=donor))
+            family.append(build(mode, style, args.sources, args.out, REPO, cjk_vf=donor))
+        bottom, top = align_family_win_metrics(family)
+        print(f"[{mode}] family win box {bottom}..{top} written to 4 faces", flush=True)
+        built.extend(family)
     print(f"built {len(built)} faces in {time.time() - started:.0f}s -> {args.out}")
     return 0
 

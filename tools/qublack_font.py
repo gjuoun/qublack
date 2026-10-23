@@ -14,12 +14,17 @@ VERTICAL_TABLES = ("vmtx", "vhea", "VORG")
 CJK_SAMPLE = "汉国图一永口"
 LATIN_SAMPLE = "axH"
 
-COPYRIGHT = (
-    "Based on Sarasa Gothic by Chen Qi's Sarasa contributors and on Recursive by ArrowType. "
-    "Both are licensed under the SIL Open Font License 1.1; this derivative is released under "
-    "the same license with new family names."
+# Google Fonts requires nameID 0 to be this exact shape (Copyright {year} The {family} Project
+# Authors ({git_url})), with the upstream attribution living in nameID 7 / AUTHORS.txt instead.
+COPYRIGHT = "Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)"
+DERIVATION = (
+    "Derived from Sarasa Gothic and Recursive (SIL OFL 1.1); the hanzi weight axis comes from "
+    "Noto Sans SC VF. Copyright holders are listed in AUTHORS.txt."
 )
-DERIVATION = "Derived from Sarasa Gothic and Recursive (SIL OFL 1.1)"
+LICENSE = (
+    "This Font Software is licensed under the SIL Open Font License, Version 1.1. "
+    "This license is available with a FAQ at: https://openfontlicense.org"
+)
 
 
 def open_font(path: str | Path, drop_vertical: bool = True) -> TTFont:
@@ -98,15 +103,18 @@ def write_names(font: TTFont, display_family: str, slug: str, style: str) -> Non
     """
     version = _release_version()
     zh_family = f"{ZH_PREFIX[display_family]} {display_family}"
-    full = f"{display_family} {style}"
+    # GF style linking accepts only R/I/B/BI in IDs 2 and 17; the file and PostScript names keep
+    # the compact "BoldItalic" form.
+    style_display = style.replace("BoldItalic", "Bold Italic")
+    full = f"{display_family} {style_display}"
     postscript = f"{slug}-{style}"
-    zh_full = f"{zh_family} {style}"
-    license_text = "This font is licensed under the SIL Open Font License 1.1"
+    zh_full = f"{zh_family} {style_display}"
+    license_text = LICENSE
 
     common = [
         (0, COPYRIGHT),
         (1, display_family),
-        (2, style),
+        (2, style_display),
         (3, f"{version}; gjuoun; {postscript}"),
         (4, full),
         (5, f"Version {version}"),
@@ -117,12 +125,12 @@ def write_names(font: TTFont, display_family: str, slug: str, style: str) -> Non
         (13, license_text),
         (14, "https://openfontlicense.org"),
         (16, display_family),
-        (17, style),
+        (17, style_display),
     ]
     localized = [
         (0, COPYRIGHT),
         (1, zh_family),
-        (2, style),
+        (2, style_display),
         (3, f"{version}; gjuoun; {postscript}"),
         (4, zh_full),
         (5, f"Version {version}"),
@@ -132,9 +140,16 @@ def write_names(font: TTFont, display_family: str, slug: str, style: str) -> Non
         (9, "Jun Guo"),
         (13, license_text),
         (14, "https://openfontlicense.org"),
-        (16, zh_family),
-        (17, style),
+        # GF compares ID 16 across platforms: keep it unlocalized, localize ID 1 only.
+        (16, display_family),
+        (17, style_display),
     ]
+
+    # The OpenType version fields have to agree with nameID 5. fontbakery parses
+    # "1.2.3" as 1.2, so a three-part version maps onto a two-part fontRevision.
+    major, minor, _patch = version.split(".")
+    font["head"].fontRevision = float(f"{major}.{minor}")
+    font["OS/2"].achVendID = "JUNG"
 
     name = font["name"]
     name.names = []  # nothing from the upstream font survives

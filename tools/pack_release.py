@@ -142,7 +142,7 @@ def main() -> int:
     entries: list[tuple[str, bytes]] = [(path.name, path.read_bytes()) for path in faces]
     entries += [(path.name, path.read_bytes()) for path in ttcs]
     entries += [(path.name, path.read_bytes()) for path in woff2]
-    entries.append(("OFL.txt", (REPO / "LICENSE").read_bytes()))
+    entries.append(("OFL.txt", (REPO / "OFL.txt").read_bytes()))
     entries.append(("README.txt", readme.encode("utf-8")))
     entries.append(("NOTICE.md", (REPO / "NOTICE.md").read_bytes()))
 

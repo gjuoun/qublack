@@ -1,0 +1,8 @@
+The images in this directory (documentation/specimen.png and any future specimen shots)
+are renders of the QuBlack family made by the project authors.
+
+Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)
+
+They are released under the Creative Commons Attribution 4.0 International licence
+(CC BY 4.0, https://creativecommons.org/licenses/by/4.0/) so Google Fonts contributors
+and mirror sites can reuse them when describing the family.

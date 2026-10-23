@@ -7,7 +7,7 @@ The build and verification toolchain behind the QuBlack release. Python 3.9+ wit
 | ------------------ | --------------------------------------------------------------------------------------------------------- |
 | `fetch_cjk_vf.py`  | download the pinned CJK variable donor (`NotoSansSC-VF.ttf`) into `--sources`, verify size + SHA-256      |
 | `build_qublack.py` | build one face: `--mode mono\|sans --style …` (Latin swap, emoji strip, names, then the mode's post step) |
-| `build_all.py`     | build all eight faces into `fonts/` (`python3 tools/build_all.py`)                                        |
+| `build_all.py`     | build all eight faces into `fonts/ttf/` (`python3 tools/build_all.py`)                                    |
 | `verify_family.py` | compare a build against `reference/baseline-v1.json` (metrics, never hashes)                              |
 | `name_audit.py`    | strict gate: name table, OFL notice, derivation, reserved names, cmap, 2:1 grid                           |
 | `cjk_weight.py`    | report/assert CJK weight ratios and whether Regular and Bold CJK share a point structure                  |
