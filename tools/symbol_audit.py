@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Full-census audit of the symbols in QuBlack Mono (44 glyphs).
+"""Full-census audit of the symbols in Qu Black Mono (44 glyphs).
 
 Harmonised glyphs (32): the built ink box must hit the blended target within 2 points of the
 hanzi. Skeleton glyphs (Latin-1, arrows): they must sit within 6 points of Sarasa own ratio, the

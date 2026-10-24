@@ -3,7 +3,7 @@
 
 Delta 12 cleared the upstream name records, so the audit now also holds the cleanliness line:
 no upstream strings outside the OFL attribution ids (0 and 7), no empty records, Mac and Windows
-carrying the same ids, a zh-CN localization naming the QuBlack families, and a version string that
+carrying the same ids, a zh-CN localization naming the Qu Black families, and a version string that
 matches package.json.
 
 usage: name_audit.py --strict <dir-or-face...>
@@ -23,8 +23,8 @@ from qublack_font import COPYRIGHT, LICENSE, open_font  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 EXPECTED = {
-    "QuBlackMono": {"display": "QuBlack Mono", "zh": "黢黑等宽", "upm": 833, "han": 1200, "ascii": 600},
-    "QuBlackSans": {"display": "QuBlack Sans", "zh": "黢黑比例", "upm": 1000, "han": 1000, "ascii": 600},
+    "QuBlackMono": {"display": "Qu Black Mono", "zh": "黢黑等宽", "upm": 833, "han": 1200, "ascii": 600},
+    "QuBlackSans": {"display": "Qu Black Sans", "zh": "黢黑比例", "upm": 1000, "han": 1000, "ascii": 600},
 }
 RESERVED = ("Source", "Sarasa", "Recursive", "ttfautohint", "1.0.42")
 # Only the derivation record (7) may name upstream projects; id 0 is the GF copyright line now.
@@ -109,6 +109,13 @@ def audit_names(path: Path, spec: dict, version: str) -> list[str]:
     notice = " ".join([win.get(7, ""), win.get(13, "")])
     if "SIL Open Font License" not in notice:
         problems.append("OFL attribution missing from the name table")
+    # The family name is two words now: a one-word regression in the naming ids has to fail the
+    # audit, not survive as a cleanup note. IDs 3/6 keep the no-space PostScript slug on purpose.
+    for label, platform in (("mac", mac), ("win", win), ("zh-CN", zh)):
+        stale = [nid for nid in (1, 4, 16) if "QuBlack" in platform.get(nid, "")]
+        if stale:
+            problems.append(label + " naming ids " + str(stale) + " still carry the one-word family")
+
     return problems
 
 

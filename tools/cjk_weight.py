@@ -18,8 +18,8 @@ Two things are measured, both from outlines only (no rasteriser, no new dependen
 
   - Bold/Regular `一` stroke >= 1.45x        (the Bold face really is a bold)
   - Bold CJK/Latin stroke ratio within +-0.20 of 1.0 (CJK and Latin strokes match; the band is
-    wider than one number because QuBlack Mono shrinks the em to 833, which raises every stroke
-    relative to the em, while QuBlack Sans keeps upm 1000)
+    wider than one number because Qu Black Mono shrinks the em to 833, which raises every stroke
+    relative to the em, while Qu Black Sans keeps upm 1000)
   - interpolable mismatch count == 0          (Regular and Bold share a point structure)
 
 usage: cjk_weight.py --report <dir-or-face...> [--against <dir-or-face>]
@@ -54,7 +54,7 @@ def faces(targets: list[Path]) -> list[Path]:
 
 
 def centroid(path: Path) -> tuple[str, str]:
-    """('QuBlackMono', 'Bold') from a QuBlack face filename."""
+    """('QuBlackMono', 'Bold') from a Qu Black face filename."""
     family, _, style = path.stem.partition("-")
     return family, style
 

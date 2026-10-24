@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build all eight QuBlack faces from the pinned sources committed in this directory.
+# Build all eight Qu Black faces from the pinned sources committed in this directory.
 #
 #   bash sources/build.sh [out-dir]        # default: fonts/ttf
 #

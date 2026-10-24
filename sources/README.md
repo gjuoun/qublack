@@ -1,12 +1,12 @@
 # sources
 
-The design sources QuBlack is built from, in the layout `tools/build_qublack.py --sources`
+The design sources Qu Black is built from, in the layout `tools/build_qublack.py --sources`
 expects. Everything here is upstream, SIL OFL 1.1, and hash-pinned:
 
 | Layer | Files |
 |---|---|
-| Hanzi skeleton | `SarasaTermSC-{Regular,Italic,Bold,BoldItalic}.ttf` (QuBlack Mono) |
-| Hanzi skeleton | `SarasaGothicSC-{…}.ttf` (QuBlack Sans) |
+| Hanzi skeleton | `SarasaTermSC-{Regular,Italic,Bold,BoldItalic}.ttf` (Qu Black Mono) |
+| Hanzi skeleton | `SarasaGothicSC-{…}.ttf` (Qu Black Sans) |
 | Hanzi weight axis | `NotoSansSC-VF.ttf` (Google/Adobe, wght 100–900) |
 | Latin (mono) | `rec_mono/RecursiveMonoLnrSt-{…}.ttf` (ArrowType Recursive 1.085) |
 | Latin (sans) | `ArrowType-Recursive-1.085/…/RecursiveSansLnrSt-{…}.ttf` |

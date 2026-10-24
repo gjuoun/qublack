@@ -1,6 +1,6 @@
 # tools
 
-The build and verification toolchain behind the QuBlack release. Python 3.9+ with
+The build and verification toolchain behind the Qu Black release. Python 3.9+ with
 `fonttools` and `brotli` (`python3 -m pip install fonttools brotli`).
 
 | Script                  | What it does                                                                                                                                                         |

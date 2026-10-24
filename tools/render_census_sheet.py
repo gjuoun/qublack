@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Render the full 44-symbol census sheet for QuBlack Mono (PNG).
+"""Render the full 44-symbol census sheet for Qu Black Mono (PNG).
 
-Two columns of 22 rows: the glyph in QuBlack Mono, the deviation from Sarasa hanzi-relative ratio
+Two columns of 22 rows: the glyph in Qu Black Mono, the deviation from Sarasa hanzi-relative ratio
 (the metric the census was triggered by) and, for harmonised glyphs, the offset from the blended
 target. Green means inside tolerance.
 
@@ -77,7 +77,7 @@ def main() -> int:
     image = Image.new("RGB", (width, height), BG)
     draw = ImageDraw.Draw(image)
 
-    draw.text((40, 28), "QuBlack Mono — 44-symbol census", font=heading, fill=FG)
+    draw.text((40, 28), "Qu Black Mono — 44-symbol census", font=heading, fill=FG)
     draw.text(
         (40, 68),
         "deviation from Sarasa hanzi-relative ratio · harmonised glyphs also show target offset · v1.0.3",
