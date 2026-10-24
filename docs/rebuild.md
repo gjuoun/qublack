@@ -116,5 +116,3 @@ The zip is deterministic (sorted entries, fixed timestamps). Publish with
 
 The specimen site lives in the `sites` monorepo (`apps/qublack`); its deploy fetches this
 repo's release zip and cuts the web shards there. This repo is fonts-only.
-
-
