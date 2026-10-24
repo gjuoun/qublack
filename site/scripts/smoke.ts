@@ -6,6 +6,7 @@
  */
 
 import puppeteer from "puppeteer-core";
+import { VERSION } from "../src/data/site";
 
 const url = process.argv[2] ?? "http://localhost:4321";
 const chromePath =
@@ -162,8 +163,8 @@ Math.max(...heroCopy.ctaHeights) - Math.min(...heroCopy.ctaHeights) <= 2
   ? pass(`copy: the CTA row shares one height (${heroCopy.ctaHeights.join("/")}px)`)
   : fail(`copy: CTA heights ${JSON.stringify(heroCopy.ctaHeights)}`);
 
-counts.download.some((href) => href?.includes("/releases/tag/v1.2.0"))
-  ? pass("download: links the v1.2.0 release")
+counts.download.some((href) => href?.includes(`/releases/tag/v${VERSION}`))
+  ? pass(`download: links the v${VERSION} release`)
   : fail(`download: release links are ${JSON.stringify(counts.download)}`);
 
 // The hero's copy-CSS pill is gone: the How-to section below the fold owns the instructions.
