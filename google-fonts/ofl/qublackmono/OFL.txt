@@ -1,4 +1,4 @@
-Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)
+Copyright 2026 The Qu Black Project Authors (https://github.com/gjuoun/qublack)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

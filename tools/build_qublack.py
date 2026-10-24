@@ -52,7 +52,7 @@ USE_CJK_DONOR = True
 # VF masters take the instanced one (--latin-vf), where the requirement is interpolability.
 USE_LATIN_VF = False
 SLUGS = {"mono": "QuBlackMono", "sans": "QuBlackSans"}
-DISPLAY = {"mono": "QuBlack Mono", "sans": "QuBlack Sans"}
+DISPLAY = {"mono": "Qu Black Mono", "sans": "Qu Black Sans"}
 # Symbols that sit against hanzi: Recursive draws them at Latin cap height, which after the
 # upm-833 move leaves them ~23-24% of the em below the hanzi top. Sarasa keeps them nearly flush.
 FIXED_SYMBOLS = ['"', "'", "(", ")", "[", "]", "{", "}", "/", "\\", "|"]
@@ -206,7 +206,7 @@ def harmonize_symbols(font: TTFont, reference_path: Path) -> int:
     Recursive draws its ASCII punctuation around the Latin cap height; Sarasa Term keeps the same
     symbols nearly flush with the hanzi top. For each symbol we take Sarasa's two ratios — ink top
     below the hanzi top, and ink height — relative to its own hanzi ink box, then apply a vertical
-    affine transform so QuBlack Mono reproduces them. Advance widths are untouched, so the 500-unit
+    affine transform so Qu Black Mono reproduces them. Advance widths are untouched, so the 500-unit
     (0.600em) cell survives.
     """
     reference = TTFont(str(reference_path))

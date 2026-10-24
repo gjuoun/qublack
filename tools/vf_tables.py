@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Name table, fvar and STAT for a QuBlack variable face.
+"""Name table, fvar and STAT for a Qu Black variable face.
 
-The VF is its own family ("QuBlack Mono VF"), not a second file sharing "QuBlack Mono": the
-static Regular already owns the PostScript name QuBlackMono-Regular, and two installed fonts with
-one PostScript name collide in every font manager. The file name keeps the Google Fonts variable
-convention (QuBlackMono[wght].ttf); only the family string carries the VF marker.
+The VF shares the family string ("Qu Black Mono") with its statics; only the PostScript name
+carries a marker (QuBlackMonoVF-Regular), because the static Regular already owns
+QuBlackMono-Regular and two installed fonts with one PostScript name collide in every font
+manager. The file name keeps the Google Fonts variable convention (QuBlackMono[wght].ttf).
 
 usage (from build_vf.py): prepare(font, display, slug, version)
 """

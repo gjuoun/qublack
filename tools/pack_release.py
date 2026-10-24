@@ -28,15 +28,15 @@ STYLES = ["Regular", "Italic", "Bold", "BoldItalic"]
 FAMILIES = ["Mono", "Sans"]
 FIXED_TIME = (2026, 10, 22, 0, 0, 0)
 
-README = """黢黑 QuBlack — {version}
+README = """黢黑 Qu Black — {version}
 {underline}
 
-一个为代码而生的双语字体家族：QuBlack Mono 严格 2:1 中英对齐（一个汉字 = 两个 ASCII 格，
-实测 2.000），QuBlack Sans 是它的比例兄弟，用于文档、网页与界面。汉字来自思源黑体（经 Sarasa
+一个为代码而生的双语字体家族：Qu Black Mono 严格 2:1 中英对齐（一个汉字 = 两个 ASCII 格，
+实测 2.000），Qu Black Sans 是它的比例兄弟，用于文档、网页与界面。汉字来自思源黑体（经 Sarasa
 Gothic），拉丁来自 Recursive Linear；整个家族可再分发、可商用，SIL OFL 1.1。
 
-A bilingual family built for code: QuBlack Mono holds a strict 2:1 grid (one hanzi = two ASCII
-cells, measured at 2.000); QuBlack Sans is its proportional sibling for documents, web and UI.
+A bilingual family built for code: Qu Black Mono holds a strict 2:1 grid (one hanzi = two ASCII
+cells, measured at 2.000); Qu Black Sans is its proportional sibling for documents, web and UI.
 Hanzi come from Source Han Sans (via Sarasa Gothic), Latin from Recursive Linear. The whole
 family is redistributable under the SIL Open Font License 1.1.
 
@@ -54,8 +54,8 @@ family is redistributable under the SIL Open Font License 1.1.
 
 家族 / family
 -------------
-  QuBlack Mono  终端、代码     upm 833    汉字 1.200em   ASCII 0.600em   等宽 2:1
-  QuBlack Sans  文档、网页、界面 upm 1000  汉字 1.000em   ASCII 0.600em
+  Qu Black Mono  终端、代码     upm 833    汉字 1.200em   ASCII 0.600em   等宽 2:1
+  Qu Black Sans  文档、网页、界面 upm 1000  汉字 1.000em   ASCII 0.600em
 
 各四个字重：Regular / Italic / Bold / BoldItalic。彩色 emoji 走系统字体（cmap 占位符已剥离）。
 
@@ -63,8 +63,8 @@ family is redistributable under the SIL Open Font License 1.1.
 --------------
   macOS:   unzip -o {zipname} -d ~/Library/Fonts/
   Linux:   mkdir -p ~/.local/share/fonts && unzip -o {zipname} -d ~/.local/share/fonts/ && fc-cache -f
-  网页:    @font-face {{ font-family: "QuBlack Sans"; src: url("QuBlackSans-Regular.woff2") format("woff2"); }}
-  终端:    font-family = "QuBlack Mono"
+  网页:    @font-face {{ font-family: "Qu Black Sans"; src: url("QuBlackSans-Regular.woff2") format("woff2"); }}
+  终端:    font-family = "Qu Black Mono"
 
 字体在进程启动时加载：浏览器、终端、Electron 客户端要完全退出重开才会用上新文件。
 
@@ -77,7 +77,7 @@ Sarasa Gothic（SIL OFL 1.1），拉丁来自 Recursive（SIL OFL 1.1），以�
 
 
 def render_readme(version: str, zipname: str) -> str:
-    title = "黢黑 QuBlack — " + version
+    title = "黢黑 Qu Black — " + version
     return README.format(version=version, underline="=" * len(title), zipname=zipname)
 
 

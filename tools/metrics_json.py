@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from qublack_font import measure  # noqa: E402
 
-FAMILIES = {"QuBlackMono": "QuBlack Mono", "QuBlackSans": "QuBlack Sans"}
+FAMILIES = {"QuBlackMono": "Qu Black Mono", "QuBlackSans": "Qu Black Sans"}
 
 
 def main() -> int:

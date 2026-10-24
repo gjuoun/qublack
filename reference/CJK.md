@@ -31,7 +31,7 @@ check` (it needs the built faces).
 | CJK / Latin stroke (mono)               | 1.01                     | 1.09   | —      |
 | CJK / Latin stroke (sans, upm 1000)     | 0.84                     | 0.91   | —      |
 
-The sans ratio is lower because QuBlack Sans keeps upm 1000 while QuBlack Mono shrinks the em to
+The sans ratio is lower because Qu Black Sans keeps upm 1000 while Qu Black Mono shrinks the em to
 833, which raises every stroke relative to the em. `cjk_weight.py --check` therefore asserts a band
 (`|ratio - 1| <= 0.20`), not one number. Heavy (`wght` 900) was measured and rejected: it pushes the
 mono ratio to ~1.40, i.e. hanzi visibly heavier than the Recursive Bold Latin.
@@ -42,11 +42,11 @@ mono ratio to ~1.40, i.e. hanzi visibly heavier than the Recursive Bold Latin.
 one. The grid (`--grid-only`: upm, advances, line height, glyph count, codepoint count) is
 identical for 8/8 faces; the ink boxes move only where the donor's outline differs from Sarasa's:
 
-| family                 | glyphs whose ink box moved           | fields        | worst delta       |
-| ---------------------- | ------------------------------------ | ------------- | ----------------- |
-| QuBlack Mono (4 faces) | `国` `永` `口`                       | `w`, `h`, `y` | `永` h −0.0024 em |
-| QuBlack Sans (4 faces) | `国` `永` `口`                       | `w`, `h`, `y` | `永` h −0.0020 em |
-| both                   | `汉` `图` `一` `黑` `白` `a` `x` `H` | —             | 0.0000            |
+| family                  | glyphs whose ink box moved           | fields        | worst delta       |
+| ----------------------- | ------------------------------------ | ------------- | ----------------- |
+| Qu Black Mono (4 faces) | `国` `永` `口`                       | `w`, `h`, `y` | `永` h −0.0024 em |
+| Qu Black Sans (4 faces) | `国` `永` `口`                       | `w`, `h`, `y` | `永` h −0.0020 em |
+| both                    | `汉` `图` `一` `黑` `白` `a` `x` `H` | —             | 0.0000            |
 
 46 of the 72 compared ink fields moved, none by more than 0.0024 em; the full per-face list is the
 `ink` diff between `baseline-v1.json` and `baseline-v2.json`.

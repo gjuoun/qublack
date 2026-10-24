@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render the three-scenario symbol sheet: pure English, pure Chinese, mixed.
 
-Each scene carries all of the fixed symbols and draws QuBlack Mono beside Sarasa Term at the same
+Each scene carries all of the fixed symbols and draws Qu Black Mono beside Sarasa Term at the same
 pixel size, so the assessor can compare like with like. Output is one PNG per scene.
 
 usage: render_scenes.py [--outdir /tmp/jun/qublack/scenes] [--style Regular]
@@ -65,7 +65,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--outdir", type=Path, default=Path("/tmp/jun/qublack/scenes"))
     parser.add_argument("--style", default="Regular")
-    parser.add_argument("--face", type=Path, default=None, help="QuBlack face to render (defaults to fonts/)")
+    parser.add_argument("--face", type=Path, default=None, help="Qu Black face to render (defaults to fonts/)")
     args = parser.parse_args()
     args.outdir.mkdir(parents=True, exist_ok=True)
 
@@ -80,8 +80,8 @@ def main() -> int:
         height = 90 + len(lines) * LINE * 2 + 40
         image = Image.new("RGB", (width, height), BG)
         draw = ImageDraw.Draw(image)
-        draw.text((32, 24), f"QuBlack Mono vs Sarasa Term — {scene.upper()} scene", font=heading, fill=FG)
-        draw.text((32, 56), "top: QuBlack Mono (2:1 cell)   bottom: Sarasa Term SC (1:1 cell)", font=mono, fill=DIM)
+        draw.text((32, 24), f"Qu Black Mono vs Sarasa Term — {scene.upper()} scene", font=heading, fill=FG)
+        draw.text((32, 56), "top: Qu Black Mono (2:1 cell)   bottom: Sarasa Term SC (1:1 cell)", font=mono, fill=DIM)
         y = 96
         for line in lines:
             draw.text((32, y), line, font=qublack, fill=FG)

@@ -29,14 +29,14 @@ from fontTools.ttLib import TTFont
 
 REPO = Path(__file__).resolve().parent.parent
 FACES = [
-    ("QuBlackMono", "QuBlack Mono", "Regular", 400, "normal"),
-    ("QuBlackMono", "QuBlack Mono", "Bold", 700, "normal"),
-    ("QuBlackMono", "QuBlack Mono", "Italic", 400, "italic"),
-    ("QuBlackMono", "QuBlack Mono", "BoldItalic", 700, "italic"),
-    ("QuBlackSans", "QuBlack Sans", "Regular", 400, "normal"),
-    ("QuBlackSans", "QuBlack Sans", "Bold", 700, "normal"),
-    ("QuBlackSans", "QuBlack Sans", "Italic", 400, "italic"),
-    ("QuBlackSans", "QuBlack Sans", "BoldItalic", 700, "italic"),
+    ("QuBlackMono", "Qu Black Mono", "Regular", 400, "normal"),
+    ("QuBlackMono", "Qu Black Mono", "Bold", 700, "normal"),
+    ("QuBlackMono", "Qu Black Mono", "Italic", 400, "italic"),
+    ("QuBlackMono", "Qu Black Mono", "BoldItalic", 700, "italic"),
+    ("QuBlackSans", "Qu Black Sans", "Regular", 400, "normal"),
+    ("QuBlackSans", "Qu Black Sans", "Bold", 700, "normal"),
+    ("QuBlackSans", "Qu Black Sans", "Italic", 400, "italic"),
+    ("QuBlackSans", "Qu Black Sans", "BoldItalic", 700, "italic"),
 ]
 TIER_LATIN = [(0x20, 0x7E), (0xA0, 0xFF), (0x2000, 0x206F), (0x2190, 0x21FF), (0x2500, 0x25FF),
               (0x2800, 0x28FF), (0x3000, 0x303F), (0xFF00, 0xFFEF)]

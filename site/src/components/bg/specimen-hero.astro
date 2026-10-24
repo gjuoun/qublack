@@ -30,14 +30,14 @@ const stats = [
           class="mt-[0.6rem] mb-[0.4rem] text-[clamp(3.2rem,7vw,5.2rem)] font-extrabold tracking-[-0.035em]"
         >
           <span class="bf-grad">黢黑</span>
-          <span class="text-foreground">QuBlack</span>
+          <span class="text-foreground">Qu Black</span>
         </h1>
 
         <p class="bf-lead">
-          Your agent answers in English, 中文 and code — in the same message. QuBlack renders all
-          three on one grid: <strong class="text-foreground">QuBlack Mono</strong> keeps a
+          Your agent answers in English, 中文 and code — in the same message. Qu Black renders all
+          three on one grid: <strong class="text-foreground">Qu Black Mono</strong> keeps a
           measured <strong class="text-foreground">2:1</strong> cell (汉 1.200em, ASCII 0.600em), so diffs,
-          tables and logs stay aligned; <strong class="text-foreground">QuBlack Sans</strong> keeps
+          tables and logs stay aligned; <strong class="text-foreground">Qu Black Sans</strong> keeps
           the prose readable next to them.
         </p>
 
@@ -76,13 +76,18 @@ const stats = [
         class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1"
         data-specimen-header
       >
-        <span class="font-code text-[0.72rem] tracking-[0.14em] text-bf-fg-muted uppercase">
+        <!-- The two-word family name costs one more mono cell in the face label, which used to push
+             this row past the phone width; below 760px the label tightens its tracking instead of
+             wrapping, so the two halves keep one centreline. -->
+        <span
+          class="font-code text-[0.72rem] tracking-[0.14em] text-bf-fg-muted uppercase max-[760px]:tracking-[0.08em]"
+        >
           editable specimen<span class="hidden min-[760px]:inline"
             > — click and type, Enter to commit, Esc to revert</span
           >
         </span>
         <span id="face-label" class="font-code text-[0.72rem] text-bf-blue" aria-live="polite"
-          >QuBlack Sans Regular</span
+          >Qu Black Sans Regular</span
         >
       </div>
 
@@ -96,7 +101,7 @@ const stats = [
         aria-multiline="false"
         data-specimen-scale
         class="m-0 cursor-text leading-[1.25] font-normal outline-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-bf-blue/60"
-        >黢黑 QuBlack 中英混排 2:1 grid · 字体 specimen</p
+        >黢黑 Qu Black 中英混排 2:1 grid · 字体 specimen</p
       >
       <p
         id="specimen-sample"

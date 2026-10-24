@@ -38,8 +38,8 @@ test("install commands use the current release asset, not a hardcoded tag", () =
 });
 
 test("snippets name the published families exactly", () => {
-  const families = new Set(code.flatMap((snippet) => snippet.match(/QuBlack (Mono|Sans)/g) ?? []));
-  expect([...families].sort()).toEqual(["QuBlack Mono", "QuBlack Sans"]);
+  const families = new Set(code.flatMap((snippet) => snippet.match(/Qu Black (Mono|Sans)/g) ?? []));
+  expect([...families].sort()).toEqual(["Qu Black Mono", "Qu Black Sans"]);
   for (const snippet of code) {
     expect(snippet.startsWith("\n")).toBe(false);
     expect(snippet.endsWith("\n")).toBe(false);
@@ -52,12 +52,12 @@ test("Ghostty is the first terminal, and the terminal notes keep the 1.2x cell h
   expect(terminals?.blurb).toContain("1.200em");
   expect(terminals?.blurb).toContain("1.2x");
   const kitty = terminals?.cards.find((card) => card.id === "kitty");
-  expect(kitty?.code).toContain("bold_italic_font QuBlack Mono Bold Italic");
+  expect(kitty?.code).toContain("bold_italic_font Qu Black Mono Bold Italic");
 });
 
 test("both families are taught, not just the mono one", () => {
-  const sans = (code.join("\n").match(/QuBlack Sans/g) ?? []).length;
-  const mono = (code.join("\n").match(/QuBlack Mono/g) ?? []).length;
+  const sans = (code.join("\n").match(/Qu Black Sans/g) ?? []).length;
+  const mono = (code.join("\n").match(/Qu Black Mono/g) ?? []).length;
   expect(sans).toBeGreaterThanOrEqual(6);
   expect(mono).toBeGreaterThan(sans);
 
@@ -68,11 +68,11 @@ test("both families are taught, not just the mono one", () => {
     ]),
   );
   const faces = web.get("faces") ?? "";
-  expect(faces).toContain('font-family: "QuBlack Mono"');
-  expect(faces).toContain('font-family: "QuBlack Sans"');
+  expect(faces).toContain('font-family: "Qu Black Mono"');
+  expect(faces).toContain('font-family: "Qu Black Sans"');
   expect(faces).toContain("body {");
-  expect(faces).toContain('"QuBlack Sans", -apple-system');
-  expect(faces).toContain('"QuBlack Mono", ui-monospace');
+  expect(faces).toContain('"Qu Black Sans", -apple-system');
+  expect(faces).toContain('"Qu Black Mono", ui-monospace');
   const stack = web.get("stack") ?? "";
   expect(stack).toContain("--font-mono:");
   expect(stack).toContain("--font-sans:");
@@ -91,12 +91,12 @@ test("framework snippets wire Sans for body and Mono for code", () => {
   for (const id of ["next", "astro"]) {
     expect(frameworks.get(id)).toContain("--font-qublack-sans");
     expect(frameworks.get(id)).toContain("--font-qublack-mono");
-    expect(frameworks.get(id)).toContain("QuBlack Sans");
+    expect(frameworks.get(id)).toContain("Qu Black Sans");
   }
   const vite = frameworks.get("vite") ?? "";
   expect(vite).toContain("--font-sans:");
   expect(vite).toContain("--font-mono:");
-  expect(vite).toContain("QuBlack Sans");
+  expect(vite).toContain("Qu Black Sans");
   const tailwind = frameworks.get("tailwind") ?? "";
   expect(tailwind).toContain("--font-sans:");
   expect(tailwind).toContain("--font-mono:");

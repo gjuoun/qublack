@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Google Fonts gate for a QuBlack build (the plan helper in
+# Google Fonts gate for a Qu Black build (the plan helper in
 # ~/.notebook/project/gjuoun/qublack/plan/scripts/gf-gate.sh mirrors this file).
 # usage: [GF_ALLOW="check_id ..."] [GF_VENV=...] [FONTSPECTOR=...] \
 #          gf-gate.sh <repo-root> <fonts-dir> [<out-dir>]
@@ -65,7 +65,7 @@ for family in Mono Sans; do
   fs_fail=$(grep -oE 'FAIL: [0-9]+' "$out/fontspector-$family.log" | tail -1 | grep -oE '[0-9]+')
   fs_fatal=$(grep -oE 'FATAL: [0-9]+' "$out/fontspector-$family.log" | tail -1 | grep -oE '[0-9]+')
   fs_warn=$(grep -oE 'WARN: [0-9]+' "$out/fontspector-$family.log" | tail -1 | grep -oE '[0-9]+')
-  echo "fontspector QuBlack $family: FAIL=${fs_fail:-?} FATAL=${fs_fatal:-?} WARN=${fs_warn:-?}"
+  echo "fontspector Qu Black $family: FAIL=${fs_fail:-?} FATAL=${fs_fatal:-?} WARN=${fs_warn:-?}"
 done
 
 # fontbakery is minutes on 57k-glyph faces; --skip-network keeps it from hanging.
@@ -81,7 +81,7 @@ for family in Mono Sans; do
     ${skip[@]+"${skip[@]}"} "${files[@]}" > "$out/fontbakery-$family.log" 2>&1 || status=1
   fb_fail=$(grep -c -E '^    Result: (FAIL|FATAL)' "$out/fontbakery-$family.log" || true)
   fb_warn=$(grep -c '^    Result: WARN' "$out/fontbakery-$family.log" || true)
-  echo "fontbakery  QuBlack $family: FAIL=$fb_fail WARN=$fb_warn"
+  echo "fontbakery  Qu Black $family: FAIL=$fb_fail WARN=$fb_warn"
 done
 
 echo "allow: ${allow:-none}"

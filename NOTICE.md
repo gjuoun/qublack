@@ -1,6 +1,6 @@
 # Provenance
 
-QuBlack is a derivative work. Every outline in it comes from an upstream project released under
+Qu Black is a derivative work. Every outline in it comes from an upstream project released under
 the SIL Open Font License 1.1:
 
 | Layer             | Upstream                                                                                                | Version      | Licence     |
@@ -21,17 +21,17 @@ From v1.2.0 the Latin outlines of every face are instanced from `Recursive_VF_1.
 the four static faces, so the family has one interpolatable Latin master set like its hanzi. The
 two variable donors are pinned and hash-checked by `tools/fetch_cjk_vf.py` and
 `tools/fetch_recursive_vf.py`. ASCII is replaced with Recursive Linear outlines
-(scaled into the mono cell for QuBlack Mono). Box drawing 0x2500–0x259F is copied from the Term
+(scaled into the mono cell for Qu Black Mono). Box drawing 0x2500–0x259F is copied from the Term
 skeleton into the sans family so tables and code blocks keep half-width cells. `Emoji=Yes`
 codepoints are removed from the cmap (keeping ASCII, © ® ™, arrows, box drawing, blocks,
 geometric shapes, braille and PUA) so colour emoji fall through to the system font. Name tables
 carry the OFL notice and this derivation statement.
 
-QuBlack Mono ships Recursive's `at.alt` alternate for `@` (the target of its `ss12` lookup)
+Qu Black Mono ships Recursive's `at.alt` alternate for `@` (the target of its `ss12` lookup)
 instead of the default `at` drawing; the outline is imported point for point through the same
-500/600 cell transform as the rest of the ASCII set. QuBlack Sans keeps the default `@`.
+500/600 cell transform as the rest of the ASCII set. Qu Black Sans keeps the default `@`.
 
-QuBlack Mono harmonises every symbol in the 44-glyph census that sits against hanzi — the delta-8
+Qu Black Mono harmonises every symbol in the 44-glyph census that sits against hanzi — the delta-8
 brackets `" ' ( ) [ ] { } / \ |` plus the delta-10 marks `` ` * ! % & ? @ $ # < > ^ + : ; - = _`
 (and a sub-percent nudge on `, . ~`) — by a
 per-glyph vertical scale and translate that puts their ink boxes on the same top/height ratios as
@@ -39,7 +39,7 @@ the Sarasa Term skeleton (y only; the 500-unit advance is untouched). `tools/sym
 measures and asserts the result within two points. Deliberately left alone: curly quotes (already
 flush), guillemets, `…`, `< >` and the CJK punctuation the skeleton brings.
 
-QuBlack Mono uses the upm-833 technique: glyph coordinates stay untouched, `unitsPerEm` is 833,
+Qu Black Mono uses the upm-833 technique: glyph coordinates stay untouched, `unitsPerEm` is 833,
 so the Sarasa 1000-unit cell reads as 1.200em and the 500-unit ASCII cell as 0.600em — a measured
 2:1 ratio.
 

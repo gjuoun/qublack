@@ -1,4 +1,4 @@
-# Rebuilding QuBlack
+# Rebuilding Qu Black
 
 Everything on https://qublack.qqntt.com/ and every asset in the release comes from the two scripts
 below plus the upstream OFL sources. No step needs a network connection once the sources are
@@ -59,19 +59,23 @@ donors left unattached.
 
 ```sh
 bash tools/gf_setup.sh        # .venv-gf (gftools 0.10.4, fontbakery 1.1.0) + fontspector 1.9.0
-GF_ALLOW="file_size family_name_compliance cjk_vertical_metrics" \
+GF_ALLOW="file_size has_license cjk_vertical_metrics" \
   bash tools/gf_gate.sh . fonts/ttf
 ```
 
 The gate stages each family in an `ofl/<dirname>/` layout and runs fontspector's googlefonts
-profile (the one Google Fonts' CI uses) plus fontbakery's `check-googlefonts`. Three checks are
-waived, each with a reason that goes into the submission:
+profile (the one Google Fonts' CI uses) plus fontbakery's `check-googlefonts`. `family_name_compliance`
+passes since the family renamed to the two-word "Qu Black" form. Three checks are waived, each with
+a reason that goes into the submission:
 - `file_size` — CJK families exceed the 9 MB limit; Noto Sans SC is 17.7 MB in google/fonts.
-- `family_name_compliance` — "QuBlack" is CamelCase; the submission requests an exception rather
-  than renaming the family.
-- `cjk_vertical_metrics` — GF wants a 1.15 em line box; QuBlack's 1.25 em line height is a design
+- `has_license` — fontspector runs on files and cannot see the staged `OFL.txt`; the license ships
+  in the release zip and in the google/fonts PR itself.
+- `cjk_vertical_metrics` — GF wants a 1.15 em line box; Qu Black's 1.25 em line height is a design
   decision. Everything else in that check (BASE, win metrics, hhea/typo agreement, vmtx/vhea) is
   satisfied, so the waiver covers the two typo ascender/descender comparisons only.
+  On the variable faces `googlefonts/font_names` is additionally waived: the `VF` marker in the
+  PostScript name (`QuBlackMonoVF-Regular`) deliberately differs from family+style so the VF and the
+  static Regular never collide in font managers.
 
 `verify_family.py` compares metrics, never hashes: a rebuild differs in glyph order and name
 records. `reference/shipped-v1.json` records the 2026-10-21 build that shipped as JunHei;

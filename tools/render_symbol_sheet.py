@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the QuBlack Mono vs Sarasa Term symbol sheet (PNG) for eyeballing.
+"""Render the Qu Black Mono vs Sarasa Term symbol sheet (PNG) for eyeballing.
 
 Both faces are drawn at the same pixel size, so a hanzi is the same height in each column and the
 symbol tops compare directly. The right-hand column prints the glyph's offset from the blended
@@ -66,7 +66,7 @@ def main() -> int:
     image = Image.new("RGB", (width, height), BG)
     draw = ImageDraw.Draw(image)
 
-    draw.text((48, 34), "QuBlack Mono  vs  Sarasa Term — symbol harmony", font=heading, fill=FG)
+    draw.text((48, 34), "Qu Black Mono  vs  Sarasa Term — symbol harmony", font=heading, fill=FG)
     draw.text(
         (48, 76),
         f"same pixel size · 汉 = 1.200em · ASCII advance untouched (0.600em) · blend "
@@ -76,7 +76,7 @@ def main() -> int:
     )
 
     col_q, col_s, col_d = 48, 560, 1080
-    draw.text((col_q, 116), "QuBlack Mono", font=mono, fill=BLUE)
+    draw.text((col_q, 116), "Qu Black Mono", font=mono, fill=BLUE)
     draw.text((col_s, 116), "Sarasa Term SC", font=mono, fill=DIM)
     draw.text((col_d, 116), "Δ from target (units)", font=mono, fill=DIM)
 

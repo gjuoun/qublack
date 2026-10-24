@@ -31,7 +31,7 @@ if (!before || !staticFace || !after || !out) {
 }
 
 const sample = [
-  "// 构建日志：@QuBlack 2:1 网格，l i I | 1 与 {}[]() 对齐检查",
+  "// 构建日志：@Qu Black 2:1 网格，l i I | 1 与 {}[]() 对齐检查",
   "const total = items.filter(x => x.qty > 0).length; // {a:1,b:2} → sum",
   'if (err?.code === "E_NO_ENTRY" && retry < 3) return null; // !?;:.',
   "async function 渲染(节点: Node[]) { await 等待(200); } // 汉字 + English",

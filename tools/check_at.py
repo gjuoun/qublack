@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assert that every QuBlack Mono @ keeps Recursive at.alt as its source outline.
+"""Assert that every Qu Black Mono @ keeps Recursive at.alt as its source outline.
 
 Delta 5 shipped Recursive at.alt for @; delta 10s census then applied the same y-only affine to it.
 The outline is still at.alt: x is untouched and y is an exact affine of the source, so this tool

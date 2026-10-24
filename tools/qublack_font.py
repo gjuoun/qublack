@@ -16,7 +16,7 @@ LATIN_SAMPLE = "axH"
 
 # Google Fonts requires nameID 0 to be this exact shape (Copyright {year} The {family} Project
 # Authors ({git_url})), with the upstream attribution living in nameID 7 / AUTHORS.txt instead.
-COPYRIGHT = "Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)"
+COPYRIGHT = "Copyright 2026 The Qu Black Project Authors (https://github.com/gjuoun/qublack)"
 DERIVATION = (
     "Derived from Sarasa Gothic and Recursive (SIL OFL 1.1); the hanzi weight axis comes from "
     "Noto Sans SC VF. Copyright holders are listed in AUTHORS.txt."
@@ -81,7 +81,7 @@ def measure(path: str | Path) -> dict:
     }
 
 
-ZH_PREFIX = {"QuBlack Mono": "黢黑等宽", "QuBlack Sans": "黢黑比例"}
+ZH_PREFIX = {"Qu Black Mono": "黢黑等宽", "Qu Black Sans": "黢黑比例"}
 
 
 def _release_version() -> str:
@@ -89,7 +89,7 @@ def _release_version() -> str:
 
 
 def write_names(font: TTFont, display_family: str, slug: str, style: str) -> None:
-    """Rebuild the whole name table: QuBlack names, OFL attribution, nothing inherited.
+    """Rebuild the whole name table: Qu Black names, OFL attribution, nothing inherited.
 
     The upstream Sarasa records (its 1.0.42 version string, the zh-CN localization saying
     "Sarasa Term SC", an empty nameID 11) were left behind by the earlier pass; a localized match
@@ -97,8 +97,8 @@ def write_names(font: TTFont, display_family: str, slug: str, style: str) -> Non
 
       - ids 0 and 7 keep the OFL derivative attribution (copyright + derivation statement);
       - ids 1/4/16 carry the family, ids 2/17 the style, 6 the PostScript name;
-      - id 3 is a real unique ID, id 5 the QuBlack version, 8/9 the manufacturer and designer;
-      - the Windows zh-CN (0x804) records carry 黢黑等宽 QuBlack Mono / 黢黑比例 QuBlack Sans;
+      - id 3 is a real unique ID, id 5 the Qu Black version, 8/9 the manufacturer and designer;
+      - the Windows zh-CN (0x804) records carry 黢黑等宽 Qu Black Mono / 黢黑比例 Qu Black Sans;
       - no empty records, and the Mac and Windows tables hold the same ids.
     """
     version = _release_version()

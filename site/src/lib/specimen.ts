@@ -5,8 +5,8 @@
  * I toggles italic, arrows walk the sections and 1–9 jump to one. None of that fires while the
  * visitor is editing text in the hero.
  *
- * Family switching is an optical decision, not just a font-family swap: QuBlack Mono sits on
- * upm 833 (hanzi 1.200em) while QuBlack Sans sits on upm 1000 (hanzi 1.000em), so at one font size
+ * Family switching is an optical decision, not just a font-family swap: Qu Black Mono sits on
+ * upm 833 (hanzi 1.200em) while Qu Black Sans sits on upm 1000 (hanzi 1.000em), so at one font size
  * the mono hanzi renders 20% larger. The editable specimen therefore scales its own font-size by
  * 833/1000 when it shows the mono family — the same optical size for 汉字, with the Latin 17%
  * smaller as the accepted trade. Sections where the real 0.6em cell is the point (ASCII table,
@@ -96,7 +96,7 @@ export function applyKey(state: SpecimenState, key: string, context: KeyContext)
 
 /** The CSS family stack the specimen and the code samples use for the current state. */
 export function fontFamily(state: SpecimenState): string {
-  return state.family === "mono" ? '"QuBlack Mono"' : '"QuBlack Sans"';
+  return state.family === "mono" ? '"Qu Black Mono"' : '"Qu Black Sans"';
 }
 
 /**
@@ -109,7 +109,7 @@ export function specimenScale(state: SpecimenState): number {
 
 /** The six font faces a state can address (Regular/Bold × upright/italic per family). */
 export function faceLabel(state: SpecimenState): string {
-  const family = state.family === "mono" ? "QuBlack Mono" : "QuBlack Sans";
+  const family = state.family === "mono" ? "Qu Black Mono" : "Qu Black Sans";
   const style = state.weight === "bold" ? "Bold" : "Regular";
   return `${family} ${style}${state.italic ? " Italic" : ""}`;
 }

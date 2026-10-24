@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Google Fonts tables QuBlack's skeleton never carried: BASE, vmtx/vhea, win metrics.
+"""Google Fonts tables Qu Black's skeleton never carried: BASE, vmtx/vhea, win metrics.
 
 The CJK geometry follows the rule fontspector's googlefonts/cjk_vertical_metrics check
 uses (and which google/fonts applies to CJK families):
@@ -9,7 +9,7 @@ uses (and which google/fonts applies to CJK families):
   * romn is the Roman baseline (0);
   * vertical baselines mirror the horizontal ones across the em box.
 
-QuBlack keeps its own 1.25 em line height (a product decision, JG-143 Q5), so the typo
+Qu Black keeps its own 1.25 em line height (a product decision, JG-143 Q5), so the typo
 ascender/descender keep summing to the layout line height while hhea is made to agree.
 """
 

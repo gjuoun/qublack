@@ -118,8 +118,8 @@ const mono = await page.evaluate(() => ({
   family: document.documentElement.dataset.specimenFamily,
   computed: getComputedStyle(document.querySelector("[data-specimen]") as Element).fontFamily,
 }));
-mono.family === "mono" && mono.computed.includes("QuBlack Mono")
-  ? pass("key M: specimen switched to QuBlack Mono")
+mono.family === "mono" && mono.computed.includes("Qu Black Mono")
+  ? pass("key M: specimen switched to Qu Black Mono")
   : fail(`key M: dataset ${mono.family}, computed ${mono.computed}`);
 
 // 3. Arrow navigation moves the page to the next section.
@@ -237,6 +237,24 @@ const beforePanels = await visiblePanels();
 // A real mouse click, not element.click(): Radix Tabs selects on mousedown, not on click.
 await page.click('[data-howto-tab="terminals"]');
 await new Promise((resolve) => setTimeout(resolve, 150));
+// The active pill cross-fades its ink over 200ms, so a fixed sleep samples the interpolation —
+// Chrome reports that mid-value as oklab(...) and it drifts run to run. Wait for the trigger's own
+// transition to stop, then assert the settled style (the thresholds below are unchanged).
+await page
+  .waitForFunction(
+    () => {
+      const tab = document.querySelector('[data-howto-tab="terminals"]');
+      if (!tab || tab.getAttribute("data-state") !== "active") return false;
+      if (tab.getAnimations().some((animation) => animation.playState === "running")) return false;
+      const state = window as unknown as { __ink?: string; __still?: number };
+      const ink = getComputedStyle(tab).color;
+      state.__still = ink === state.__ink ? (state.__still ?? 0) + 1 : 0;
+      state.__ink = ink;
+      return (state.__still ?? 0) >= 3;
+    },
+    { polling: "raf", timeout: 4_000 },
+  )
+  .catch(() => undefined);
 const tabSwitch = await page.evaluate(async () => {
   const after = [...document.querySelectorAll<HTMLElement>("[data-howto-panel]")]
     .filter((panel) => panel.getBoundingClientRect().height > 0)
@@ -275,7 +293,7 @@ tabState.toast.includes(tabState.payload.slice(0, 20))
   ? pass("how-to: a snippet copy button writes the plate to the clipboard and fires the toast")
   : fail(`how-to: toast ${JSON.stringify(tabSwitch.toast)} shown=${tabSwitch.shown}`);
 
-// 5. The hero's agent container: markdown rendered in QuBlack — bold, inline code and a
+// 5. The hero's agent container: markdown rendered in Qu Black — bold, inline code and a
 // colourless code plate — plus a streamed reply.
 const chat = await page.evaluate(() => {
   const thread = document.getElementById("agent-thread");
@@ -300,8 +318,8 @@ const chat = await page.evaluate(() => {
 chat.messages >= 4
   ? pass(`agent chat: ${chat.messages} messages in the initial thread`)
   : fail(`agent chat: ${chat.messages} messages`);
-chat.codeBlocks >= 3 && chat.codeFont.includes("QuBlack Mono")
-  ? pass(`agent chat: ${chat.codeBlocks} markdown code plates render in QuBlack Mono`)
+chat.codeBlocks >= 3 && chat.codeFont.includes("Qu Black Mono")
+  ? pass(`agent chat: ${chat.codeBlocks} markdown code plates render in Qu Black Mono`)
   : fail(`agent chat: ${chat.codeBlocks} code plates, font ${chat.codeFont}`);
 chat.codeUniform && chat.codeSpans === 0
   ? pass("agent chat: code plate is one greyscale slab (no syntax colours)")
@@ -309,8 +327,8 @@ chat.codeUniform && chat.codeSpans === 0
 chat.boldWeight === "700" && chat.boldText.includes("Found it")
   ? pass(`agent chat: **bold** renders at weight ${chat.boldWeight}`)
   : fail(`agent chat: bold weight ${chat.boldWeight}, text ${JSON.stringify(chat.boldText)}`);
-chat.inlineFont.includes("QuBlack Mono")
-  ? pass("agent chat: inline code renders in QuBlack Mono")
+chat.inlineFont.includes("Qu Black Mono")
+  ? pass("agent chat: inline code renders in Qu Black Mono")
   : fail(`agent chat: inline code font ${chat.inlineFont}`);
 
 // The ghost-indent bug: every rendered code line starts at the same x, and only intentional
@@ -754,7 +772,9 @@ const specimenOptics = () =>
     const cell = document.querySelector("#ascii-grid span")!;
     const context = document.createElement("canvas").getContext("2d")!;
     const family =
-      document.documentElement.dataset.specimenFamily === "mono" ? "QuBlack Mono" : "QuBlack Sans";
+      document.documentElement.dataset.specimenFamily === "mono"
+        ? "Qu Black Mono"
+        : "Qu Black Sans";
     const size = Number.parseFloat(getComputedStyle(hero).fontSize);
     context.font = `${size}px "${family}"`;
     const metrics = context.measureText("汉");
@@ -834,6 +854,9 @@ heroEdge.twoUp && heroEdge.delta <= 2
 
 await page.setViewport({ width: 390, height: 844 });
 await page.reload({ waitUntil: "load" });
+// Every other viewport probe awaits the faces after a reload, and the header row is measured text,
+// so this one must too or it grades a fallback face (145.2px vs 138.7px for the same label).
+await page.evaluate(() => document.fonts.ready.then(() => undefined));
 const mobile = await page.evaluate(() => {
   const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
   const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
@@ -884,15 +907,15 @@ const fonts = await page.evaluate(() => {
   const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
   const woff2 = resources.filter((entry) => entry.name.endsWith(".woff2"));
   return {
-    mono: document.fonts.check('400 16px "QuBlack Mono"'),
-    sans: document.fonts.check('400 16px "QuBlack Sans"'),
+    mono: document.fonts.check('400 16px "Qu Black Mono"'),
+    sans: document.fonts.check('400 16px "Qu Black Sans"'),
     bytes: woff2.reduce((sum, entry) => sum + (entry.transferSize || entry.encodedBodySize), 0),
     shards: woff2.length,
     cls: (window as unknown as { __cls: number }).__cls,
   };
 });
 fonts.mono && fonts.sans
-  ? pass("fonts: QuBlack Mono and QuBlack Sans both resolve")
+  ? pass("fonts: Qu Black Mono and Qu Black Sans both resolve")
   : fail(`fonts: mono=${fonts.mono} sans=${fonts.sans}`);
 initialFonts.bytes < 400_000
   ? pass(
@@ -946,7 +969,25 @@ cta.label && cta.href.includes("/releases/tag/") && cta.releaseBtnGone
 await page.evaluate(() => {
   document.querySelector<HTMLAnchorElement>('a[href="#download"]')?.click();
 });
-await new Promise((r) => setTimeout(r, 900));
+// The jump is a smooth scroll on a ~7500px page: it is not even moving 100ms in and is still
+// 619px short at 900ms (settles at 30px by ~1.5s). Wait for the scroll to end — scrollend fires
+// only when it does — and grade the landing, not the animation. The 3s guard covers a jump that
+// needs no scrolling at all.
+await page.evaluate(
+  () =>
+    new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 3_000);
+      if (!("onscrollend" in window)) return;
+      window.addEventListener(
+        "scrollend",
+        () => {
+          clearTimeout(timer);
+          resolve();
+        },
+        { once: true },
+      );
+    }),
+);
 const landing = await page.evaluate(() => {
   const sec = document.getElementById("download")!.getBoundingClientRect();
   const header = document.querySelector("header, nav")!.getBoundingClientRect();

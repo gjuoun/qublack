@@ -1,11 +1,11 @@
-# 黢黑 QuBlack
+# 黢黑 Qu Black
 
-A bilingual typeface family built for code: **QuBlack Mono** holds a strict **2:1** grid (one
-hanzi = two ASCII cells, measured at 2.000), **QuBlack Sans** is its proportional sibling for
+A bilingual typeface family built for code: **Qu Black Mono** holds a strict **2:1** grid (one
+hanzi = two ASCII cells, measured at 2.000), **Qu Black Sans** is its proportional sibling for
 documents, web and UI. Both carry Source Han Sans hanzi (via Sarasa Gothic) and Recursive Linear
 Latin, so the whole family is redistributable under the SIL Open Font License 1.1.
 
-![QuBlack specimen](documentation/specimen.png)
+![Qu Black specimen](documentation/specimen.png)
 
 Site: **https://qublack.qqntt.com/** — specimen, measurements and downloads.
 Release: **[v1.1.0](https://github.com/gjuoun/qublack/releases/tag/v1.1.0)** · Google Fonts
@@ -14,10 +14,10 @@ submission in progress (see `google-fonts/`) · CI:
 
 ## Family
 
-| Family       | Use                | upm  | Hanzi   | ASCII   |
-| ------------ | ------------------ | ---- | ------- | ------- |
-| QuBlack Mono | terminal, code     | 833  | 1.200em | 0.600em |
-| QuBlack Sans | documents, web, UI | 1000 | 1.000em | 0.600em |
+| Family        | Use                | upm  | Hanzi   | ASCII   |
+| ------------- | ------------------ | ---- | ------- | ------- |
+| Qu Black Mono | terminal, code     | 833  | 1.200em | 0.600em |
+| Qu Black Sans | documents, web, UI | 1000 | 1.000em | 0.600em |
 
 Four styles each: Regular, Italic, Bold, Bold Italic.
 
@@ -39,7 +39,7 @@ git-ignored, `bash sources/build.sh` rebuilds the statics from the pinned inputs
   coverage are unchanged; `reference/CJK.md` records the measurements, the 2,482-codepoint donor
   boundary and the 0.0024 em worst-case ink delta.
 - **v1.0.4** — clean name tables (the zh-CN records now read 黢黑等宽 QuBlack Mono / 黢黑比例
-  QuBlack Sans, no Sarasa version strings or empty records) and an OTS fix that lets Chrome load the
+  Qu Black Sans, no Sarasa version strings or empty records) and an OTS fix that lets Chrome load the
   TTFs directly.
 - **v1.0.3** — the full 44-symbol census: every CJK-adjacent mark sits on Sarasa's ink ratios.
 - **v1.0.2** — the bracket set harmonised.
@@ -51,7 +51,7 @@ git-ignored, `bash sources/build.sh` rebuilds the statics from the pinned inputs
 | --------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
 | **TTF**   | `QuBlackMono-*.ttf`, `QuBlackSans-*.ttf` | system install — macOS `~/Library/Fonts`, Linux `~/.local/share/fonts`, Windows double-click |
 | **TTC**   | `QuBlackMono.ttc`, `QuBlackSans.ttc`     | the smaller bundle: four faces per file, shared tables                                       |
-| **WOFF2** | `QuBlack*-*.woff2`                       | `@font-face` self-hosting on the web — **WOFF2, not WOFF1**                                  |
+| **WOFF2** | `Qu Black*-*.woff2`                      | `@font-face` self-hosting on the web — **WOFF2, not WOFF1**                                  |
 
 No OTF: the outlines are `glyf`; a CFF conversion would only cost size and hinting.
 
@@ -77,7 +77,7 @@ bun run check                   # lint, typecheck, tests, site build
 
 ## Credits
 
-QuBlack is a derivative work, and it also borrows ideas. With thanks:
+Qu Black is a derivative work, and it also borrows ideas. With thanks:
 
 **Glyphs**
 - [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic) by Chen Qi's Sarasa contributors — the
@@ -90,7 +90,7 @@ QuBlack is a derivative work, and it also borrows ideas. With thanks:
   Sans (SIL OFL 1.1).
 
 **Ideas and references**
-- Sarasa's own Term/Mono split and its 2:1 alignment paradigm — why QuBlack Mono exists as a second
+- Sarasa's own Term/Mono split and its 2:1 alignment paradigm — why Qu Black Mono exists as a second
   family rather than another weight.
 - The upm-833 optical trick (change `unitsPerEm`, leave every coordinate alone) that makes the mono
   cell read 1.200em against a 0.600em ASCII cell.

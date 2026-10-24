@@ -76,7 +76,7 @@ def designspace(light: Path, heavy: Path, target: Path) -> Path:
         source.path = str(path)
         source.name = f"wght{weight}"
         source.location = {"Weight": weight}
-        source.familyName = "QuBlack"
+        source.familyName = "Qu Black"
         source.styleName = WEIGHTS[weight]
         doc.addSource(source)
     doc.write(str(target))
