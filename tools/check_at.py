@@ -56,7 +56,8 @@ def main() -> int:
     )
     args = parser.parse_args()
     if str(args.latin_vf) == "auto":
-        args.latin_vf = latin_masters.donor_for(args.donors)
+        # --donors points at the mono static directory; the pinned variable donor sits one level up.
+        args.latin_vf = latin_masters.donor_for(args.donors.parent)
 
     styles = [args.style] if args.style else STYLES
     failures = 0
@@ -72,7 +73,7 @@ def main() -> int:
         donor = (
             TTFont(str(donor_path))
             if args.latin_vf is None
-            else latin_masters.instance(args.latin_vf, "mono", style, args.donors)
+            else latin_masters.instance(args.latin_vf, "mono", style, static=donor_path)
         )
         built_points = points(built, built.getBestCmap()[0x40])
         donor_points = points(donor, "at.alt")

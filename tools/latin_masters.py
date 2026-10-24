@@ -198,10 +198,22 @@ def reconcile(instance: TTFont, reference: TTFont) -> tuple[list[str], float, st
     return sorted(picks), worst[0], worst[1]
 
 
-def instance(donor: Path, mode: str, style: str, sources: Path = DEFAULT_SOURCES, cache: Path = CACHE) -> TTFont:
-    """Return the donor instanced at one style, reconciled to the static release, cached."""
+def instance(
+    donor: Path,
+    mode: str,
+    style: str,
+    sources: Path = DEFAULT_SOURCES,
+    cache: Path = CACHE,
+    static: Path | None = None,
+) -> TTFont:
+    """Return the donor instanced at one style, reconciled to the static release, cached.
+
+    `static` names the reference face directly; callers that already resolve it (the at.alt guard
+    points --donors at rec_mono itself) should pass it instead of letting it be derived from a
+    sources root.
+    """
     cache.mkdir(parents=True, exist_ok=True)
-    static = static_donor(Path(sources), mode, style)
+    static = Path(static) if static is not None else static_donor(Path(sources), mode, style)
     if not static.exists():
         raise SystemExit(f"missing static donor: {static} (needed to reconcile the Latin outlines)")
     key = f"{donor.stem}-{donor.stat().st_size}-{mode}-{style}-v{CACHE_VERSION}"
