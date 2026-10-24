@@ -38,7 +38,7 @@ python3 tools/verify_family.py fonts/ttf/          # metrics against reference/b
 python3 tools/verify_family.py fonts/ttf/ --against reference/baseline-v1.json --grid-only
 python3 tools/cjk_weight.py --check fonts/ttf/     # CJK weight ratios + Regular/Bold interpolability
 python3 tools/name_audit.py --strict fonts/ttf/    # name table, OFL notice, cmap, 2:1 grid
-bun run site/scripts/font-probe.ts fonts/ttf/      # Chrome OTS load + canvas render, 8/8
+bun run tools/font-probe.ts fonts/ttf/      # Chrome OTS load + canvas render, 8/8
 ```
 
 The `--latin-vf` path does not draw the raw VF instances: `tools/latin_masters.py` reconciles every
@@ -95,27 +95,12 @@ cover, are described in `reference/CJK.md`.
 bun run fonts:vf                            # ~4 min: two masters per family, then the merge
 python3 tools/vf_audit.py --check fonts/vf  # fvar/STAT/axis/glyph surface
 bash ../../scripts/vf-gate.sh "$PWD"        # axis ends: grid, 44-symbol census, at.alt
-bun run site/scripts/font-probe.ts fonts/vf --vf
+bun run tools/font-probe.ts fonts/vf --vf
 ```
 
 Output is `fonts/vf/QuBlackMono[wght].ttf` and `QuBlackSans[wght].ttf` (about 22 MB each), also
 git-ignored. `reference/VF.md` explains the two-master model, the frozen glyphs that cannot
 interpolate, the BASE exclusion and the sans layout fallback.
-
-## 3. Cut the web fonts
-
-```sh
-python3 tools/web_fonts.py --out site/public/fonts --css site/src/styles/qublack-fonts.css
-python3 tools/web_fonts.py --check        # regenerate to /tmp and byte-compare
-```
-
-564 shards over eight faces (about 52 MB on disk, 46 KB for the first shard). Shard 0 holds every
-codepoint the site's own source uses, so a first paint needs one small shard per face; the rest
-follows the GB2312 level-1 order and then codepoint order. `head.modified`/`created` are pinned so
-the output is byte-reproducible.
-
-The shards are **not committed**. Cloudflare Pages downloads the release zip, cuts them, and
-deploys the result; locally the same command writes into the git-ignored `site/public/fonts/ttf/`.
 
 ## 4. Package the release
 
@@ -127,16 +112,9 @@ python3 tools/pack_release.py --tag v1.0.4
 The zip is deterministic (sorted entries, fixed timestamps). Publish with
 `gh release create v1.0.4 dist/QuBlack-family-1.0.4.zip dist/SHA256SUMS dist/README-release.txt`.
 
-## 5. Site
+## Site
 
-```sh
-bun install
-bun run fonts:web        # once, after the faces exist
-bun run site:dev         # http://localhost:4321
-bun run check            # lint, typecheck, tests, site build
-bun run site/scripts/smoke.ts http://localhost:4321
-```
+The specimen site lives in the `sites` monorepo (`apps/qublack`); its deploy fetches this
+repo's release zip and cuts the web shards there. This repo is fonts-only.
 
-The smoke script drives the locally installed Chrome through puppeteer-core and asserts the
-interactions (editable hero, B/M keys, arrow navigation), the content counts, the font payload
-budget and CLS.
+
