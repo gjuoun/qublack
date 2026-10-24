@@ -1,11 +1,11 @@
 /**
  * A deliberately small markdown renderer for the agent specimen.
  *
- * Agent output in the wild is markdown, and the container has to prove QuBlack keeps its 2:1 grid
+ * Agent output in the wild is markdown, and the container has to prove Qu Black keeps its 2:1 grid
  * under markdown typography. So this renders exactly the subset an agent reply uses — fenced code,
  * bold, inline code, headings and bullets — and nothing else:
  *
- * - **No syntax highlighting.** A fenced block is one flat greyscale plate in QuBlack Mono; colour
+ * - **No syntax highlighting.** A fenced block is one flat greyscale plate in Qu Black Mono; colour
  *   would compete with the typeface the page is selling.
  * - **Everything is escaped first**, so the returned string is safe for set:html / innerHTML even
  *   when the source came from an input box.

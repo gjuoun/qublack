@@ -68,7 +68,7 @@ export function BGHowToTabs({ tabs }: { tabs: HowToTab[] }) {
   return (
     <Tabs defaultValue={tabs[0]?.id} className="gap-0">
       <TabsList
-        aria-label="How to use QuBlack"
+        aria-label="How to use Qu Black"
         data-howto-tabs
         className="flex w-full flex-wrap justify-start gap-[0.4rem] rounded-full border border-bf-border bg-bf-border-muted/55 p-[0.4rem] group-data-horizontal/tabs:h-auto"
       >

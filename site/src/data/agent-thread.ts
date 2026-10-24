@@ -2,7 +2,7 @@
  * The conversation the homepage specimen renders: a real-shaped agent exchange. Every agent turn
  * is **markdown**, because that is what agent output looks like in the wild — a bold verdict, a
  * bulleted explanation, a fenced code block, inline identifiers. The container renders it with
- * QuBlack: prose in the sans face, code and identifiers in the mono face, no syntax colours.
+ * Qu Black: prose in the sans face, code and identifiers in the mono face, no syntax colours.
  */
 
 export interface ChatMessage {
@@ -25,7 +25,7 @@ export const THREAD: ChatMessage[] = [
     markdown: [
       "**Found it.** 价格列少了 `minmax(0, …)`，一个长中文商品名就把 grid track 顶出了视口。",
       "",
-      "QuBlack Mono 里 **汉字 = 2 个 ASCII 格**，所以两条轨道同样宽：",
+      "Qu Black Mono 里 **汉字 = 2 个 ASCII 格**，所以两条轨道同样宽：",
       "",
       "```text",
       "汉汉 | aaaa",
@@ -75,6 +75,6 @@ export const REPLIES: string[] = [
     "国国 | bbbb",
     "```",
   ].join("\n"),
-  "**Fixed.** 只动渲染层：`font-family` 换成 QuBlack，行高按中英分别设，其余不动。",
+  "**Fixed.** 只动渲染层：`font-family` 换成 Qu Black，行高按中英分别设，其余不动。",
   "**Tests pass** — 12 passed, 0 failed. 要我把同样的修正补到移动端断点吗？",
 ];

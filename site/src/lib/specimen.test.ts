@@ -84,8 +84,8 @@ test("unknown keys are ignored", () => {
 });
 
 test("the face label names the family, weight and italic", () => {
-  expect(faceLabel(INITIAL_STATE)).toBe("QuBlack Sans Regular");
+  expect(faceLabel(INITIAL_STATE)).toBe("Qu Black Sans Regular");
   expect(faceLabel({ family: "mono", weight: "bold", italic: true })).toBe(
-    "QuBlack Mono Bold Italic",
+    "Qu Black Mono Bold Italic",
   );
 });

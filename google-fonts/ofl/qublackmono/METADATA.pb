@@ -1,43 +1,43 @@
-name: "QuBlack Mono"
+name: "Qu Black Mono"
 designer: "Jun Guo"
 license: "OFL"
 category: "MONOSPACE"
 date_added: "2026-10-23"
 fonts {
-  name: "QuBlack Mono"
+  name: "Qu Black Mono"
   style: "normal"
   weight: 400
   filename: "QuBlackMono-Regular.ttf"
   post_script_name: "QuBlackMono-Regular"
-  full_name: "QuBlack Mono Regular"
-  copyright: "Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)"
+  full_name: "Qu Black Mono Regular"
+  copyright: "Copyright 2026 The Qu Black Project Authors (https://github.com/gjuoun/qublack)"
 }
 fonts {
-  name: "QuBlack Mono"
+  name: "Qu Black Mono"
   style: "italic"
   weight: 400
   filename: "QuBlackMono-Italic.ttf"
   post_script_name: "QuBlackMono-Italic"
-  full_name: "QuBlack Mono Italic"
-  copyright: "Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)"
+  full_name: "Qu Black Mono Italic"
+  copyright: "Copyright 2026 The Qu Black Project Authors (https://github.com/gjuoun/qublack)"
 }
 fonts {
-  name: "QuBlack Mono"
+  name: "Qu Black Mono"
   style: "normal"
   weight: 700
   filename: "QuBlackMono-Bold.ttf"
   post_script_name: "QuBlackMono-Bold"
-  full_name: "QuBlack Mono Bold"
-  copyright: "Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)"
+  full_name: "Qu Black Mono Bold"
+  copyright: "Copyright 2026 The Qu Black Project Authors (https://github.com/gjuoun/qublack)"
 }
 fonts {
-  name: "QuBlack Mono"
+  name: "Qu Black Mono"
   style: "italic"
   weight: 700
   filename: "QuBlackMono-BoldItalic.ttf"
   post_script_name: "QuBlackMono-BoldItalic"
-  full_name: "QuBlack Mono Bold Italic"
-  copyright: "Copyright 2026 The QuBlack Project Authors (https://github.com/gjuoun/qublack)"
+  full_name: "Qu Black Mono Bold Italic"
+  copyright: "Copyright 2026 The Qu Black Project Authors (https://github.com/gjuoun/qublack)"
 }
 subsets: "armenian"
 subsets: "braille"

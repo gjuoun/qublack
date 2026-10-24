@@ -19,9 +19,9 @@
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: "QuBlack Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "QuBlack Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --font-display: "QuBlack Sans", "Helvetica Neue", system-ui, sans-serif;
+  --font-sans: "Qu Black Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Qu Black Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Qu Black Sans", "Helvetica Neue", system-ui, sans-serif;
   --ease-bf: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-hue: bf-hue 12s var(--ease-bf) infinite alternate;
   --animate-ring: bf-ring 22s linear infinite;
@@ -219,7 +219,7 @@
   max-width: 56ch;
 }
 
-/* The code face: QuBlack Mono, always with ligatures off — this family has none on purpose. */
+/* The code face: Qu Black Mono, always with ligatures off — this family has none on purpose. */
 @utility font-code {
   font-family: var(--font-mono);
   font-variant-ligatures: none;

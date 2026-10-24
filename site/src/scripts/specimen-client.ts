@@ -39,7 +39,7 @@ const render = (): void => {
   root.dataset.specimenWeight = state.weight;
   root.dataset.specimenItalic = String(state.italic);
   for (const sample of samples) {
-    sample.style.fontFamily = state.family === "mono" ? '"QuBlack Mono"' : '"QuBlack Sans"';
+    sample.style.fontFamily = state.family === "mono" ? '"Qu Black Mono"' : '"Qu Black Sans"';
     sample.style.fontWeight = state.weight === "bold" ? "700" : "400";
     sample.style.fontStyle = state.italic ? "italic" : "normal";
   }
