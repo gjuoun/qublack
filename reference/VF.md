@@ -73,6 +73,15 @@ glyphs (`#` 88 vs 72 points, `x` 51 vs 56, `1` 43/43 with a different on/off bit
 pair can no longer be merged, and it changes rendered ink by 0.0–0.9% (`l` 1.16 → 1.16 px² at
 12 px). The gap was the missing alternates, not the overlaps.
 
+**The metrics travel with the drawing.** A rasteriser draws a glyph at `xMin + (lsb - xMin)`, so an
+outline swapped in under the default glyph's bearing lands where the default was: the sans `l` sits
+at 108 while the default bearing is 37, and the first reconciliation rendered it 71 units (0.85 px
+at 12 px) to the left of the static. The substitute now also takes the alternate's advance and
+bearing, the copy is rejected if it moves by more than one unit, and the ink gate measures the ink
+centroid in em — the raster sum is blind to translation. Measured bearing deltas against the
+statics, mono `l f g i r` and sans `l` `0`: zero at both weights; worst centroid shift 0.17% of the
+em, down from 7.1%.
+
 **`maxp` limits change how an instance rasterises.** varLib zeroes the merged `maxp` instruction
 limits (`maxZones` 1, no twilight/storage/stack), and FreeType then renders the same outline 8.8%
 heavier on `@` than the static face does. `build_vf.py` restores the six limits from the wght 400
