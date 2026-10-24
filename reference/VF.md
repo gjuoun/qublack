@@ -4,10 +4,10 @@ v1.2.0 adds two weight-axis variable fonts to the eight static faces. They are *
 committed files**: `fonts/` is fully git-ignored, the binaries are produced locally by
 `bun run fonts:vf`, and they ship inside the release zip only.
 
-| family       | file                             | PostScript              | instances                                          | glyphs | size              |
-| ------------ | -------------------------------- | ----------------------- | -------------------------------------------------- | ------ | ----------------- |
-| QuBlack Mono | `fonts/vf/QuBlackMono[wght].ttf` | `QuBlackMonoVF-Regular` | Regular 400 · Medium 500 · SemiBold 600 · Bold 700 | 57,129 | 22,574,360 B      |
-| QuBlack Sans | `fonts/vf/QuBlackSans[wght].ttf` | `QuBlackSansVF-Regular` | same ladder                                        | 53,716 | see the build log |
+| family        | file                             | PostScript              | instances                                          | glyphs | size              |
+| ------------- | -------------------------------- | ----------------------- | -------------------------------------------------- | ------ | ----------------- |
+| Qu Black Mono | `fonts/vf/QuBlackMono[wght].ttf` | `QuBlackMonoVF-Regular` | Regular 400 · Medium 500 · SemiBold 600 · Bold 700 | 57,129 | 22,574,360 B      |
+| Qu Black Sans | `fonts/vf/QuBlackSans[wght].ttf` | `QuBlackSansVF-Regular` | same ladder                                        | 53,716 | see the build log |
 
 The family string is the unmarked name — Google Fonts rejects `VF` as an illegal particle — while
 the PostScript name keeps the marker. That marker is deliberate: the static faces already own
@@ -24,7 +24,7 @@ alternative is a name collision or dropping the statics from the release.
 ```
 
 Result: **FAIL 0 / FATAL 0** for both families (WARN-only). The four waivers are the three the
-static gate already carries — `QuBlack` is CamelCase, the 1.25 em line box is a design decision,
+static gate already carries — `Qu Black` is CamelCase, the 1.25 em line box is a design decision,
 CJK families exceed the 9 MB file-size limit — plus `font_names` for the PostScript marker above.
 
 ## Masters
