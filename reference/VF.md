@@ -37,14 +37,55 @@ the statics cannot drift:
 | CJK   | `NotoSansSC-VF.ttf` instanced at 400                                                 | same donor at 700 |
 | Latin | `Recursive_VF_1.085.ttf` at `MONO` 1 (mono) / 0 (sans), `CASL` 0, `CRSV` 0, `slnt` 0 | same at 700       |
 
-**The static faces do not use the instanced donor.** Measured: at wght 400 the instance's `l` is
-4 units narrower than the static `l` (68..532 vs 72..534) and carries the overlap contours the
-statics had removed — a pixel on a thin stem at 24 ppem, 12–15% rasterised coverage on that glyph.
-Rebuilding the statics from the instance would therefore move the shipped faces, which the card
-forbids. The statics keep the Recursive statics (`USE_LATIN_VF = False`, byte-identical to
-v1.1.0); only the VF masters take the instance, where the requirement is interpolability. The VF
-and the static Regular differ by that sub-pixel amount on a handful of Latin glyphs — documented
-here rather than hidden.
+**The static faces do not use the instanced donor.** Their Latin comes from the Recursive statics
+(`USE_LATIN_VF = False`, byte-identical to v1.1.0); only the VF masters take the variable instance.
+That instance is reconciled to the static release before it is drawn (next section), so the two
+agree on ink: measured per glyph, the axis ends are within 0.7% of the shipped statics.
+
+## Latin ink
+
+The variable donor is not the drawing ArrowType shipped in its statics. Its static releases bake the
+donor's own alternates, and drawing a glyph out of a variable font never applies them, so the raw
+instance loses 15–30% of the ink area on the affected glyphs (mono `i` 28.0%, `r` 25.4%, `f` 19.2%,
+`l` 14.9%, `g` 1.6%; sans `0` 15.3%, `l` 8.2%). The v1.2.0 variable faces shipped that way, which
+is why thin stems rendered visibly lighter than the statics at small sizes.
+
+`tools/latin_masters.py` now reconciles every `0x20–0x7E` slot against the matching ArrowType static
+of the same weight: among the default glyph and its `name.*` alternates it keeps the one with the
+static's box and ink, decomposes it into the slot, and reports the pick. The picks are the ones the
+statics use — `f.mono g.mono i.mono l.mono r.mono` for the mono family, `l.sans zero.sans_pnum` for
+the proportional one — and the build aborts above 2.5% drift instead of shipping a face whose
+strokes disagree.
+
+| per glyph, against the shipped statics | ink area       | rasterised ink, 24/48 ppem |
+| -------------------------------------- | -------------- | -------------------------- |
+| before (v1.2.0)                        | −28.0% (`i`)   | −87.5 px² (`i`)            |
+| after                                  | **0.7%** (`\`) | **2.8 px²** (`Q`)          |
+
+The pair still interpolates (`vf_compat`: `ascii 0`); the reconciliation rewrites five glyph slots
+per mono family and two per sans family, and adds no geometry. `python3 tools/latin_masters.py
+sources/upstream/Recursive_VF_1.085.ttf --mode mono --style Regular --check` prints the picks and
+the residual (0.76% for mono Regular, 0.54% for sans Regular).
+
+**Ruled out — `removeOverlaps()` and stem compensation.** Applying
+`fontTools.ttLib.removeOverlaps` to each instance breaks the point structure of 35 of 95 ASCII
+glyphs (`#` 88 vs 72 points, `x` 51 vs 56, `1` 43/43 with a different on/off bit pattern), so the
+pair can no longer be merged, and it changes rendered ink by 0.0–0.9% (`l` 1.16 → 1.16 px² at
+12 px). The gap was the missing alternates, not the overlaps.
+
+**The metrics travel with the drawing.** A rasteriser draws a glyph at `xMin + (lsb - xMin)`, so an
+outline swapped in under the default glyph's bearing lands where the default was: the sans `l` sits
+at 108 while the default bearing is 37, and the first reconciliation rendered it 71 units (0.85 px
+at 12 px) to the left of the static. The substitute now also takes the alternate's advance and
+bearing, the copy is rejected if it moves by more than one unit, and the ink gate measures the ink
+centroid in em — the raster sum is blind to translation. Measured bearing deltas against the
+statics, mono `l f g i r` and sans `l` `0`: zero at both weights; worst centroid shift 0.17% of the
+em, down from 7.1%.
+
+**`maxp` limits change how an instance rasterises.** varLib zeroes the merged `maxp` instruction
+limits (`maxZones` 1, no twilight/storage/stack), and FreeType then renders the same outline 8.8%
+heavier on `@` than the static face does. `build_vf.py` restores the six limits from the wght 400
+master, which is what the statics carry.
 
 ## The freeze
 
@@ -97,6 +138,8 @@ A true-italic CJK donor would need two more masters per family and an `ital` axi
 ```sh
 bun run fonts:vf                        # build both VFs (local, git-ignored)
 python3 tools/vf_audit.py --check fonts/vf
+python3 tools/latin_masters.py sources/upstream/Recursive_VF_1.085.ttf --mode mono --style Regular --check
 bash ../../scripts/vf-gate.sh "$PWD"    # axis ends: grid, census, at.alt
+python3 ../../scripts/vf-ink.py --vf fonts/vf   # per-glyph ink of the axis ends vs fonts/ttf
 bun run site/scripts/font-probe.ts fonts/vf --vf
 ```

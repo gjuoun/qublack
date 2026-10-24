@@ -46,11 +46,18 @@ def main() -> int:
     parser.add_argument("--style", default=None, help="check one style only")
     parser.add_argument(
         "--latin-vf",
+        nargs="?",
+        const="auto",
         type=Path,
         default=None,
-        help="compare against the instanced Recursive VF the build used, not the static donor",
+        metavar="PATH",
+        help="compare against the instanced Recursive VF the build used, not the static donor "
+        "(no value = <donors>/Recursive_VF_1.085.ttf)",
     )
     args = parser.parse_args()
+    if str(args.latin_vf) == "auto":
+        # --donors points at the mono static directory; the pinned variable donor sits one level up.
+        args.latin_vf = latin_masters.donor_for(args.donors.parent)
 
     styles = [args.style] if args.style else STYLES
     failures = 0
@@ -63,7 +70,11 @@ def main() -> int:
             continue
 
         built = TTFont(str(built_path))
-        donor = TTFont(str(donor_path)) if args.latin_vf is None else latin_masters.instance(args.latin_vf, "mono", style)
+        donor = (
+            TTFont(str(donor_path))
+            if args.latin_vf is None
+            else latin_masters.instance(args.latin_vf, "mono", style, static=donor_path)
+        )
         built_points = points(built, built.getBestCmap()[0x40])
         donor_points = points(donor, "at.alt")
         default_points = points(donor, "at")

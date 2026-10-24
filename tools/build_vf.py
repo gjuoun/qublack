@@ -38,6 +38,20 @@ from vf_masters import freeze  # noqa: E402
 from vf_tables import prepare, release_version  # noqa: E402
 
 WEIGHTS = {400: "Regular", 700: "Bold"}
+# varLib zeroes these in the merged maxp. They are only limits, but the rasteriser reads maxZones
+# and the twilight/storage sizes to decide which hinting path to take: measured on the sans pair, an
+# instance of a face with the zeroed limits renders 8.8% more ink on `@` than the identical outline
+# in a static face, because it stops matching the shipped statics. The masters carry the values the
+# statics do, so the VF restores them after the merge.
+INSTRUCTION_LIMITS = (
+    "maxZones",
+    "maxTwilightPoints",
+    "maxStorage",
+    "maxFunctionDefs",
+    "maxInstructionDefs",
+    "maxStackElements",
+    "maxSizeOfInstructions",
+)
 
 
 def strip_layout(paths: list[Path]) -> None:
@@ -128,6 +142,8 @@ def build_family(
     prepare(merged, display, f"{slug}VF", release_version())
     write_base(merged)
     merged["maxp"].numGlyphs = len(merged.getGlyphOrder())
+    for field in INSTRUCTION_LIMITS:
+        setattr(merged["maxp"], field, getattr(light["maxp"], field))
 
     outdir.mkdir(parents=True, exist_ok=True)
     out = outdir / f"{slug}[wght].ttf"
