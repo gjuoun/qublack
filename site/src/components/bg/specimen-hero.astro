@@ -76,7 +76,12 @@ const stats = [
         class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1"
         data-specimen-header
       >
-        <span class="font-code text-[0.72rem] tracking-[0.14em] text-bf-fg-muted uppercase">
+        <!-- The two-word family name costs one more mono cell in the face label, which used to push
+             this row past the phone width; below 760px the label tightens its tracking instead of
+             wrapping, so the two halves keep one centreline. -->
+        <span
+          class="font-code text-[0.72rem] tracking-[0.14em] text-bf-fg-muted uppercase max-[760px]:tracking-[0.08em]"
+        >
           editable specimen<span class="hidden min-[760px]:inline"
             > — click and type, Enter to commit, Esc to revert</span
           >
