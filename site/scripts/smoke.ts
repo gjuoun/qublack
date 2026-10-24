@@ -237,6 +237,24 @@ const beforePanels = await visiblePanels();
 // A real mouse click, not element.click(): Radix Tabs selects on mousedown, not on click.
 await page.click('[data-howto-tab="terminals"]');
 await new Promise((resolve) => setTimeout(resolve, 150));
+// The active pill cross-fades its ink over 200ms, so a fixed sleep samples the interpolation —
+// Chrome reports that mid-value as oklab(...) and it drifts run to run. Wait for the trigger's own
+// transition to stop, then assert the settled style (the thresholds below are unchanged).
+await page
+  .waitForFunction(
+    () => {
+      const tab = document.querySelector('[data-howto-tab="terminals"]');
+      if (!tab || tab.getAttribute("data-state") !== "active") return false;
+      if (tab.getAnimations().some((animation) => animation.playState === "running")) return false;
+      const state = window as unknown as { __ink?: string; __still?: number };
+      const ink = getComputedStyle(tab).color;
+      state.__still = ink === state.__ink ? (state.__still ?? 0) + 1 : 0;
+      state.__ink = ink;
+      return (state.__still ?? 0) >= 3;
+    },
+    { polling: "raf", timeout: 4_000 },
+  )
+  .catch(() => undefined);
 const tabSwitch = await page.evaluate(async () => {
   const after = [...document.querySelectorAll<HTMLElement>("[data-howto-panel]")]
     .filter((panel) => panel.getBoundingClientRect().height > 0)
@@ -836,6 +854,9 @@ heroEdge.twoUp && heroEdge.delta <= 2
 
 await page.setViewport({ width: 390, height: 844 });
 await page.reload({ waitUntil: "load" });
+// Every other viewport probe awaits the faces after a reload, and the header row is measured text,
+// so this one must too or it grades a fallback face (145.2px vs 138.7px for the same label).
+await page.evaluate(() => document.fonts.ready.then(() => undefined));
 const mobile = await page.evaluate(() => {
   const chat = document.getElementById("agent-chat")!.getBoundingClientRect();
   const wrap = document.querySelector("#specimen .bf-wrap")!.getBoundingClientRect();
@@ -948,7 +969,25 @@ cta.label && cta.href.includes("/releases/tag/") && cta.releaseBtnGone
 await page.evaluate(() => {
   document.querySelector<HTMLAnchorElement>('a[href="#download"]')?.click();
 });
-await new Promise((r) => setTimeout(r, 900));
+// The jump is a smooth scroll on a ~7500px page: it is not even moving 100ms in and is still
+// 619px short at 900ms (settles at 30px by ~1.5s). Wait for the scroll to end — scrollend fires
+// only when it does — and grade the landing, not the animation. The 3s guard covers a jump that
+// needs no scrolling at all.
+await page.evaluate(
+  () =>
+    new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 3_000);
+      if (!("onscrollend" in window)) return;
+      window.addEventListener(
+        "scrollend",
+        () => {
+          clearTimeout(timer);
+          resolve();
+        },
+        { once: true },
+      );
+    }),
+);
 const landing = await page.evaluate(() => {
   const sec = document.getElementById("download")!.getBoundingClientRect();
   const header = document.querySelector("header, nav")!.getBoundingClientRect();

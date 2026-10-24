@@ -73,9 +73,9 @@ a reason that goes into the submission:
 - `cjk_vertical_metrics` — GF wants a 1.15 em line box; Qu Black's 1.25 em line height is a design
   decision. Everything else in that check (BASE, win metrics, hhea/typo agreement, vmtx/vhea) is
   satisfied, so the waiver covers the two typo ascender/descender comparisons only.
-On the variable faces `googlefonts/font_names` is additionally waived: the `VF` marker in the
-PostScript name (`QuBlackMonoVF-Regular`) deliberately differs from family+style so the VF and the
-static Regular never collide in font managers.
+  On the variable faces `googlefonts/font_names` is additionally waived: the `VF` marker in the
+  PostScript name (`QuBlackMonoVF-Regular`) deliberately differs from family+style so the VF and the
+  static Regular never collide in font managers.
 
 `verify_family.py` compares metrics, never hashes: a rebuild differs in glyph order and name
 records. `reference/shipped-v1.json` records the 2026-10-21 build that shipped as JunHei;
