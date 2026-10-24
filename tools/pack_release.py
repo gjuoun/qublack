@@ -106,6 +106,7 @@ def main() -> int:
     parser.add_argument("--fonts", type=Path, default=REPO / "fonts/ttf")
     parser.add_argument("--dist", type=Path, default=REPO / "dist")
     parser.add_argument("--skip-woff2", action="store_true", help="reuse existing .woff2 files")
+    parser.add_argument("--vf", type=Path, default=REPO / "fonts/vf", help="dir with the variable faces")
     args = parser.parse_args()
 
     version = args.tag.lstrip("v")
@@ -142,6 +143,17 @@ def main() -> int:
     entries: list[tuple[str, bytes]] = [(path.name, path.read_bytes()) for path in faces]
     entries += [(path.name, path.read_bytes()) for path in ttcs]
     entries += [(path.name, path.read_bytes()) for path in woff2]
+
+    # The two variable faces (wght 400-700) — standalone assets and zip members.
+    vfs: list[Path] = (
+        sorted(p for p in args.vf.glob("*.ttf") if "[wght]" in p.name) if args.vf.exists() else []
+    )
+    import shutil
+
+    for path in vfs:
+        shutil.copy2(path, args.dist / path.name)
+    entries += [(path.name, path.read_bytes()) for path in vfs]
+
     entries.append(("OFL.txt", (REPO / "OFL.txt").read_bytes()))
     entries.append(("README.txt", readme.encode("utf-8")))
     entries.append(("NOTICE.md", (REPO / "NOTICE.md").read_bytes()))
@@ -157,6 +169,7 @@ def main() -> int:
     sums = [(sha256(zip_path), zipname)]
     sums += [(sha256(path), path.name) for path in ttcs]
     sums += [(sha256(path), path.name) for path in woff2]
+    sums += [(sha256(args.dist / path.name), path.name) for path in vfs]
     (args.dist / "SHA256SUMS").write_text(
         "".join(f"{digest}  {name}\n" for digest, name in sorted(sums, key=lambda item: item[1])),
         encoding="utf-8",
@@ -166,7 +179,7 @@ def main() -> int:
         data = measure(path)
         print(f"  {path.name:30s} {path.stat().st_size:>10,} B  {data['glyphs']:>6} glyphs")
     print(f"packed {zip_path.name}: {zip_path.stat().st_size:,} B  sha256 {sha256(zip_path)}")
-    print(f"assets: {len(faces)} TTF, {len(ttcs)} TTC, {len(woff2)} WOFF2 + zip + sums")
+    print(f"assets: {len(faces)} TTF, {len(ttcs)} TTC, {len(woff2)} WOFF2, {len(vfs)} VF + zip + sums")
     return 0
 
 
