@@ -46,11 +46,17 @@ def main() -> int:
     parser.add_argument("--style", default=None, help="check one style only")
     parser.add_argument(
         "--latin-vf",
+        nargs="?",
+        const="auto",
         type=Path,
         default=None,
-        help="compare against the instanced Recursive VF the build used, not the static donor",
+        metavar="PATH",
+        help="compare against the instanced Recursive VF the build used, not the static donor "
+        "(no value = <donors>/Recursive_VF_1.085.ttf)",
     )
     args = parser.parse_args()
+    if str(args.latin_vf) == "auto":
+        args.latin_vf = latin_masters.donor_for(args.donors)
 
     styles = [args.style] if args.style else STYLES
     failures = 0
