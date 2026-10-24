@@ -31,11 +31,12 @@ if (!before || !staticFace || !after || !out) {
 }
 
 const sample = [
-  "const ll = 0b1010_1010 | Ili1;  // l i I | 1 l",
-  "if (api.status !== 200 || !user?.active) return nil; // ?:;.",
-  "// 汉字混排：黢黑等宽 2:1 对齐，汉字一格，ASCII 两格 abcd",
-  "npm run build --filter=site && bun test src/site  ✓ done @ v1.2.0",
-  "thin stems: l i I | 1 ; : . ,  FgRt",
+  "// 构建日志：@QuBlack 2:1 网格，l i I | 1 与 {}[]() 对齐检查",
+  "const total = items.filter(x => x.qty > 0).length; // {a:1,b:2} → sum",
+  'if (err?.code === "E_NO_ENTRY" && retry < 3) return null; // !?;:.',
+  "async function 渲染(节点: Node[]) { await 等待(200); } // 汉字 + English",
+  "$ npm run build --filter=site && bun test src/site  ✓ 12 passed",
+  "Δx=0.25; δ≈1e-9; ① ② ③ §¶°± ←↑→↓ 漢字混排对齐测试",
 ].join("\n");
 
 const work = mkdtempSync(join(tmpdir(), "qublack-compare-"));
@@ -51,8 +52,8 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
   @font-face { font-family: QF-static; src: url(static.ttf) format("truetype"); }
   @font-face { font-family: QF-after;  src: url(after.ttf)  format("truetype"); }
   body { background:#1e1e2e; color:#d9d9d4; margin:0; padding:24px; font-synthesis:none;
-         display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; width:1860px; }
-  .col { min-width:0; }
+         display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; width:2400px; }
+  .col { min-width:0; overflow:hidden; }
   .label { font:600 13px -apple-system, sans-serif; color:#8be9fd; letter-spacing:.5px; margin:0 0 6px; }
   .label b { color:#ff79c6; }
   .sub { font:500 11px -apple-system, sans-serif; color:#6272a4; margin:12px 0 4px; }
@@ -92,7 +93,7 @@ const browser = await puppeteer.launch({
 });
 try {
   const page = await browser.newPage();
-  await page.setViewport({ width: 1910, height: 900, deviceScaleFactor: 2 });
+  await page.setViewport({ width: 2450, height: 900, deviceScaleFactor: 2 });
   await page.goto(pathToFileURL(join(work, "index.html")).href, { waitUntil: "load" });
   await page.evaluate(() => document.fonts.ready);
   const checks = await page.evaluate(() => ({
