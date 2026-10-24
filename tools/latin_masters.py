@@ -42,8 +42,9 @@ REPO = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCES = Path(os.environ.get("QUBLACK_SOURCES") or REPO / "sources/upstream")
 CACHE = Path.home() / ".cache" / "qublack"
 DEFAULT_DONOR = "Recursive_VF_1.085.ttf"
-# Bump when the cached instance changes shape. 2 = the rvrn/mono reconcile above.
-CACHE_VERSION = 2
+# Bump when the cached instance changes shape. 3 = the reconcile carries the alternate's metrics;
+# 2 = the rvrn/mono reconcile.
+CACHE_VERSION = 3
 # Percent of the static glyph's ink area a reconciled glyph may still differ by.
 TOLERANCE = 2.5
 ASCII = range(0x20, 0x7F)
@@ -184,12 +185,22 @@ def reconcile(instance: TTFont, reference: TTFont) -> tuple[list[str], float, st
             # component-preserving copy turns the slot into a cycle. The decomposition is checked
             # against the alternate's own ink, because a pen round-trip is where the shape is lost.
             before = ink_area(instance, best[1])
-            glyf[name] = _decompose(instance, best[1])
+            source_box = _bounds(instance, best[1])
+            glyph = _decompose(instance, best[1])
+            # The drawing does not travel alone: a glyph that keeps the default's bearing is drawn
+            # shifted by (lsb - xMin), and FreeType honours exactly that. Measured on the sans l,
+            # the alternate sits at x 108 while the default's bearing is 37, so the copy rendered
+            # 71 units to the left until the metrics moved with it.
+            instance["hmtx"].metrics[name] = instance["hmtx"].metrics[best[1]]
+            glyf[name] = glyph
             after = ink_area(instance, name)
             if before <= 0 or abs(after - before) / before > 0.005:
                 raise SystemExit(
                     f"[latin] {name}: decomposed {best[1]} changed its ink ({before:.0f} -> {after:.0f} u^2)"
                 )
+            moved = max(abs(a - b) for a, b in zip(_bounds(instance, name), source_box))
+            if moved > 1:
+                raise SystemExit(f"[latin] {name}: {best[1]} moved {moved:.1f} units while being copied")
             picks.append(best[1])
         value = best[0]
 
