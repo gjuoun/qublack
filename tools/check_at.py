@@ -63,7 +63,11 @@ def main() -> int:
             continue
 
         built = TTFont(str(built_path))
-        donor = TTFont(str(donor_path)) if args.latin_vf is None else latin_masters.instance(args.latin_vf, "mono", style)
+        donor = (
+            TTFont(str(donor_path))
+            if args.latin_vf is None
+            else latin_masters.instance(args.latin_vf, "mono", style, args.donors)
+        )
         built_points = points(built, built.getBestCmap()[0x40])
         donor_points = points(donor, "at.alt")
         default_points = points(donor, "at")

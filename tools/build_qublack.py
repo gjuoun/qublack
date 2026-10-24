@@ -300,7 +300,11 @@ def build(
         raise SystemExit(f"missing donor: {latin_path}")
 
     skeleton = TTFont(str(skeleton_path))
-    latin = TTFont(str(latin_path)) if latin_vf is None else latin_masters.instance(latin_vf, mode, style)
+    latin = (
+        TTFont(str(latin_path))
+        if latin_vf is None
+        else latin_masters.instance(latin_vf, mode, style, sources)
+    )
     for font in (skeleton, latin):
         drop_vertical(font)
     assert skeleton["head"].unitsPerEm == 1000 and latin["head"].unitsPerEm == 1000

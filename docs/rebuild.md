@@ -16,6 +16,9 @@ unpacked.
 | Hanzi weight axis     | `NotoSansSC-VF.ttf`                                 | `python3 tools/fetch_cjk_vf.py` — pinned Noto Sans SC VF (OFL 1.1)          |
 | Emoji table           | `assets/emoji-data.txt`                             | vendored from the Unicode character database                                |
 
+The toolchain needs `skia-pathops` next to `fonttools` (`requirements.txt`): the Latin instance is
+reconciled to the static release with outline booleans, and the VF ink gate compares filled areas.
+
 `--sources` defaults to `sources/upstream` (override with `QUBLACK_SOURCES`); any directory with the layout in
 `tools/README.md` works. The one input that is scripted rather than hand-unpacked is the hanzi
 weight axis: `python3 tools/fetch_cjk_vf.py` downloads `NotoSansSC-VF.ttf` from a pinned google/fonts
@@ -37,6 +40,12 @@ python3 tools/cjk_weight.py --check fonts/ttf/     # CJK weight ratios + Regular
 python3 tools/name_audit.py --strict fonts/ttf/    # name table, OFL notice, cmap, 2:1 grid
 bun run site/scripts/font-probe.ts fonts/ttf/      # Chrome OTS load + canvas render, 8/8
 ```
+
+The `--latin-vf` path does not draw the raw VF instances: `tools/latin_masters.py` reconciles every
+ASCII slot against the matching ArrowType static first, because the statics bake the donor's feature
+substitutions (`l.mono`, `f.mono`, `g.mono`, `i.mono`, `r.mono`; `l.sans` and `zero.sans_pnum` for the
+proportional face). Without that step the variable faces render thin strokes 10-30% lighter than the
+statics at small sizes. The eight static faces keep the static donors and are untouched.
 
 Each face is one `build_qublack.py` run. The mono pipeline applies the upm-833 trick after the
 Latin swap, so `汉` = 1.200em and ASCII = 0.600em with the glyph coordinates untouched. The sans
