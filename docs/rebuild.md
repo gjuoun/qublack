@@ -117,8 +117,8 @@ Everything above also runs as one [release pipeline](../.github/workflows/releas
 dispatch on an ubuntu runner: build the ten faces from the committed sources, gate them, pack,
 create the release with its fifteen assets, then ask the `sites` repository to deploy.
 
-| Input     | Meaning                                                                       |
-| --------- | ----------------------------------------------------------------------------- |
+| Input     | Meaning                                                                        |
+| --------- | ------------------------------------------------------------------------------ |
 | `version` | release version without the `v`; must equal `package.json` before a real run   |
 | `notes`   | release body, markdown                                                         |
 | `dry_run` | build, gate and pack for real, publish a **draft** release, print the dispatch |
