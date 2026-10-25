@@ -15,6 +15,7 @@
     "fonts:vf": "python3 tools/build_vf.py --sources sources/upstream --out fonts/vf",
     "fonts:probe": "bun run tools/font-probe.ts fonts/ttf/",
     "fonts:weight": "python3 tools/cjk_weight.py --check fonts/ttf/",
+    "fonts:gate": "bash tools/ci-gate.sh",
     "fonts:verify": "python3 tools/verify_family.py fonts/ttf/ --against reference/baseline-v2.json",
     "fonts:audit": "python3 tools/name_audit.py --strict fonts/ttf/",
     "fonts:web": "python3 tools/web_fonts.py --out site/public/fonts --css site/src/styles/qublack-fonts.css",

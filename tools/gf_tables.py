@@ -9,7 +9,7 @@ uses (and which google/fonts applies to CJK families):
   * romn is the Roman baseline (0);
   * vertical baselines mirror the horizontal ones across the em box.
 
-Qu Black keeps its own 1.25 em line height (a product decision, JG-143 Q5), so the typo
+Qu Black keeps its own 1.25 em line height (a product decision), so the typo
 ascender/descender keep summing to the layout line height while hhea is made to agree.
 """
 
