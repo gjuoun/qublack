@@ -174,7 +174,10 @@ jobs:
             flags+=(--draft)
           fi
           shopt -s nullglob
-          files=(dist/*)
+          # gh expands its file arguments as globs, so a literal [wght] in a filename
+          # must be escaped or the upload aborts with "no matches found".
+          files=()
+          for f in dist/*; do g=${f//\[/\\[}; g=${g//\]/\\]}; files+=("$g"); done
           echo "uploading ${#files[@]} assets as $TAG"
           gh release create "$TAG" "${files[@]}" "${flags[@]}"
           gh release view "$TAG" --json tagName,isDraft,assets \
