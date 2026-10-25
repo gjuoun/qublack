@@ -174,10 +174,11 @@ jobs:
             flags+=(--draft)
           fi
           shopt -s nullglob
-          # gh expands its file arguments as globs, so a literal [wght] in a filename
-          # must be escaped or the upload aborts with "no matches found".
-          files=()
-          for f in dist/*; do g=${f//\[/\\[}; g=${g//\]/\\]}; files+=("$g"); done
+          # gh expands its file arguments as globs, so a literal [wght] would abort
+          # the upload; escape it, and pass bare names from inside dist/ so the
+          # asset name keeps the brackets.
+          mapfile -t files < <(python3 -c 'import os;print(chr(10).join(n.replace("[",chr(92)+"[").replace("]",chr(92)+"]") for n in sorted(os.listdir("dist")) if os.path.isfile(os.path.join("dist",n))))')
+          cd dist
           echo "uploading ${#files[@]} assets as $TAG"
           gh release create "$TAG" "${files[@]}" "${flags[@]}"
           gh release view "$TAG" --json tagName,isDraft,assets \

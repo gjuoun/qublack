@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -144,12 +145,14 @@ def main() -> int:
     entries += [(path.name, path.read_bytes()) for path in ttcs]
     entries += [(path.name, path.read_bytes()) for path in woff2]
 
+    # The static faces ship as standalone assets too, not only inside the zip.
+    for path in faces:
+        shutil.copy2(path, args.dist / path.name)
+
     # The two variable faces (wght 400-700) — standalone assets and zip members.
     vfs: list[Path] = (
         sorted(p for p in args.vf.glob("*.ttf") if "[wght]" in p.name) if args.vf.exists() else []
     )
-    import shutil
-
     for path in vfs:
         shutil.copy2(path, args.dist / path.name)
     entries += [(path.name, path.read_bytes()) for path in vfs]
