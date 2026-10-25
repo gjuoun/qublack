@@ -94,7 +94,7 @@ cover, are described in `reference/CJK.md`.
 ```sh
 bun run fonts:vf                            # ~4 min: two masters per family, then the merge
 python3 tools/vf_audit.py --check fonts/vf  # fvar/STAT/axis/glyph surface
-bash ../../scripts/vf-gate.sh "$PWD"        # axis ends: grid, 44-symbol census, at.alt
+bash tools/vf_gate.sh .                     # axis ends: grid, 44-symbol census, at.alt
 bun run tools/font-probe.ts fonts/vf --vf
 ```
 
