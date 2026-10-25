@@ -26,7 +26,9 @@ Four styles each: Regular, Italic, Bold, Bold Italic.
 `v1.2.0` assets on the GitHub release page — the eight static faces plus the two variable
 faces, one wght-axis file per family. No font binary lives in this repository: `fonts/` is
 git-ignored, `bash sources/build.sh` rebuilds the statics from the pinned inputs and
-`bun run fonts:vf` rebuilds the variables.
+`bun run fonts:vf` rebuilds the variables. Releases are cut by
+[the release pipeline](.github/workflows/release-pipeline.yml) — one dispatch builds, gates and
+publishes them.
 - **v1.2.0 (unreleased)** — variable faces: `QuBlackMono[wght].ttf` and `QuBlackSans[wght].ttf`
   span 400–700 as one file each, built from two masters (Noto Sans SC VF for hanzi, the Recursive
   variable donor for Latin). The static faces are unchanged; `reference/VF.md` records the
