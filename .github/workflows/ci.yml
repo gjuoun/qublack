@@ -19,3 +19,7 @@ jobs:
           node-version: "24"
       - run: bun install --frozen-lockfile
       - run: bun run check
+      # actionlint reads the workflow files themselves: expressions, contexts and the event
+      # schema. shellcheck's shell-style notes are not this repo's business, so it is off.
+      - name: Lint the workflows
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -shellcheck= .github/workflows/*.yml

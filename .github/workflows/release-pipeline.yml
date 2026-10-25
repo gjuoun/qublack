@@ -1,0 +1,214 @@
+name: Release pipeline
+
+# One dispatch builds the family from the committed sources, gates it, packs it and publishes it,
+# then asks the sites repository to deploy the release. Every gate is a hard stop: a red gate
+# means no release exists at the end of the run.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without the leading v, e.g. 1.4.0 — must equal the version in package.json"
+        required: true
+      notes:
+        description: "Release notes, markdown (empty: the tag with the family name is used)"
+        required: false
+        default: ""
+      dry_run:
+        description: "Build, gate and pack, publish a draft release, and print the site dispatch instead of sending it"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-pipeline
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the build toolchain
+        run: pip install -r tools/requirements.txt
+      - name: Check the committed sources
+        run: bash sources/check-sources.sh
+      - name: Build the eight static faces
+        run: bash sources/build.sh fonts/ttf
+      - name: Build the two variable faces
+        run: python3 tools/build_vf.py --sources sources/upstream --out fonts/vf
+      - name: Keep the faces
+        uses: actions/upload-artifact@v4
+        with:
+          name: fonts
+          path: |
+            fonts/ttf/*.ttf
+            fonts/vf/*.ttf
+          retention-days: 7
+          compression-level: 1
+
+  gates:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r tools/requirements.txt
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: fonts
+          path: fonts
+      - name: Install fontspector
+        run: bash tools/gf_setup.sh --fontspector-only
+      - name: Resolve Chrome
+        id: chrome
+        run: |
+          set -euo pipefail
+          path=$(command -v google-chrome || command -v google-chrome-stable || echo /opt/google/chrome/chrome)
+          test -x "$path"
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+          "$path" --version
+      - name: Gate the build
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.path }}
+          LOGS: ${{ runner.temp }}/gate-logs
+        run: bun run fonts:gate
+      - name: Keep the gate reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-reports
+          path: ${{ runner.temp }}/gate-logs
+          retention-days: 7
+          if-no-files-found: ignore
+
+  release:
+    needs: gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r tools/requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: fonts
+          path: fonts
+      - name: Check the version against package.json
+        run: |
+          set -euo pipefail
+          want="${{ inputs.version }}"
+          have=$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')
+          if [ "$want" = "$have" ]; then
+            echo "version $want matches package.json"
+            exit 0
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "::notice::dry run: the tag says $want, the assets carry $have from package.json"
+            exit 0
+          fi
+          echo "::error::version $want does not match package.json ($have) — bump package.json, commit, then release"
+          exit 1
+      - name: Pack the release
+        run: python3 tools/pack_release.py --tag "v${{ inputs.version }}"
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          title="Qu Black $TAG"
+          printf '%s' "$NOTES" > "$RUNNER_TEMP/notes.md"
+          flags=(--title "$title" --target "$GITHUB_SHA")
+          if [ -s "$RUNNER_TEMP/notes.md" ]; then
+            flags+=(--notes-file "$RUNNER_TEMP/notes.md")
+          else
+            flags+=(--notes "$title")
+          fi
+          if [ "$DRY" = "true" ]; then
+            flags+=(--draft)
+          fi
+          shopt -s nullglob
+          files=(dist/*)
+          echo "uploading ${#files[@]} assets as $TAG"
+          gh release create "$TAG" "${files[@]}" "${flags[@]}"
+          gh release view "$TAG" --json tagName,isDraft,assets \
+            --jq '"assets \(.assets|length) tag \(.tagName) draft \(.isDraft)"'
+
+  dispatch:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITES_TOKEN: ${{ secrets.SITES_DISPATCH_TOKEN }}
+    steps:
+      - name: Ask the site to deploy
+        env:
+          GH_TOKEN: ${{ env.SITES_TOKEN }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::SITES_DISPATCH_TOKEN is unset — skipping the site deploy."
+            echo "Add a fine-grained token with Actions read/write on gjuoun/sites as the repository secret SITES_DISPATCH_TOKEN, then re-run this job."
+            exit 0
+          fi
+          found=$(gh workflow list --repo gjuoun/sites --all --json path --jq '.[] | select(.path | endswith("deploy-qublack.yml")) | .path')
+          if [ -z "$found" ]; then
+            echo "::error::deploy-qublack.yml is not visible to this token — check its Actions permission on gjuoun/sites"
+            exit 1
+          fi
+          echo "token reaches $found"
+          if [ "$DRY" = "true" ]; then
+            echo "::notice::dry run — not dispatched. It would run: gh workflow run deploy-qublack.yml --repo gjuoun/sites --ref main"
+            exit 0
+          fi
+          gh workflow run deploy-qublack.yml --repo gjuoun/sites --ref main
+          sleep 10
+          gh run list --repo gjuoun/sites --workflow deploy-qublack.yml --limit 1 --json status,url \
+            --jq '.[0] | "deploy \(.status) \(.url)"'
