@@ -109,8 +109,37 @@ python3 tools/pack_release.py --tag v1.0.4
 # dist/QuBlack-family-1.0.4.zip, dist/SHA256SUMS
 ```
 
-The zip is deterministic (sorted entries, fixed timestamps). Publish with
-`gh release create v1.0.4 dist/QuBlack-family-1.0.4.zip dist/SHA256SUMS dist/README-release.txt`.
+The zip is deterministic (sorted entries, fixed timestamps).
+
+## 5. Publish from CI
+
+Everything above also runs as one [release pipeline](../.github/workflows/release-pipeline.yml)
+dispatch on an ubuntu runner: build the ten faces from the committed sources, gate them, pack,
+create the release with its fifteen assets, then ask the `sites` repository to deploy.
+
+| Input     | Meaning                                                                       |
+| --------- | ----------------------------------------------------------------------------- |
+| `version` | release version without the `v`; must equal `package.json` before a real run   |
+| `notes`   | release body, markdown                                                         |
+| `dry_run` | build, gate and pack for real, publish a **draft** release, print the dispatch |
+
+The gates are `bun run fonts:gate` (`tools/ci-gate.sh`), the same twelve checks run by hand
+below, and any red gate stops the run before a release exists. `fontbakery` is skipped there:
+it needs minutes per family on these 57k-glyph faces, and fontspector's googlefonts profile —
+the one Google Fonts' CI runs — is the submission surface. The waiver set is
+`file_size has_license cjk_vertical_metrics` (reasons in §2b) plus, for the variable faces
+only, `font_names`, because their PostScript name carries the `VF` marker on purpose; the
+statics are gated without that waiver, and `name_audit --strict` pins their name ids anyway.
+
+A dry run is honest about what it cannot prove: a draft release is not the latest published
+release, so the site would still build from the previous one — that is why the dispatch is
+printed and not sent.
+
+The dispatch needs a fine-grained token with **Actions: read and write** on `gjuoun/sites`,
+stored as the repository secret `SITES_DISPATCH_TOKEN`. Without it the run stays green up to
+the deploy step and warns instead of failing: the release is already out, the deploy is not.
+
+Locally the manual flow still works: `gh release create v1.0.4 dist/*`.
 
 ## Site
 
