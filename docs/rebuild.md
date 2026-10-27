@@ -105,7 +105,7 @@ interpolate, the BASE exclusion and the sans layout fallback.
 ## 4. Package the release
 
 ```sh
-python3 tools/pack_release.py --tag v1.0.4
+python3 tools/pack_release.py --tag <version>
 # dist/QuBlack-family-1.0.4.zip, dist/SHA256SUMS
 ```
 
@@ -139,7 +139,7 @@ The dispatch needs a fine-grained token with **Actions: read and write** on `gju
 stored as the repository secret `SITES_DISPATCH_TOKEN`. Without it the run stays green up to
 the deploy step and warns instead of failing: the release is already out, the deploy is not.
 
-Locally the manual flow still works: `gh release create v1.0.4 dist/*`.
+Locally the manual flow still works: `gh release create <version> dist/*`.
 
 ## Site
 

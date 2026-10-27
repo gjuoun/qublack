@@ -8,7 +8,7 @@ Latin, so the whole family is redistributable under the SIL Open Font License 1.
 ![Qu Black specimen](documentation/specimen.png)
 
 Site: **https://qublack.qqntt.com/** — specimen, measurements and downloads.
-Release: **[v1.1.0](https://github.com/gjuoun/qublack/releases/tag/v1.1.0)** · Google Fonts
+Releases: **[github.com/gjuoun/qublack/releases](https://github.com/gjuoun/qublack/releases/latest)** · Google Fonts
 submission in progress (see `google-fonts/`) · CI:
 ![CI](https://github.com/gjuoun/qublack/actions/workflows/ci.yml/badge.svg)
 
@@ -23,37 +23,24 @@ Four styles each: Regular, Italic, Bold, Bold Italic.
 
 ## Download
 
-`v1.2.0` assets on the GitHub release page — the eight static faces plus the two variable
-faces, one wght-axis file per family. No font binary lives in this repository: `fonts/` is
-git-ignored, `bash sources/build.sh` rebuilds the statics from the pinned inputs and
-`bun run fonts:vf` rebuilds the variables. Releases are cut by
-[the release pipeline](.github/workflows/release-pipeline.yml) — one dispatch builds, gates and
-publishes them.
-- **v1.2.0 (unreleased)** — variable faces: `QuBlackMono[wght].ttf` and `QuBlackSans[wght].ttf`
-  span 400–700 as one file each, built from two masters (Noto Sans SC VF for hanzi, the Recursive
-  variable donor for Latin). The static faces are unchanged; `reference/VF.md` records the
-  interpolability measurements, the 15,940-glyph freeze (Hangul and the CJK tail outside Noto),
-  the BASE/GPOS merge findings and the italic decision. Font binaries leave git: the repo now ships
-  sources and build scripts only.
-- **v1.1.0** — hanzi outlines now come from one weight-axis donor (Noto Sans SC VF,
-  instanced at `wght` 400/700) instead of the two static Sarasa weights, so Regular and Bold share
-  an interpolatable master design — the prerequisite for a variable font. Grid metrics, names and
-  coverage are unchanged; `reference/CJK.md` records the measurements, the 2,482-codepoint donor
-  boundary and the 0.0024 em worst-case ink delta.
-- **v1.0.4** — clean name tables (the zh-CN records now read 黢黑等宽 QuBlack Mono / 黢黑比例
-  Qu Black Sans, no Sarasa version strings or empty records) and an OTS fix that lets Chrome load the
-  TTFs directly.
-- **v1.0.3** — the full 44-symbol census: every CJK-adjacent mark sits on Sarasa's ink ratios.
-- **v1.0.2** — the bracket set harmonised.
-- **v1.0.1** — the mono `@` swapped for Recursive's `at.alt` alternate.
+Every release carries the eight static faces plus the two variable faces, one wght-axis file per
+family. No font binary lives in this repository: `fonts/` is git-ignored, `bash sources/build.sh`
+rebuilds the statics from the pinned inputs and `bun run fonts:vf` rebuilds the variables. Releases
+are cut by [the release pipeline](.github/workflows/release-pipeline.yml) — one dispatch builds,
+gates and publishes them.
+
+The changelog and the notes for each release live on the
+[releases page](https://github.com/gjuoun/qublack/releases); the measurements behind each design
+decision (variable-font interpolability, the CJK donor boundary, ink deltas) live in
+`reference/`.
 
 ### Formats
 
-| Format    | Files                                    | Use it for                                                                                   |
-| --------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **TTF**   | `QuBlackMono-*.ttf`, `QuBlackSans-*.ttf` | system install — macOS `~/Library/Fonts`, Linux `~/.local/share/fonts`, Windows double-click |
-| **TTC**   | `QuBlackMono.ttc`, `QuBlackSans.ttc`     | the smaller bundle: four faces per file, shared tables                                       |
-| **WOFF2** | `Qu Black*-*.woff2`                      | `@font-face` self-hosting on the web — **WOFF2, not WOFF1**                                  |
+| Format    | Files                                        | Use it for                                                                                   |
+| --------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **TTF**   | `QuBlackMono-*.ttf`, `QuBlackSans-*.ttf`     | system install — macOS `~/Library/Fonts`, Linux `~/.local/share/fonts`, Windows double-click |
+| **TTC**   | `QuBlackMono.ttc`, `QuBlackSans.ttc`         | the smaller bundle: four faces per file, shared tables                                       |
+| **WOFF2** | `QuBlackMono-*.woff2`, `QuBlackSans-*.woff2` | `@font-face` self-hosting on the web — **WOFF2, not WOFF1**                                  |
 
 No OTF: the outlines are `glyf`; a CFF conversion would only cost size and hinting.
 
@@ -87,7 +74,7 @@ Qu Black is a derivative work, and it also borrows ideas. With thanks:
 - [Source Han Sans](https://github.com/adobe-fonts/source-han-sans) by Adobe and Google — the hanzi
   ink Sarasa carries (SIL OFL 1.1).
 - [Noto Sans SC](https://github.com/google/fonts/tree/main/ofl/notosanssc) — the variable instance
-  the hanzi outlines are taken from since v1.1.0, same Source Han Sans design (SIL OFL 1.1).
+  the hanzi outlines are taken from, same Source Han Sans design (SIL OFL 1.1).
 - [Recursive](https://github.com/arrowtype/recursive) by ArrowType — every Latin outline, Mono and
   Sans (SIL OFL 1.1).
 
